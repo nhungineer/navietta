@@ -2,11 +2,24 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useTravelContext } from "@/contexts/TravelContext";
 import { flightDetailsSchema, type FlightDetails } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { Plane, PlaneTakeoff, Minus, Plus, MapPin, Luggage } from "lucide-react";
+import {
+  Plane,
+  PlaneTakeoff,
+  Minus,
+  Plus,
+  MapPin,
+  Luggage,
+} from "lucide-react";
 
 export default function FlightDetailsPage() {
   const { navigateToStep, setFlightDetails } = useTravelContext();
@@ -21,10 +34,10 @@ export default function FlightDetailsPage() {
     arrivalDate: "2025-08-23",
     adults: 2,
     children: 0,
-    luggageCount: 1,
+    luggageCount: 2,
     nextStop: "Naples",
-    nextStopTime: "03:30",
-    transportMode: "taxi",
+    nextStopTime: "15:30",
+    transportMode: "train",
   });
 
   const handleInputChange = (
@@ -128,9 +141,7 @@ export default function FlightDetailsPage() {
             <Input
               type="time"
               value={formData.arrivalTime}
-              onChange={(e) =>
-                handleInputChange("arrivalTime", e.target.value)
-              }
+              onChange={(e) => handleInputChange("arrivalTime", e.target.value)}
             />
           </div>
 
@@ -154,9 +165,7 @@ export default function FlightDetailsPage() {
             <Input
               type="date"
               value={formData.arrivalDate}
-              onChange={(e) =>
-                handleInputChange("arrivalDate", e.target.value)
-              }
+              onChange={(e) => handleInputChange("arrivalDate", e.target.value)}
             />
           </div>
         </div>
@@ -273,7 +282,12 @@ export default function FlightDetailsPage() {
             />
             <Select
               value={formData.transportMode}
-              onValueChange={(value) => handleInputChange("transportMode", value as FlightDetails["transportMode"])}
+              onValueChange={(value) =>
+                handleInputChange(
+                  "transportMode",
+                  value as FlightDetails["transportMode"],
+                )
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Mode of transport" />

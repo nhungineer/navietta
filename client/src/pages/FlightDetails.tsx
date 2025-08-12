@@ -103,80 +103,52 @@ export default function FlightDetailsPage() {
             <Label className="block text-sm font-medium text-textSecondary mb-2">
               Departure
             </Label>
-            <div className="relative">
-              <Clock
-                className="absolute left-3 top-3 text-textSecondary"
-                size={16}
-              />
-              <Input
-                type="time"
-                value={formData.departureTime}
-                onChange={(e) =>
-                  handleInputChange("departureTime", e.target.value)
-                }
-                className="pl-10"
-              />
-            </div>
+            <Input
+              type="time"
+              value={formData.departureTime}
+              onChange={(e) =>
+                handleInputChange("departureTime", e.target.value)
+              }
+            />
           </div>
 
           <div>
             <Label className="block text-sm font-medium text-textSecondary mb-2">
               Arrival
             </Label>
-            <div className="relative">
-              <Clock
-                className="absolute left-3 top-3 text-textSecondary"
-                size={16}
-              />
-              <Input
-                type="time"
-                value={formData.arrivalTime}
-                onChange={(e) =>
-                  handleInputChange("arrivalTime", e.target.value)
-                }
-                className="pl-10"
-              />
-            </div>
+            <Input
+              type="time"
+              value={formData.arrivalTime}
+              onChange={(e) =>
+                handleInputChange("arrivalTime", e.target.value)
+              }
+            />
           </div>
 
           <div>
             <Label className="block text-sm font-medium text-textSecondary mb-2">
               Departure Date
             </Label>
-            <div className="relative">
-              <Clock
-                className="absolute left-3 top-3 text-textSecondary"
-                size={16}
-              />
-              <Input
-                type="date"
-                value={formData.departureDate}
-                onChange={(e) =>
-                  handleInputChange("departureDate", e.target.value)
-                }
-                className="pl-10"
-              />
-            </div>
+            <Input
+              type="date"
+              value={formData.departureDate}
+              onChange={(e) =>
+                handleInputChange("departureDate", e.target.value)
+              }
+            />
           </div>
 
           <div>
             <Label className="block text-sm font-medium text-textSecondary mb-2">
               Arrival Date
             </Label>
-            <div className="relative">
-              <Clock
-                className="absolute left-3 top-3 text-textSecondary"
-                size={16}
-              />
-              <Input
-                type="date"
-                value={formData.arrivalDate}
-                onChange={(e) =>
-                  handleInputChange("arrivalDate", e.target.value)
-                }
-                className="pl-10"
-              />
-            </div>
+            <Input
+              type="date"
+              value={formData.arrivalDate}
+              onChange={(e) =>
+                handleInputChange("arrivalDate", e.target.value)
+              }
+            />
           </div>
         </div>
 
@@ -279,20 +251,13 @@ export default function FlightDetailsPage() {
                 className="pl-10"
               />
             </div>
-            <div className="relative">
-              <Clock
-                className="absolute left-3 top-3 text-textSecondary"
-                size={16}
-              />
-              <Input
-                type="time"
-                value={formData.nextStopTime}
-                onChange={(e) =>
-                  handleInputChange("nextStopTime", e.target.value)
-                }
-                className="pl-10"
-              />
-            </div>
+            <Input
+              type="time"
+              value={formData.nextStopTime}
+              onChange={(e) =>
+                handleInputChange("nextStopTime", e.target.value)
+              }
+            />
           </div>
         </div>
 

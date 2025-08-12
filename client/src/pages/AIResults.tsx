@@ -95,19 +95,7 @@ export default function AIResultsPage() {
         message: userMessage,
       });
 
-      console.log('Chat response status:', response.status);
-      console.log('Chat response headers:', response.headers);
-      
-      const responseText = await response.text();
-      console.log('Chat response text:', responseText.substring(0, 200));
-      
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('Failed to parse JSON:', parseError);
-        throw new Error('Invalid response format from server');
-      }
+      const data = await response.json();
       
       // Add AI response to chat
       setChatMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
@@ -411,12 +399,12 @@ export default function AIResultsPage() {
           <div className="mb-6 space-y-4 max-h-64 overflow-y-auto">
             {chatMessages.map((message, index) => (
               <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                <div className={`w-[90%] px-4 py-3 rounded-lg ${
                   message.role === 'user' 
                     ? 'bg-primary text-white' 
                     : 'bg-gray-100 text-textPrimary'
                 }`}>
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                 </div>
               </div>
             ))}

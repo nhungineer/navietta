@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTravelContext } from "@/contexts/TravelContext";
 import { flightDetailsSchema, type FlightDetails } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { Plane, PlaneTakeoff, Clock, Minus, Plus, MapPin } from "lucide-react";
+import { Plane, PlaneTakeoff, Minus, Plus, MapPin, Luggage } from "lucide-react";
 
 export default function FlightDetailsPage() {
   const { navigateToStep, setFlightDetails } = useTravelContext();
@@ -21,9 +21,10 @@ export default function FlightDetailsPage() {
     arrivalDate: "2025-08-23",
     adults: 2,
     children: 0,
-    luggage: "standard",
+    luggageCount: 1,
     nextStop: "Naples",
     nextStopTime: "03:30",
+    transportMode: "taxi",
   });
 
   const handleInputChange = (
@@ -53,6 +54,14 @@ export default function FlightDetailsPage() {
       ? currentValue + 1
       : Math.max(type === "adults" ? 1 : 0, currentValue - 1);
     handleInputChange(type, newValue);
+  };
+
+  const updateLuggage = (increment: boolean) => {
+    const currentValue = formData.luggageCount;
+    const newValue = increment
+      ? currentValue + 1
+      : Math.max(0, currentValue - 1);
+    handleInputChange("luggageCount", newValue);
   };
 
   return (
@@ -208,36 +217,40 @@ export default function FlightDetailsPage() {
           <h3 className="text-lg font-medium text-textPrimary mb-4">
             Check-in luggage
           </h3>
-          <RadioGroup
-            value={formData.luggage}
-            onValueChange={(value) => handleInputChange("luggage", value)}
-          >
+          <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="none" id="luggage-none" />
-              <Label htmlFor="luggage-none" className="text-textPrimary">
-                No check-in luggage
-              </Label>
+              <Luggage className="text-textSecondary" size={16} />
+              <span className="text-textSecondary">Pieces of luggage</span>
             </div>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="standard" id="luggage-standard" />
-              <Label htmlFor="luggage-standard" className="text-textPrimary">
-                Standard luggage
-              </Label>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-8 h-8 p-0"
+                onClick={() => updateLuggage(false)}
+              >
+                <Minus size={12} />
+              </Button>
+              <span className="w-8 text-center font-medium">
+                {formData.luggageCount}
+              </span>
+              <Button
+                variant="default"
+                size="sm"
+                className="w-8 h-8 p-0 bg-secondary hover:bg-secondary/90"
+                onClick={() => updateLuggage(true)}
+              >
+                <Plus size={12} />
+              </Button>
             </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="multiple" id="luggage-multiple" />
-              <Label htmlFor="luggage-multiple" className="text-textPrimary">
-                Multiple bags
-              </Label>
-            </div>
-          </RadioGroup>
+          </div>
         </div>
 
         <div className="mt-8">
           <h3 className="text-lg font-medium text-textPrimary mb-4">
             Immediate next stop
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
               <MapPin
                 className="absolute left-3 top-3 text-textSecondary"
@@ -258,6 +271,22 @@ export default function FlightDetailsPage() {
                 handleInputChange("nextStopTime", e.target.value)
               }
             />
+            <Select
+              value={formData.transportMode}
+              onValueChange={(value) => handleInputChange("transportMode", value as FlightDetails["transportMode"])}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Mode of transport" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="flight">Flight</SelectItem>
+                <SelectItem value="taxi">Taxi/Rideshare</SelectItem>
+                <SelectItem value="train">Train</SelectItem>
+                <SelectItem value="bus">Bus</SelectItem>
+                <SelectItem value="hired_car">Hired car</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

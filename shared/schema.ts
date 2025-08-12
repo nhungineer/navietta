@@ -14,9 +14,10 @@ export const travelSessions = pgTable("travel_sessions", {
     arrivalDate: string;
     adults: number;
     children: number;
-    luggage: 'none' | 'standard' | 'multiple';
+    luggageCount: number;
     nextStop: string;
     nextStopTime: string;
+    transportMode: 'flight' | 'taxi' | 'train' | 'bus' | 'hired_car' | 'other';
   }>(),
   preferences: jsonb("preferences").$type<{
     budgetComfort: number; // 0-100 scale
@@ -63,9 +64,10 @@ export const flightDetailsSchema = z.object({
   arrivalDate: z.string().min(1, "Arrival date is required"),
   adults: z.number().min(1, "At least 1 adult required").max(10),
   children: z.number().min(0).max(10),
-  luggage: z.enum(['none', 'standard', 'multiple']),
+  luggageCount: z.number().min(0).max(20),
   nextStop: z.string().min(1, "Next stop is required"),
   nextStopTime: z.string().min(1, "Next stop time is required"),
+  transportMode: z.enum(['flight', 'taxi', 'train', 'bus', 'hired_car', 'other']),
 });
 
 export const preferencesSchema = z.object({

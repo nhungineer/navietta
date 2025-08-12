@@ -99,7 +99,7 @@ export default function AIResultsPage() {
                 <span className="text-white font-bold">N</span>
               </div>
               <div>
-                <h3 className="font-semibold text-textPrimary">Navegia AI Assistant</h3>
+                <h3 className="font-semibold text-textPrimary">Navietta AI Assistant</h3>
                 <p className="text-sm text-textSecondary">Analyzing your travel situation...</p>
               </div>
             </div>
@@ -112,7 +112,7 @@ export default function AIResultsPage() {
             <Brain className="text-primary mr-2 inline" size={20} />
             AI Reasoning Process
           </h3>
-          
+
           <div className="space-y-4">
             <div className="flex items-start space-x-3">
               <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center mt-0.5">
@@ -158,7 +158,7 @@ export default function AIResultsPage() {
               <span className="text-white font-bold">N</span>
             </div>
             <div>
-              <h3 className="font-semibold text-textPrimary">Navegia AI Assistant</h3>
+              <h3 className="font-semibold text-textPrimary">Navietta AI Assistant</h3>
               <p className="text-sm text-textSecondary">Analysis complete - here are your options</p>
             </div>
           </div>
@@ -171,7 +171,7 @@ export default function AIResultsPage() {
           <Brain className="text-primary mr-2 inline" size={20} />
           AI Reasoning Process
         </h3>
-        
+
         <div className="space-y-4">
           <div className="flex items-start space-x-3">
             <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center mt-0.5">
@@ -239,7 +239,7 @@ export default function AIResultsPage() {
             <div className={option.recommended ? 'mt-2' : ''}>
               <h4 className="text-lg font-semibold text-textPrimary mb-2">{option.title}</h4>
               <p className="text-sm text-textSecondary mb-4">{option.description}</p>
-              
+
               <div className="space-y-2 mb-4">
                 <div className="flex items-center text-sm">
                   <Clock className="text-primary w-4" size={16} />
@@ -284,7 +284,7 @@ export default function AIResultsPage() {
           <div className="flex-1">
             <Input
               type="text"
-              placeholder="Ask Navegia anything about your travel options..."
+              placeholder="Ask Navietta anything about your travel options..."
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && setChatInput('')}

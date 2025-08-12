@@ -1,6 +1,6 @@
 # Overview
 
-Navegia is a travel transit application that helps users find optimal layover recommendations between flights. The application uses AI (Anthropic Claude) to analyze flight details and user preferences to generate personalized transit options. It follows a multi-step wizard flow where users input flight information, set preferences, and receive AI-generated recommendations for how to spend their layover time.
+Navietta is a travel transit application that helps users find optimal layover recommendations between flights. The application uses AI (Anthropic Claude) to analyze flight details and user preferences to generate personalized transit options. It follows a multi-step wizard flow where users input flight information, set preferences, and receive AI-generated recommendations for how to spend their layover time.
 
 # User Preferences
 

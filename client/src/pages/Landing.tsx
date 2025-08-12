@@ -11,7 +11,7 @@ export default function Landing() {
         <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full mb-6">
           <span className="text-2xl font-bold text-white">N</span>
         </div>
-        <h1 className="text-4xl font-bold text-textPrimary mb-4">Navegia</h1>
+        <h1 className="text-4xl font-bold text-textPrimary mb-4">Navietta</h1>
         <p className="text-xl text-textSecondary mb-2">Travel transit, stress free</p>
         <div className="text-primary text-3xl mb-8">
           <Plane className="mx-auto" size={48} />

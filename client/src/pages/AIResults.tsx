@@ -270,10 +270,15 @@ export default function AIResultsPage() {
                       <ChevronDown className="text-textSecondary" size={16} />
                     )}
                   </CollapsibleTrigger>
-                  {!reasoningState.situationAssessment.completed && (
-                    <p className="text-sm text-textSecondary mt-1">
-                      {reasoningState.situationAssessment.content || 'Analyzing your arrival time, energy level, and destination requirements...'}
-                    </p>
+                  {!reasoningState.situationAssessment.completed && reasoningState.situationAssessment.active && (
+                    <div className="text-sm text-textSecondary mt-1">
+                      <div className="whitespace-pre-wrap">
+                        {reasoningState.situationAssessment.content || 'Analyzing your arrival time, energy level, and destination requirements...'}
+                      </div>
+                      {reasoningState.situationAssessment.content && (
+                        <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1"></div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
@@ -312,10 +317,15 @@ export default function AIResultsPage() {
                       <ChevronDown className="text-textSecondary" size={16} />
                     )}
                   </CollapsibleTrigger>
-                  {!reasoningState.generatingOptions.completed && (
-                    <p className="text-sm text-textSecondary mt-1">
-                      {reasoningState.generatingOptions.content || 'Evaluating different routes and timing combinations...'}
-                    </p>
+                  {!reasoningState.generatingOptions.completed && reasoningState.generatingOptions.active && (
+                    <div className="text-sm text-textSecondary mt-1">
+                      <div className="whitespace-pre-wrap">
+                        {reasoningState.generatingOptions.content || 'Evaluating different routes and timing combinations...'}
+                      </div>
+                      {reasoningState.generatingOptions.content && (
+                        <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1"></div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
@@ -354,10 +364,15 @@ export default function AIResultsPage() {
                       <ChevronDown className="text-textSecondary" size={16} />
                     )}
                   </CollapsibleTrigger>
-                  {!reasoningState.tradeOffAnalysis.completed && (
-                    <p className="text-sm text-textSecondary mt-1">
-                      {reasoningState.tradeOffAnalysis.content || 'Analyzing trade-offs and creating personalized recommendations...'}
-                    </p>
+                  {!reasoningState.tradeOffAnalysis.completed && reasoningState.tradeOffAnalysis.active && (
+                    <div className="text-sm text-textSecondary mt-1">
+                      <div className="whitespace-pre-wrap">
+                        {reasoningState.tradeOffAnalysis.content || 'Analyzing trade-offs and creating personalized recommendations...'}
+                      </div>
+                      {reasoningState.tradeOffAnalysis.content && (
+                        <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1"></div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>

@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useTravelContext } from '@/contexts/TravelContext';
 import { flightDetailsSchema, type FlightDetails } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
-import { Plane, PlaneTakeoff, Clock, Minus, Plus } from 'lucide-react';
+import { Plane, PlaneTakeoff, Clock, Minus, Plus, MapPin } from 'lucide-react';
 
 export default function FlightDetailsPage() {
   const { navigateToStep, setFlightDetails } = useTravelContext();
@@ -110,20 +110,28 @@ export default function FlightDetailsPage() {
 
           <div>
             <Label className="block text-sm font-medium text-textSecondary mb-2">Departure Date</Label>
-            <Input
-              type="date"
-              value={formData.departureDate}
-              onChange={(e) => handleInputChange('departureDate', e.target.value)}
-            />
+            <div className="relative">
+              <Clock className="absolute left-3 top-3 text-textSecondary" size={16} />
+              <Input
+                type="date"
+                value={formData.departureDate}
+                onChange={(e) => handleInputChange('departureDate', e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
 
           <div>
             <Label className="block text-sm font-medium text-textSecondary mb-2">Arrival Date</Label>
-            <Input
-              type="date"
-              value={formData.arrivalDate}
-              onChange={(e) => handleInputChange('arrivalDate', e.target.value)}
-            />
+            <div className="relative">
+              <Clock className="absolute left-3 top-3 text-textSecondary" size={16} />
+              <Input
+                type="date"
+                value={formData.arrivalDate}
+                onChange={(e) => handleInputChange('arrivalDate', e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
         </div>
 
@@ -194,17 +202,25 @@ export default function FlightDetailsPage() {
         <div className="mt-8">
           <h3 className="text-lg font-medium text-textPrimary mb-4">Immediate next stop</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              type="text"
-              placeholder="Hotel name or location"
-              value={formData.nextStop}
-              onChange={(e) => handleInputChange('nextStop', e.target.value)}
-            />
-            <Input
-              type="time"
-              value={formData.nextStopTime}
-              onChange={(e) => handleInputChange('nextStopTime', e.target.value)}
-            />
+            <div className="relative">
+              <MapPin className="absolute left-3 top-3 text-textSecondary" size={16} />
+              <Input
+                type="text"
+                placeholder="Hotel name or location"
+                value={formData.nextStop}
+                onChange={(e) => handleInputChange('nextStop', e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="relative">
+              <Clock className="absolute left-3 top-3 text-textSecondary" size={16} />
+              <Input
+                type="time"
+                value={formData.nextStopTime}
+                onChange={(e) => handleInputChange('nextStopTime', e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
         </div>
 

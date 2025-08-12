@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { useTravelContext } from '@/contexts/TravelContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { Brain, Clock, Check, Loader2, Send, Bot } from 'lucide-react';
+import { Brain, Clock, Check, Loader2, Send, Bot, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -40,42 +41,118 @@ export default function AIResultsPage() {
   const [recommendations, setRecommendations] = useState<AIRecommendations | null>(null);
   const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const [reasoningState, setReasoningState] = useState<{
+    situationAssessment: { content: string; completed: boolean; active: boolean };
+    generatingOptions: { content: string; completed: boolean; active: boolean };
+    tradeOffAnalysis: { content: string; completed: boolean; active: boolean };
+  }>({
+    situationAssessment: { content: '', completed: false, active: false },
+    generatingOptions: { content: '', completed: false, active: false },
+    tradeOffAnalysis: { content: '', completed: false, active: false },
+  });
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  const generateRecommendationsMutation = useMutation({
-    mutationFn: async () => {
+  const startStreamingRecommendations = async () => {
+    try {
       if (!flightDetails || !preferences) {
         throw new Error('Missing flight details or preferences');
       }
 
-      const response = await apiRequest('POST', '/api/travel/generate-recommendations', {
-        flightDetails,
-        preferences,
+      const newSessionId = sessionId || crypto.randomUUID();
+      if (!sessionId) {
+        setSessionId(newSessionId);
+      }
+
+      setIsLoading(true);
+      setReasoningState({
+        situationAssessment: { content: '', completed: false, active: false },
+        generatingOptions: { content: '', completed: false, active: false },
+        tradeOffAnalysis: { content: '', completed: false, active: false },
       });
 
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setSessionId(data.sessionId);
-      setRecommendations(data.recommendations);
-      setIsLoading(false);
-    },
-    onError: (error) => {
-      console.error('Failed to generate recommendations:', error);
+      // Make POST request with streaming response
+      const response = await fetch('/api/travel/generate-recommendations-stream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId: newSessionId,
+          flightDetails,
+          preferences,
+        }),
+      });
+
+      if (!response.body) {
+        throw new Error('No response body');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.substring(6));
+              handleStreamEvent(data);
+            } catch (e) {
+              console.log('Failed to parse line:', line);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Streaming error:', error);
       toast({
         title: "Error",
         description: "Failed to generate travel recommendations. Please try again.",
         variant: "destructive",
       });
       setIsLoading(false);
-    },
-  });
+    }
+  };
+
+  const handleStreamEvent = (data: any) => {
+    if (data.stage) {
+      if (data.completed === undefined) {
+        // This is a reasoning-start event
+        setReasoningState(prev => ({
+          ...prev,
+          [data.stage.replace('-', '') as keyof typeof prev]: {
+            ...prev[data.stage.replace('-', '') as keyof typeof prev],
+            active: true
+          }
+        }));
+      } else {
+        // This is a reasoning-progress event
+        const stageKey = data.stage.replace('-', '') as keyof typeof reasoningState;
+        setReasoningState(prev => ({
+          ...prev,
+          [stageKey]: {
+            content: data.completed ? data.content : prev[stageKey].content + data.content,
+            completed: data.completed,
+            active: !data.completed
+          }
+        }));
+      }
+    } else if (data.recommendations) {
+      // Final recommendations received
+      setRecommendations(data.recommendations);
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (flightDetails && preferences && !recommendations) {
-      setIsLoading(true);
-      generateRecommendationsMutation.mutate();
+      startStreamingRecommendations();
     }
   }, [flightDetails, preferences]);
 
@@ -152,35 +229,128 @@ export default function AIResultsPage() {
           </h3>
 
           <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center mt-0.5">
-                <Check className="text-white" size={12} />
+            {/* Situation Assessment */}
+            <Collapsible 
+              open={reasoningState.situationAssessment.active || !reasoningState.situationAssessment.completed}
+            >
+              <div className="flex items-start space-x-3">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
+                  reasoningState.situationAssessment.completed 
+                    ? 'bg-primary' 
+                    : reasoningState.situationAssessment.active 
+                      ? 'bg-accent animate-pulse' 
+                      : 'bg-gray-300'
+                }`}>
+                  {reasoningState.situationAssessment.completed ? (
+                    <Check className="text-white" size={12} />
+                  ) : reasoningState.situationAssessment.active ? (
+                    <Loader2 className="text-white animate-spin" size={12} />
+                  ) : (
+                    <span className="text-white font-medium text-xs">1</span>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
+                    <h4 className="font-medium text-textPrimary">Situation assessment</h4>
+                    {reasoningState.situationAssessment.completed && (
+                      <ChevronDown className="text-textSecondary" size={16} />
+                    )}
+                  </CollapsibleTrigger>
+                  {!reasoningState.situationAssessment.completed && (
+                    <p className="text-sm text-textSecondary mt-1">
+                      {reasoningState.situationAssessment.content || 'Analyzing your arrival time, energy level, and destination requirements...'}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="flex-1">
-                <h4 className="font-medium text-textPrimary">Situation assessment</h4>
-                <p className="text-sm text-textSecondary mt-1">Analyzing your arrival time, energy level, and destination requirements</p>
-              </div>
-            </div>
+              <CollapsibleContent className="ml-9 mt-2">
+                <p className="text-sm text-textSecondary whitespace-pre-wrap">
+                  {reasoningState.situationAssessment.content}
+                </p>
+              </CollapsibleContent>
+            </Collapsible>
 
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center mt-0.5">
-                <Check className="text-white" size={12} />
+            {/* Generating Options */}
+            <Collapsible 
+              open={reasoningState.generatingOptions.active || !reasoningState.generatingOptions.completed}
+            >
+              <div className="flex items-start space-x-3">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
+                  reasoningState.generatingOptions.completed 
+                    ? 'bg-primary' 
+                    : reasoningState.generatingOptions.active 
+                      ? 'bg-accent animate-pulse' 
+                      : 'bg-gray-300'
+                }`}>
+                  {reasoningState.generatingOptions.completed ? (
+                    <Check className="text-white" size={12} />
+                  ) : reasoningState.generatingOptions.active ? (
+                    <Loader2 className="text-white animate-spin" size={12} />
+                  ) : (
+                    <span className="text-white font-medium text-xs">2</span>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
+                    <h4 className="font-medium text-textPrimary">Generating options</h4>
+                    {reasoningState.generatingOptions.completed && (
+                      <ChevronDown className="text-textSecondary" size={16} />
+                    )}
+                  </CollapsibleTrigger>
+                  {!reasoningState.generatingOptions.completed && (
+                    <p className="text-sm text-textSecondary mt-1">
+                      {reasoningState.generatingOptions.content || 'Evaluating different routes and timing combinations...'}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="flex-1">
-                <h4 className="font-medium text-textPrimary">Generating options</h4>
-                <p className="text-sm text-textSecondary mt-1">Evaluating different routes and timing combinations</p>
-              </div>
-            </div>
+              <CollapsibleContent className="ml-9 mt-2">
+                <p className="text-sm text-textSecondary whitespace-pre-wrap">
+                  {reasoningState.generatingOptions.content}
+                </p>
+              </CollapsibleContent>
+            </Collapsible>
 
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-secondary rounded-full flex items-center justify-center mt-0.5 animate-pulse">
-                <Loader2 className="text-white animate-spin" size={12} />
+            {/* Trade-off Analysis */}
+            <Collapsible 
+              open={reasoningState.tradeOffAnalysis.active || !reasoningState.tradeOffAnalysis.completed}
+            >
+              <div className="flex items-start space-x-3">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
+                  reasoningState.tradeOffAnalysis.completed 
+                    ? 'bg-primary' 
+                    : reasoningState.tradeOffAnalysis.active 
+                      ? 'bg-accent animate-pulse' 
+                      : 'bg-gray-300'
+                }`}>
+                  {reasoningState.tradeOffAnalysis.completed ? (
+                    <Check className="text-white" size={12} />
+                  ) : reasoningState.tradeOffAnalysis.active ? (
+                    <Loader2 className="text-white animate-spin" size={12} />
+                  ) : (
+                    <span className="text-white font-medium text-xs">3</span>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
+                    <h4 className="font-medium text-textPrimary">Trade-off analysis</h4>
+                    {reasoningState.tradeOffAnalysis.completed && (
+                      <ChevronDown className="text-textSecondary" size={16} />
+                    )}
+                  </CollapsibleTrigger>
+                  {!reasoningState.tradeOffAnalysis.completed && (
+                    <p className="text-sm text-textSecondary mt-1">
+                      {reasoningState.tradeOffAnalysis.content || 'Analyzing trade-offs and creating personalized recommendations...'}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="flex-1">
-                <h4 className="font-medium text-textPrimary">Finalizing recommendations</h4>
-                <p className="text-sm text-textSecondary mt-1">Creating personalized travel options...</p>
-              </div>
-            </div>
+              <CollapsibleContent className="ml-9 mt-2">
+                <p className="text-sm text-textSecondary whitespace-pre-wrap">
+                  {reasoningState.tradeOffAnalysis.content}
+                </p>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         </div>
       </div>

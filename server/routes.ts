@@ -75,6 +75,225 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stream travel recommendations with real-time reasoning
+  app.post("/api/travel/generate-recommendations-stream", async (req, res) => {
+    try {
+      const { sessionId, flightDetails, preferences } = req.body;
+      
+      if (!sessionId || !flightDetails || !preferences) {
+        return res.status(400).json({ message: 'Session ID, flight details and preferences are required' });
+      }
+
+      // Set headers for Server-Sent Events
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+      });
+
+      const sendEvent = (event: string, data: any) => {
+        res.write(`event: ${event}\n`);
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+      };
+
+      if (process.env.ANTHROPIC_API_KEY) {
+        try {
+          // Send initial status
+          sendEvent('reasoning-start', { stage: 'situation-assessment' });
+
+          const stream = anthropic.messages.stream({
+            model: DEFAULT_MODEL_STR,
+            max_tokens: 4000,
+            system: `You are Navietta, the expert AI travel assistant specializing in arrival logistics and layover planning. You provide detailed, transparent reasoning for travel recommendations.
+
+CRITICAL: Structure your response with clear section headers for streaming display:
+
+## SITUATION ASSESSMENT
+[Analyze the travel scenario, timing constraints, and key challenges]
+
+## GENERATING OPTIONS  
+[Develop different travel options with specific details]
+
+## TRADE-OFF ANALYSIS
+[Compare options with clear reasoning about pros/cons]
+
+## FINAL RECOMMENDATIONS
+[Provide final JSON recommendations]
+
+Travel Details:
+- From: ${flightDetails.from}
+- To: ${flightDetails.to} 
+- Arrival: ${flightDetails.arrivalTime}
+- Next destination: ${flightDetails.nextStop}
+- Departure: ${flightDetails.nextStopTime}
+
+User Preferences (0-100):
+- Comfort priority: ${preferences.comfort}
+- Cost priority: ${preferences.cost} 
+- Energy level: ${preferences.energy}
+
+Provide detailed reasoning for each section, then end with JSON recommendations in this format:
+{
+  "reasoning": {
+    "situationAssessment": "...",
+    "generatingOptions": "...", 
+    "tradeOffAnalysis": "..."
+  },
+  "options": [...travel options...]
+}`,
+            messages: [{
+              role: "user",
+              content: `Please analyze this travel situation and provide detailed recommendations with transparent reasoning.`
+            }]
+          });
+
+          let currentStage = 'situation-assessment';
+          let accumulatedText = '';
+          let reasoningData = {
+            situationAssessment: '',
+            generatingOptions: '',
+            tradeOffAnalysis: ''
+          };
+
+          stream.on('text', (text) => {
+            accumulatedText += text;
+            
+            // Detect stage changes
+            if (text.includes('## GENERATING OPTIONS')) {
+              sendEvent('reasoning-progress', { 
+                stage: 'situation-assessment', 
+                content: reasoningData.situationAssessment,
+                completed: true 
+              });
+              currentStage = 'generating-options';
+              sendEvent('reasoning-start', { stage: 'generating-options' });
+            } else if (text.includes('## TRADE-OFF ANALYSIS')) {
+              sendEvent('reasoning-progress', { 
+                stage: 'generating-options', 
+                content: reasoningData.generatingOptions,
+                completed: true 
+              });
+              currentStage = 'trade-off-analysis';
+              sendEvent('reasoning-start', { stage: 'trade-off-analysis' });
+            } else if (text.includes('## FINAL RECOMMENDATIONS')) {
+              sendEvent('reasoning-progress', { 
+                stage: 'trade-off-analysis', 
+                content: reasoningData.tradeOffAnalysis,
+                completed: true 
+              });
+              currentStage = 'final-recommendations';
+            } else {
+              // Send progressive text for current stage
+              if (currentStage === 'situation-assessment') {
+                reasoningData.situationAssessment += text;
+              } else if (currentStage === 'generating-options') {
+                reasoningData.generatingOptions += text;
+              } else if (currentStage === 'trade-off-analysis') {
+                reasoningData.tradeOffAnalysis += text;
+              }
+              
+              sendEvent('reasoning-progress', { 
+                stage: currentStage, 
+                content: text, 
+                completed: false 
+              });
+            }
+          });
+
+          stream.on('end', async () => {
+            try {
+              // Parse final recommendations from the accumulated text
+              const jsonMatch = accumulatedText.match(/\{[\s\S]*"options"[\s\S]*\]/);
+              let recommendations;
+              
+              if (jsonMatch) {
+                recommendations = JSON.parse(jsonMatch[0]);
+              } else {
+                // Fallback to mock data if parsing fails
+                recommendations = await generateMockTravelRecommendations(flightDetails, preferences);
+              }
+
+              // Store session data
+              const sessionData = {
+                id: sessionId,
+                flightDetails,
+                preferences,
+                aiRecommendations: recommendations,
+                createdAt: new Date()
+              };
+              
+              await storage.createTravelSession(sessionData);
+              
+              sendEvent('complete', { recommendations, sessionId });
+            } catch (error) {
+              console.error('Error processing final recommendations:', error);
+              sendEvent('error', { message: 'Failed to process recommendations' });
+            }
+            res.end();
+          });
+
+          stream.on('error', (error) => {
+            console.error('Streaming error:', error);
+            sendEvent('error', { message: 'Streaming failed' });
+            res.end();
+          });
+
+        } catch (error) {
+          console.error('Claude API error:', error);
+          sendEvent('error', { message: 'AI service temporarily unavailable' });
+          res.end();
+        }
+      } else {
+        // Mock streaming for demo without API key
+        const stages = ['situation-assessment', 'generating-options', 'trade-off-analysis'];
+        const mockTexts = [
+          'Critical timing challenge: 19:15 arrival to 20:20 Naples departure gives only 65 minutes...',
+          'Evaluating airport express train (35min) vs taxi (45min) vs private transfer options...',
+          'Budget preference drives focus on public transport while moderate energy suggests realistic options...'
+        ];
+
+        for (let i = 0; i < stages.length; i++) {
+          sendEvent('reasoning-start', { stage: stages[i] });
+          
+          // Simulate word-by-word streaming
+          const words = mockTexts[i].split(' ');
+          for (const word of words) {
+            sendEvent('reasoning-progress', { 
+              stage: stages[i], 
+              content: word + ' ', 
+              completed: false 
+            });
+            await new Promise(resolve => setTimeout(resolve, 50));
+          }
+          
+          sendEvent('reasoning-progress', { 
+            stage: stages[i], 
+            content: mockTexts[i], 
+            completed: true 
+          });
+        }
+
+        const recommendations = await generateMockTravelRecommendations(flightDetails, preferences);
+        const sessionData = {
+          id: sessionId,
+          flightDetails,
+          preferences,
+          aiRecommendations: recommendations,
+          createdAt: new Date()
+        };
+        
+        await storage.createTravelSession(sessionData);
+        sendEvent('complete', { recommendations, sessionId });
+        res.end();
+      }
+
+    } catch (error) {
+      console.error('Error in streaming endpoint:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
   // Chat with AI about travel recommendations
   app.post("/api/travel/chat", async (req, res) => {
     try {

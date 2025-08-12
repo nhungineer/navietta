@@ -7,9 +7,10 @@ interface FlightDetails {
   arrivalDate: string;
   adults: number;
   children: number;
-  luggage: 'none' | 'standard' | 'multiple';
+  luggageCount: number;
   nextStop: string;
   nextStopTime: string;
+  transportMode: 'flight' | 'taxi' | 'train' | 'bus' | 'hired_car' | 'other';
 }
 
 interface Preferences {
@@ -56,7 +57,7 @@ export async function generateMockTravelRecommendations(
 
   return {
     reasoning: {
-      situationAssessment: `Arriving at ${flightDetails.arrivalTime} in ${flightDetails.to} with ${isEveningArrival ? 'evening' : 'daytime'} arrival. You have ${flightDetails.luggage} luggage and need to reach ${flightDetails.nextStop} by ${flightDetails.nextStopTime}. ${isHighEnergy ? 'Your high energy level suggests you can handle more complex transit options.' : 'Your lower energy level indicates you prefer simpler, more direct options.'}`,
+      situationAssessment: `Arriving at ${flightDetails.arrivalTime} in ${flightDetails.to} with ${isEveningArrival ? 'evening' : 'daytime'} arrival. You have ${flightDetails.luggageCount} piece(s) of luggage and need to reach ${flightDetails.nextStop} by ${flightDetails.nextStopTime}. ${isHighEnergy ? 'Your high energy level suggests you can handle more complex transit options.' : 'Your lower energy level indicates you prefer simpler, more direct options.'}`,
       
       generatingOptions: `Considering ${preferences.transitStyle} style preferences and ${isComfortFocused ? 'comfort-focused' : 'budget-conscious'} approach. Evaluating direct transfers, overnight stays, and exploration opportunities based on your ${flightDetails.arrivalTime} arrival time.`,
       
@@ -73,7 +74,7 @@ export async function generateMockTravelRecommendations(
           {
             time: flightDetails.arrivalTime,
             title: "Land & Collect Luggage",
-            description: `Arrive at ${flightDetails.to} airport, collect ${flightDetails.luggage} luggage`,
+            description: `Arrive at ${flightDetails.to} airport, collect ${flightDetails.luggageCount} piece(s) of luggage`,
             type: "primary"
           },
           {

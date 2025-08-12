@@ -69,7 +69,7 @@ export default function PreferencesPage() {
           </h2>
           {flightDetails && (
             <p className="text-textSecondary">
-              Transiting plan for <strong></strong>{flightDetails.adults} adult
+              Transiting plan for <strong>{flightDetails.adults} adult
               {flightDetails.adults > 1 ? "s" : ""}</strong>
               {flightDetails.children > 0 &&
                 ` and ${flightDetails.children} child${flightDetails.children > 1 ? "ren" : ""}`}{" "}

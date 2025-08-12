@@ -243,106 +243,118 @@ export default function AIResultsPage() {
 
           <div className="space-y-6">
             {/* Situation Assessment */}
-            <div key="situation-assessment" className="border-l-4 border-gray-200 pl-4">
-              <div className="flex items-start space-x-3 mb-3">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
-                  reasoningState.situationAssessment.completed 
-                    ? 'bg-primary' 
-                    : reasoningState.situationAssessment.active 
-                      ? 'bg-accent animate-pulse' 
-                      : 'bg-gray-300'
-                }`}>
-                  {reasoningState.situationAssessment.completed ? (
-                    <Check className="text-white" size={12} />
-                  ) : reasoningState.situationAssessment.active ? (
-                    <Loader2 className="text-white animate-spin" size={12} />
-                  ) : (
+            {reasoningState.situationAssessment.active || reasoningState.situationAssessment.completed ? (
+              <div key="situation-assessment" className="border-l-4 border-primary pl-4 bg-blue-50 p-4 rounded-r-lg">
+                <div className="flex items-start space-x-3 mb-3">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
+                    reasoningState.situationAssessment.completed ? 'bg-primary' : 'bg-accent animate-pulse'
+                  }`}>
+                    {reasoningState.situationAssessment.completed ? (
+                      <Check className="text-white" size={12} />
+                    ) : (
+                      <Loader2 className="text-white animate-spin" size={12} />
+                    )}
+                  </div>
+                  <h4 className="font-medium text-textPrimary">Situation Assessment</h4>
+                </div>
+                <div className="ml-9 text-sm text-textSecondary">
+                  <div className="whitespace-pre-wrap min-h-[20px] font-mono">
+                    {reasoningState.situationAssessment.content}
+                    {!reasoningState.situationAssessment.completed && (
+                      <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1">|</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div key="situation-assessment-waiting" className="border-l-4 border-gray-200 pl-4">
+                <div className="flex items-start space-x-3 mb-3">
+                  <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center mt-0.5">
                     <span className="text-white font-medium text-xs">1</span>
-                  )}
+                  </div>
+                  <h4 className="font-medium text-textSecondary">Situation Assessment</h4>
                 </div>
-                <h4 className="font-medium text-textPrimary">Situation Assessment</h4>
-              </div>
-              <div className="ml-9 text-sm text-textSecondary">
-                <div className="whitespace-pre-wrap min-h-[20px]">
-                  {reasoningState.situationAssessment.content || (
-                    reasoningState.situationAssessment.active 
-                      ? 'Analyzing your arrival time, energy level, and destination requirements...' 
-                      : 'Waiting to start analysis...'
-                  )}
+                <div className="ml-9 text-sm text-textSecondary">
+                  Waiting to start analysis...
                 </div>
-                {reasoningState.situationAssessment.active && reasoningState.situationAssessment.content && (
-                  <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1"></div>
-                )}
               </div>
-            </div>
+            )}
 
             {/* Generating Options */}
-            <div key="generating-options" className="border-l-4 border-gray-200 pl-4">
-              <div className="flex items-start space-x-3 mb-3">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
-                  reasoningState.generatingOptions.completed 
-                    ? 'bg-primary' 
-                    : reasoningState.generatingOptions.active 
-                      ? 'bg-accent animate-pulse' 
-                      : 'bg-gray-300'
-                }`}>
-                  {reasoningState.generatingOptions.completed ? (
-                    <Check className="text-white" size={12} />
-                  ) : reasoningState.generatingOptions.active ? (
-                    <Loader2 className="text-white animate-spin" size={12} />
-                  ) : (
+            {reasoningState.generatingOptions.active || reasoningState.generatingOptions.completed ? (
+              <div key="generating-options" className="border-l-4 border-primary pl-4 bg-green-50 p-4 rounded-r-lg">
+                <div className="flex items-start space-x-3 mb-3">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
+                    reasoningState.generatingOptions.completed ? 'bg-primary' : 'bg-accent animate-pulse'
+                  }`}>
+                    {reasoningState.generatingOptions.completed ? (
+                      <Check className="text-white" size={12} />
+                    ) : (
+                      <Loader2 className="text-white animate-spin" size={12} />
+                    )}
+                  </div>
+                  <h4 className="font-medium text-textPrimary">Generating Options</h4>
+                </div>
+                <div className="ml-9 text-sm text-textSecondary">
+                  <div className="whitespace-pre-wrap min-h-[20px] font-mono">
+                    {reasoningState.generatingOptions.content}
+                    {!reasoningState.generatingOptions.completed && (
+                      <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1">|</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div key="generating-options-waiting" className="border-l-4 border-gray-200 pl-4">
+                <div className="flex items-start space-x-3 mb-3">
+                  <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center mt-0.5">
                     <span className="text-white font-medium text-xs">2</span>
-                  )}
+                  </div>
+                  <h4 className="font-medium text-textSecondary">Generating Options</h4>
                 </div>
-                <h4 className="font-medium text-textPrimary">Generating Options</h4>
-              </div>
-              <div className="ml-9 text-sm text-textSecondary">
-                <div className="whitespace-pre-wrap min-h-[20px]">
-                  {reasoningState.generatingOptions.content || (
-                    reasoningState.generatingOptions.active 
-                      ? 'Evaluating different routes and timing combinations...' 
-                      : 'Waiting for situation analysis to complete...'
-                  )}
+                <div className="ml-9 text-sm text-textSecondary">
+                  Waiting for situation analysis to complete...
                 </div>
-                {reasoningState.generatingOptions.active && reasoningState.generatingOptions.content && (
-                  <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1"></div>
-                )}
               </div>
-            </div>
+            )}
 
             {/* Trade-off Analysis */}
-            <div key="trade-off-analysis" className="border-l-4 border-gray-200 pl-4">
-              <div className="flex items-start space-x-3 mb-3">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
-                  reasoningState.tradeOffAnalysis.completed 
-                    ? 'bg-primary' 
-                    : reasoningState.tradeOffAnalysis.active 
-                      ? 'bg-accent animate-pulse' 
-                      : 'bg-gray-300'
-                }`}>
-                  {reasoningState.tradeOffAnalysis.completed ? (
-                    <Check className="text-white" size={12} />
-                  ) : reasoningState.tradeOffAnalysis.active ? (
-                    <Loader2 className="text-white animate-spin" size={12} />
-                  ) : (
+            {reasoningState.tradeOffAnalysis.active || reasoningState.tradeOffAnalysis.completed ? (
+              <div key="trade-off-analysis" className="border-l-4 border-primary pl-4 bg-purple-50 p-4 rounded-r-lg">
+                <div className="flex items-start space-x-3 mb-3">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
+                    reasoningState.tradeOffAnalysis.completed ? 'bg-primary' : 'bg-accent animate-pulse'
+                  }`}>
+                    {reasoningState.tradeOffAnalysis.completed ? (
+                      <Check className="text-white" size={12} />
+                    ) : (
+                      <Loader2 className="text-white animate-spin" size={12} />
+                    )}
+                  </div>
+                  <h4 className="font-medium text-textPrimary">Trade-off Analysis</h4>
+                </div>
+                <div className="ml-9 text-sm text-textSecondary">
+                  <div className="whitespace-pre-wrap min-h-[20px] font-mono">
+                    {reasoningState.tradeOffAnalysis.content}
+                    {!reasoningState.tradeOffAnalysis.completed && (
+                      <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1">|</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div key="trade-off-analysis-waiting" className="border-l-4 border-gray-200 pl-4">
+                <div className="flex items-start space-x-3 mb-3">
+                  <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center mt-0.5">
                     <span className="text-white font-medium text-xs">3</span>
-                  )}
+                  </div>
+                  <h4 className="font-medium text-textSecondary">Trade-off Analysis</h4>
                 </div>
-                <h4 className="font-medium text-textPrimary">Trade-off Analysis</h4>
-              </div>
-              <div className="ml-9 text-sm text-textSecondary">
-                <div className="whitespace-pre-wrap min-h-[20px]">
-                  {reasoningState.tradeOffAnalysis.content || (
-                    reasoningState.tradeOffAnalysis.active 
-                      ? 'Analyzing trade-offs and creating personalized recommendations...' 
-                      : 'Waiting for options generation to complete...'
-                  )}
+                <div className="ml-9 text-sm text-textSecondary">
+                  Waiting for options generation to complete...
                 </div>
-                {reasoningState.tradeOffAnalysis.active && reasoningState.tradeOffAnalysis.content && (
-                  <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1"></div>
-                )}
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

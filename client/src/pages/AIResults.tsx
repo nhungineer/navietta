@@ -224,29 +224,6 @@ export default function AIResultsPage() {
         </Accordion>
       </div>
 
-      {recommendations.options[0]?.timelineItems && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-textPrimary mb-6">
-            <Clock className="text-primary mr-2 inline" size={20} />
-            Recommended Timeline
-          </h3>
-
-          <div className="space-y-4">
-            {recommendations.options[0].timelineItems.map((item, index) => (
-              <div key={index} className="flex items-center space-x-4">
-                <div className={`text-sm font-medium px-2 py-1 rounded ${getTypeColor(item.type)}`}>
-                  {item.time}
-                </div>
-                <div className={`flex-1 border-l-2 pl-4 pb-4 ${getTypeColorForTimeline(item.type)}`}>
-                  <h4 className="font-medium text-textPrimary">{item.title}</h4>
-                  <p className="text-sm text-textSecondary">{item.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {recommendations.options.map((option, index) => (
           <div key={option.id} className={`bg-white rounded-xl shadow-sm p-6 ${option.recommended ? 'border-2 border-primary relative' : ''}`}>
@@ -297,6 +274,29 @@ export default function AIResultsPage() {
           </div>
         ))}
       </div>
+
+      {recommendations.options[0]?.timelineItems && (
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h3 className="text-lg font-semibold text-textPrimary mb-6">
+            <Clock className="text-primary mr-2 inline" size={20} />
+            Recommended Timeline
+          </h3>
+
+          <div className="space-y-4">
+            {recommendations.options[0].timelineItems.map((item, index) => (
+              <div key={index} className="flex items-center space-x-4">
+                <div className={`text-sm font-medium px-2 py-1 rounded ${getTypeColor(item.type)}`}>
+                  {item.time}
+                </div>
+                <div className={`flex-1 border-l-2 pl-4 pb-4 ${getTypeColorForTimeline(item.type)}`}>
+                  <h4 className="font-medium text-textPrimary">{item.title}</h4>
+                  <p className="text-sm text-textSecondary">{item.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center space-x-4">

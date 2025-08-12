@@ -121,31 +121,43 @@ export default function AIResultsPage() {
   };
 
   const handleStreamEvent = (data: any) => {
+    console.log('Stream event received:', data); // Debug log
+    
     if (data.stage) {
       const stageKey = data.stage.replace(/-/g, '') as keyof typeof reasoningState;
+      console.log('Processing stage:', data.stage, '-> stageKey:', stageKey); // Debug log
       
       if (data.completed === undefined) {
         // This is a reasoning-start event
+        console.log('Starting stage:', stageKey); // Debug log
         setReasoningState(prev => ({
           ...prev,
           [stageKey]: {
             ...prev[stageKey],
-            active: true
+            active: true,
+            content: prev[stageKey]?.content || ''
           }
         }));
       } else {
         // This is a reasoning-progress event
-        setReasoningState(prev => ({
-          ...prev,
-          [stageKey]: {
-            content: data.completed ? data.content : (prev[stageKey]?.content || '') + (data.content || ''),
-            completed: data.completed,
-            active: !data.completed
-          }
-        }));
+        console.log('Updating stage:', stageKey, 'completed:', data.completed, 'content length:', data.content?.length); // Debug log
+        setReasoningState(prev => {
+          const currentContent = prev[stageKey]?.content || '';
+          const newContent = data.completed ? data.content : currentContent + (data.content || '');
+          console.log('Current content length:', currentContent.length, 'New content length:', newContent.length); // Debug log
+          
+          return {
+            ...prev,
+            [stageKey]: {
+              content: newContent,
+              completed: data.completed,
+              active: !data.completed
+            }
+          };
+        });
       }
     } else if (data.recommendations) {
-      // Final recommendations received
+      console.log('Final recommendations received'); // Debug log
       setRecommendations(data.recommendations);
       setIsLoading(false);
     }
@@ -232,6 +244,7 @@ export default function AIResultsPage() {
           <div className="space-y-4">
             {/* Situation Assessment */}
             <Collapsible 
+              key="situation-assessment"
               open={reasoningState.situationAssessment.active || !reasoningState.situationAssessment.completed}
             >
               <div className="flex items-start space-x-3">
@@ -273,6 +286,7 @@ export default function AIResultsPage() {
 
             {/* Generating Options */}
             <Collapsible 
+              key="generating-options"
               open={reasoningState.generatingOptions.active || !reasoningState.generatingOptions.completed}
             >
               <div className="flex items-start space-x-3">
@@ -314,6 +328,7 @@ export default function AIResultsPage() {
 
             {/* Trade-off Analysis */}
             <Collapsible 
+              key="trade-off-analysis"
               open={reasoningState.tradeOffAnalysis.active || !reasoningState.tradeOffAnalysis.completed}
             >
               <div className="flex items-start space-x-3">

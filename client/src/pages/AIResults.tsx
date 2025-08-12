@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { useTravelContext } from '@/contexts/TravelContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Brain, Clock, Check, Loader2, Send, Bot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AIRecommendations {
   reasoning: {
@@ -37,6 +39,7 @@ export default function AIResultsPage() {
   const [chatInput, setChatInput] = useState('');
   const [recommendations, setRecommendations] = useState<AIRecommendations | null>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const generateRecommendationsMutation = useMutation({
     mutationFn: async () => {
@@ -224,56 +227,115 @@ export default function AIResultsPage() {
         </Accordion>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {recommendations.options.map((option, index) => (
-          <div key={option.id} className={`bg-white rounded-xl shadow-sm p-6 ${option.recommended ? 'border-2 border-primary relative' : ''}`}>
-            {option.recommended && (
-              <div className="absolute -top-3 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
-                Recommended
-              </div>
-            )}
-            <div className={option.recommended ? 'mt-2' : ''}>
-              <h4 className="text-lg font-semibold text-textPrimary mb-2">{option.title}</h4>
-              <p className="text-sm text-textSecondary mb-4">{option.description}</p>
+      {isMobile ? (
+        <Carousel className="w-full">
+          <CarouselContent className="-ml-2 md:-ml-4">
+            {recommendations.options.map((option, index) => (
+              <CarouselItem key={option.id} className="pl-2 md:pl-4 basis-4/5">
+                <div className={`bg-white rounded-xl shadow-sm p-6 h-full ${option.recommended ? 'border-2 border-primary relative' : ''}`}>
+                  {option.recommended && (
+                    <div className="absolute -top-3 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
+                      Recommended
+                    </div>
+                  )}
+                  <div className={option.recommended ? 'mt-2' : ''}>
+                    <h4 className="text-lg font-semibold text-textPrimary mb-2">{option.title}</h4>
+                    <p className="text-sm text-textSecondary mb-4">{option.description}</p>
 
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center text-sm">
-                  <Clock className="text-primary w-4" size={16} />
-                  <span className="ml-2 text-textSecondary">{option.duration}</span>
-                </div>
-                <div className="flex items-center text-sm">
-                  <span className="ml-2 text-textSecondary">{option.cost}</span>
-                </div>
-                <div className="flex items-center text-sm">
-                  <span className="ml-2 text-textSecondary">{option.energyLevel}</span>
-                </div>
-              </div>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center text-sm">
+                        <Clock className="text-primary w-4" size={16} />
+                        <span className="ml-2 text-textSecondary">{option.duration}</span>
+                      </div>
+                      <div className="flex items-center text-sm">
+                        <span className="ml-2 text-textSecondary">{option.cost}</span>
+                      </div>
+                      <div className="flex items-center text-sm">
+                        <span className="ml-2 text-textSecondary">{option.energyLevel}</span>
+                      </div>
+                    </div>
 
-              <div className="flex items-center justify-between text-xs text-textSecondary mb-4">
-                <span>Comfort</span>
-                <div className="flex-1 mx-2 bg-gray-200 rounded-full h-1">
-                  <div 
-                    className={`h-1 rounded-full ${option.recommended ? 'bg-primary' : 'bg-accent'}`}
-                    style={{ width: `${option.comfortScore}%` }}
-                  ></div>
-                </div>
-                <span>{option.comfortScore}%</span>
-              </div>
+                    <div className="flex items-center justify-between text-xs text-textSecondary mb-4">
+                      <span>Comfort</span>
+                      <div className="flex-1 mx-2 bg-gray-200 rounded-full h-1">
+                        <div 
+                          className={`h-1 rounded-full ${option.recommended ? 'bg-primary' : 'bg-accent'}`}
+                          style={{ width: `${option.comfortScore}%` }}
+                        ></div>
+                      </div>
+                      <span>{option.comfortScore}%</span>
+                    </div>
 
-              <Button 
-                className={`w-full text-sm font-medium ${
-                  option.recommended 
-                    ? 'bg-primary text-white hover:bg-primary/90' 
-                    : 'border border-accent text-accent hover:bg-accent hover:text-white'
-                }`}
-                variant={option.recommended ? 'default' : 'outline'}
-              >
-                View Details
-              </Button>
+                    <Button 
+                      className={`w-full text-sm font-medium ${
+                        option.recommended 
+                          ? 'bg-primary text-white hover:bg-primary/90' 
+                          : 'border border-accent text-accent hover:bg-accent hover:text-white'
+                      }`}
+                      variant={option.recommended ? 'default' : 'outline'}
+                    >
+                      View Details
+                    </Button>
+                  </div>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="left-2" />
+          <CarouselNext className="right-2" />
+        </Carousel>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {recommendations.options.map((option, index) => (
+            <div key={option.id} className={`bg-white rounded-xl shadow-sm p-6 ${option.recommended ? 'border-2 border-primary relative' : ''}`}>
+              {option.recommended && (
+                <div className="absolute -top-3 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
+                  Recommended
+                </div>
+              )}
+              <div className={option.recommended ? 'mt-2' : ''}>
+                <h4 className="text-lg font-semibold text-textPrimary mb-2">{option.title}</h4>
+                <p className="text-sm text-textSecondary mb-4">{option.description}</p>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center text-sm">
+                    <Clock className="text-primary w-4" size={16} />
+                    <span className="ml-2 text-textSecondary">{option.duration}</span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <span className="ml-2 text-textSecondary">{option.cost}</span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <span className="ml-2 text-textSecondary">{option.energyLevel}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-textSecondary mb-4">
+                  <span>Comfort</span>
+                  <div className="flex-1 mx-2 bg-gray-200 rounded-full h-1">
+                    <div 
+                      className={`h-1 rounded-full ${option.recommended ? 'bg-primary' : 'bg-accent'}`}
+                      style={{ width: `${option.comfortScore}%` }}
+                    ></div>
+                  </div>
+                  <span>{option.comfortScore}%</span>
+                </div>
+
+                <Button 
+                  className={`w-full text-sm font-medium ${
+                    option.recommended 
+                      ? 'bg-primary text-white hover:bg-primary/90' 
+                      : 'border border-accent text-accent hover:bg-accent hover:text-white'
+                  }`}
+                  variant={option.recommended ? 'default' : 'outline'}
+                >
+                  View Details
+                </Button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {recommendations.options[0]?.timelineItems && (
         <div className="bg-white rounded-xl shadow-sm p-6">

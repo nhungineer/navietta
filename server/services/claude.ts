@@ -25,9 +25,10 @@ interface FlightDetails {
   arrivalDate: string;
   adults: number;
   children: number;
-  luggage: 'none' | 'standard' | 'multiple';
+  luggageCount: number;
   nextStop: string;
   nextStopTime: string;
+  transportMode: 'flight' | 'taxi' | 'train' | 'bus' | 'hired_car' | 'other';
 }
 
 interface Preferences {
@@ -77,7 +78,9 @@ export async function generateTravelRecommendations(
 - Prioritise the user's stated preferences (comfort/budget/efficiency)
 - Provide higher granularity for their primary concern
 - Address group dynamics and special needs when mentioned
-- Consider contextual factors: weather, time of day, energy levels, luggage
+- Consider contextual factors: weather, time of day, energy levels, luggage count
+- Factor in preferred transport mode when generating recommendations
+- Acknowledge luggage handling complexity based on piece count
 
 ## Rome-Specific Knowledge Base
 
@@ -99,8 +102,9 @@ CRITICAL: You must respond with ONLY a valid JSON object. Do not use markdown co
 - Flying from ${flightDetails.from} to ${flightDetails.to}
 - Arrival: ${flightDetails.arrivalTime} on ${flightDetails.arrivalDate}
 - Travelers: ${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ''}
-- Luggage: ${flightDetails.luggage} luggage
+- Luggage: ${flightDetails.luggageCount} piece(s) of check-in luggage
 - Next destination: ${flightDetails.nextStop} at ${flightDetails.nextStopTime}
+- Preferred transport mode: ${flightDetails.transportMode.replace('_', ' ')}
 
 USER PREFERENCES:
 - Budget vs Comfort preference: ${preferences.budgetComfort}/100 (0=budget focused, 100=comfort focused)

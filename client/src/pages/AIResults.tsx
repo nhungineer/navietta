@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { useTravelContext } from '@/contexts/TravelContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -241,13 +241,10 @@ export default function AIResultsPage() {
             AI Reasoning Process
           </h3>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* Situation Assessment */}
-            <Collapsible 
-              key="situation-assessment"
-              open={reasoningState.situationAssessment.active || !reasoningState.situationAssessment.completed}
-            >
-              <div className="flex items-start space-x-3">
+            <div key="situation-assessment" className="border-l-4 border-gray-200 pl-4">
+              <div className="flex items-start space-x-3 mb-3">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
                   reasoningState.situationAssessment.completed 
                     ? 'bg-primary' 
@@ -263,38 +260,25 @@ export default function AIResultsPage() {
                     <span className="text-white font-medium text-xs">1</span>
                   )}
                 </div>
-                <div className="flex-1">
-                  <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
-                    <h4 className="font-medium text-textPrimary">Situation assessment</h4>
-                    {reasoningState.situationAssessment.completed && (
-                      <ChevronDown className="text-textSecondary" size={16} />
-                    )}
-                  </CollapsibleTrigger>
-                  {!reasoningState.situationAssessment.completed && reasoningState.situationAssessment.active && (
-                    <div className="text-sm text-textSecondary mt-1">
-                      <div className="whitespace-pre-wrap">
-                        {reasoningState.situationAssessment.content || 'Analyzing your arrival time, energy level, and destination requirements...'}
-                      </div>
-                      {reasoningState.situationAssessment.content && (
-                        <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1"></div>
-                      )}
-                    </div>
+                <h4 className="font-medium text-textPrimary">Situation Assessment</h4>
+              </div>
+              <div className="ml-9 text-sm text-textSecondary">
+                <div className="whitespace-pre-wrap min-h-[20px]">
+                  {reasoningState.situationAssessment.content || (
+                    reasoningState.situationAssessment.active 
+                      ? 'Analyzing your arrival time, energy level, and destination requirements...' 
+                      : 'Waiting to start analysis...'
                   )}
                 </div>
+                {reasoningState.situationAssessment.active && reasoningState.situationAssessment.content && (
+                  <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1"></div>
+                )}
               </div>
-              <CollapsibleContent className="ml-9 mt-2">
-                <p className="text-sm text-textSecondary whitespace-pre-wrap">
-                  {reasoningState.situationAssessment.content}
-                </p>
-              </CollapsibleContent>
-            </Collapsible>
+            </div>
 
             {/* Generating Options */}
-            <Collapsible 
-              key="generating-options"
-              open={reasoningState.generatingOptions.active || !reasoningState.generatingOptions.completed}
-            >
-              <div className="flex items-start space-x-3">
+            <div key="generating-options" className="border-l-4 border-gray-200 pl-4">
+              <div className="flex items-start space-x-3 mb-3">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
                   reasoningState.generatingOptions.completed 
                     ? 'bg-primary' 
@@ -310,38 +294,25 @@ export default function AIResultsPage() {
                     <span className="text-white font-medium text-xs">2</span>
                   )}
                 </div>
-                <div className="flex-1">
-                  <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
-                    <h4 className="font-medium text-textPrimary">Generating options</h4>
-                    {reasoningState.generatingOptions.completed && (
-                      <ChevronDown className="text-textSecondary" size={16} />
-                    )}
-                  </CollapsibleTrigger>
-                  {!reasoningState.generatingOptions.completed && reasoningState.generatingOptions.active && (
-                    <div className="text-sm text-textSecondary mt-1">
-                      <div className="whitespace-pre-wrap">
-                        {reasoningState.generatingOptions.content || 'Evaluating different routes and timing combinations...'}
-                      </div>
-                      {reasoningState.generatingOptions.content && (
-                        <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1"></div>
-                      )}
-                    </div>
+                <h4 className="font-medium text-textPrimary">Generating Options</h4>
+              </div>
+              <div className="ml-9 text-sm text-textSecondary">
+                <div className="whitespace-pre-wrap min-h-[20px]">
+                  {reasoningState.generatingOptions.content || (
+                    reasoningState.generatingOptions.active 
+                      ? 'Evaluating different routes and timing combinations...' 
+                      : 'Waiting for situation analysis to complete...'
                   )}
                 </div>
+                {reasoningState.generatingOptions.active && reasoningState.generatingOptions.content && (
+                  <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1"></div>
+                )}
               </div>
-              <CollapsibleContent className="ml-9 mt-2">
-                <p className="text-sm text-textSecondary whitespace-pre-wrap">
-                  {reasoningState.generatingOptions.content}
-                </p>
-              </CollapsibleContent>
-            </Collapsible>
+            </div>
 
             {/* Trade-off Analysis */}
-            <Collapsible 
-              key="trade-off-analysis"
-              open={reasoningState.tradeOffAnalysis.active || !reasoningState.tradeOffAnalysis.completed}
-            >
-              <div className="flex items-start space-x-3">
+            <div key="trade-off-analysis" className="border-l-4 border-gray-200 pl-4">
+              <div className="flex items-start space-x-3 mb-3">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
                   reasoningState.tradeOffAnalysis.completed 
                     ? 'bg-primary' 
@@ -357,31 +328,21 @@ export default function AIResultsPage() {
                     <span className="text-white font-medium text-xs">3</span>
                   )}
                 </div>
-                <div className="flex-1">
-                  <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
-                    <h4 className="font-medium text-textPrimary">Trade-off analysis</h4>
-                    {reasoningState.tradeOffAnalysis.completed && (
-                      <ChevronDown className="text-textSecondary" size={16} />
-                    )}
-                  </CollapsibleTrigger>
-                  {!reasoningState.tradeOffAnalysis.completed && reasoningState.tradeOffAnalysis.active && (
-                    <div className="text-sm text-textSecondary mt-1">
-                      <div className="whitespace-pre-wrap">
-                        {reasoningState.tradeOffAnalysis.content || 'Analyzing trade-offs and creating personalized recommendations...'}
-                      </div>
-                      {reasoningState.tradeOffAnalysis.content && (
-                        <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1"></div>
-                      )}
-                    </div>
+                <h4 className="font-medium text-textPrimary">Trade-off Analysis</h4>
+              </div>
+              <div className="ml-9 text-sm text-textSecondary">
+                <div className="whitespace-pre-wrap min-h-[20px]">
+                  {reasoningState.tradeOffAnalysis.content || (
+                    reasoningState.tradeOffAnalysis.active 
+                      ? 'Analyzing trade-offs and creating personalized recommendations...' 
+                      : 'Waiting for options generation to complete...'
                   )}
                 </div>
+                {reasoningState.tradeOffAnalysis.active && reasoningState.tradeOffAnalysis.content && (
+                  <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1"></div>
+                )}
               </div>
-              <CollapsibleContent className="ml-9 mt-2">
-                <p className="text-sm text-textSecondary whitespace-pre-wrap">
-                  {reasoningState.tradeOffAnalysis.content}
-                </p>
-              </CollapsibleContent>
-            </Collapsible>
+            </div>
           </div>
         </div>
       </div>

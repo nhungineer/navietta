@@ -210,7 +210,7 @@ export default function AIResultsPage() {
           AI Reasoning Process
         </h3>
 
-        <Accordion type="multiple" className="w-full">
+        <Accordion type="multiple" className="w-full" defaultValue={["situation-assessment", "generating-options", "trade-off-analysis"]}>
           <AccordionItem value="situation-assessment">
             <AccordionTrigger className="text-left">
               <div className="flex items-center space-x-3">

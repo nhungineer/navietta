@@ -38,6 +38,8 @@ export default function AIResultsPage() {
   const { flightDetails, preferences, sessionId, setSessionId, isLoading, setIsLoading } = useTravelContext();
   const [chatInput, setChatInput] = useState('');
   const [recommendations, setRecommendations] = useState<AIRecommendations | null>(null);
+  const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
+  const [isChatLoading, setIsChatLoading] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -76,6 +78,50 @@ export default function AIResultsPage() {
       generateRecommendationsMutation.mutate();
     }
   }, [flightDetails, preferences]);
+
+  const handleChatSubmit = async () => {
+    if (!chatInput.trim() || !sessionId || isChatLoading) return;
+
+    const userMessage = chatInput.trim();
+    setChatInput('');
+    setIsChatLoading(true);
+
+    // Add user message to chat
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+
+    try {
+      const response = await apiRequest('POST', '/api/travel/chat', {
+        sessionId,
+        message: userMessage,
+      });
+
+      console.log('Chat response status:', response.status);
+      console.log('Chat response headers:', response.headers);
+      
+      const responseText = await response.text();
+      console.log('Chat response text:', responseText.substring(0, 200));
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse JSON:', parseError);
+        throw new Error('Invalid response format from server');
+      }
+      
+      // Add AI response to chat
+      setChatMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+    } catch (error) {
+      console.error('Chat error:', error);
+      toast({
+        title: "Chat Error",
+        description: "Failed to get response from AI assistant. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
 
   const getTypeColor = (type: 'primary' | 'accent' | 'secondary') => {
     switch (type) {
@@ -361,6 +407,32 @@ export default function AIResultsPage() {
       )}
 
       <div className="bg-white rounded-xl shadow-sm p-6">
+        {chatMessages.length > 0 && (
+          <div className="mb-6 space-y-4 max-h-64 overflow-y-auto">
+            {chatMessages.map((message, index) => (
+              <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                  message.role === 'user' 
+                    ? 'bg-primary text-white' 
+                    : 'bg-gray-100 text-textPrimary'
+                }`}>
+                  <p className="text-sm">{message.content}</p>
+                </div>
+              </div>
+            ))}
+            {isChatLoading && (
+              <div className="flex justify-start">
+                <div className="bg-gray-100 text-textPrimary px-4 py-2 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="animate-spin" size={16} />
+                    <span className="text-sm">Navietta is thinking...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        
         <div className="flex items-center space-x-4">
           <div className="flex-1">
             <Input
@@ -368,11 +440,16 @@ export default function AIResultsPage() {
               placeholder="Ask Navietta anything about your travel options..."
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && setChatInput('')}
+              onKeyPress={(e) => e.key === 'Enter' && handleChatSubmit()}
+              disabled={isChatLoading}
             />
           </div>
-          <Button className="bg-primary text-white hover:bg-primary/90">
-            <Send size={16} />
+          <Button 
+            className="bg-primary text-white hover:bg-primary/90"
+            onClick={handleChatSubmit}
+            disabled={isChatLoading || !chatInput.trim()}
+          >
+            {isChatLoading ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
           </Button>
         </div>
       </div>

@@ -122,22 +122,23 @@ export default function AIResultsPage() {
 
   const handleStreamEvent = (data: any) => {
     if (data.stage) {
+      const stageKey = data.stage.replace(/-/g, '') as keyof typeof reasoningState;
+      
       if (data.completed === undefined) {
         // This is a reasoning-start event
         setReasoningState(prev => ({
           ...prev,
-          [data.stage.replace('-', '') as keyof typeof prev]: {
-            ...prev[data.stage.replace('-', '') as keyof typeof prev],
+          [stageKey]: {
+            ...prev[stageKey],
             active: true
           }
         }));
       } else {
         // This is a reasoning-progress event
-        const stageKey = data.stage.replace('-', '') as keyof typeof reasoningState;
         setReasoningState(prev => ({
           ...prev,
           [stageKey]: {
-            content: data.completed ? data.content : prev[stageKey].content + data.content,
+            content: data.completed ? data.content : (prev[stageKey]?.content || '') + (data.content || ''),
             completed: data.completed,
             active: !data.completed
           }

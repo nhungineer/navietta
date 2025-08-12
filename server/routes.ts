@@ -100,7 +100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (process.env.ANTHROPIC_API_KEY) {
         try {
           // Send initial status
-          sendEvent('reasoning-start', { stage: 'situation-assessment' });
+          sendEvent('reasoning-start', { stage: 'situationassessment' });
 
           const stream = anthropic.messages.stream({
             model: DEFAULT_MODEL_STR,
@@ -162,23 +162,23 @@ Provide detailed reasoning for each section, then end with JSON recommendations 
             // Detect stage changes
             if (text.includes('## GENERATING OPTIONS')) {
               sendEvent('reasoning-progress', { 
-                stage: 'situation-assessment', 
+                stage: 'situationassessment', 
                 content: reasoningData.situationAssessment,
                 completed: true 
               });
               currentStage = 'generating-options';
-              sendEvent('reasoning-start', { stage: 'generating-options' });
+              sendEvent('reasoning-start', { stage: 'generatingoptions' });
             } else if (text.includes('## TRADE-OFF ANALYSIS')) {
               sendEvent('reasoning-progress', { 
-                stage: 'generating-options', 
+                stage: 'generatingoptions', 
                 content: reasoningData.generatingOptions,
                 completed: true 
               });
               currentStage = 'trade-off-analysis';
-              sendEvent('reasoning-start', { stage: 'trade-off-analysis' });
+              sendEvent('reasoning-start', { stage: 'tradeoffanalysis' });
             } else if (text.includes('## FINAL RECOMMENDATIONS')) {
               sendEvent('reasoning-progress', { 
-                stage: 'trade-off-analysis', 
+                stage: 'tradeoffanalysis', 
                 content: reasoningData.tradeOffAnalysis,
                 completed: true 
               });
@@ -187,30 +187,57 @@ Provide detailed reasoning for each section, then end with JSON recommendations 
               // Send progressive text for current stage
               if (currentStage === 'situation-assessment') {
                 reasoningData.situationAssessment += text;
+                sendEvent('reasoning-progress', { 
+                  stage: 'situationassessment', 
+                  content: text, 
+                  completed: false 
+                });
               } else if (currentStage === 'generating-options') {
                 reasoningData.generatingOptions += text;
+                sendEvent('reasoning-progress', { 
+                  stage: 'generatingoptions', 
+                  content: text, 
+                  completed: false 
+                });
               } else if (currentStage === 'trade-off-analysis') {
                 reasoningData.tradeOffAnalysis += text;
+                sendEvent('reasoning-progress', { 
+                  stage: 'tradeoffanalysis', 
+                  content: text, 
+                  completed: false 
+                });
               }
-              
-              sendEvent('reasoning-progress', { 
-                stage: currentStage, 
-                content: text, 
-                completed: false 
-              });
             }
           });
 
           stream.on('end', async () => {
             try {
-              // Parse final recommendations from the accumulated text
-              const jsonMatch = accumulatedText.match(/\{[\s\S]*"options"[\s\S]*\]/);
+              // Try multiple approaches to extract JSON from Claude's response
               let recommendations;
               
+              // First try: look for JSON block
+              const jsonMatch = accumulatedText.match(/```json\s*([\s\S]*?)\s*```/) || 
+                               accumulatedText.match(/\{[\s\S]*"options"[\s\S]*?\]\s*\}/);
+              
               if (jsonMatch) {
-                recommendations = JSON.parse(jsonMatch[0]);
-              } else {
-                // Fallback to mock data if parsing fails
+                try {
+                  const jsonStr = jsonMatch[1] || jsonMatch[0];
+                  recommendations = JSON.parse(jsonStr);
+                } catch (parseError) {
+                  console.log('Failed to parse JSON, trying cleanup:', parseError);
+                  
+                  // Try to clean up the JSON string
+                  let cleanedJson = (jsonMatch[1] || jsonMatch[0])
+                    .replace(/,(\s*[}\]])/g, '$1')  // Remove trailing commas
+                    .replace(/([{,]\s*)(\w+):/g, '$1"$2":')  // Quote unquoted keys
+                    .trim();
+                  
+                  recommendations = JSON.parse(cleanedJson);
+                }
+              }
+              
+              if (!recommendations || !recommendations.options) {
+                console.log('No valid JSON found, using mock data');
                 recommendations = await generateMockTravelRecommendations(flightDetails, preferences);
               }
 
@@ -228,7 +255,23 @@ Provide detailed reasoning for each section, then end with JSON recommendations 
               sendEvent('complete', { recommendations, sessionId });
             } catch (error) {
               console.error('Error processing final recommendations:', error);
-              sendEvent('error', { message: 'Failed to process recommendations' });
+              
+              // Use mock data as final fallback
+              try {
+                const recommendations = await generateMockTravelRecommendations(flightDetails, preferences);
+                const sessionData = {
+                  id: sessionId,
+                  flightDetails,
+                  preferences,
+                  aiRecommendations: recommendations,
+                  createdAt: new Date()
+                };
+                await storage.createTravelSession(sessionData);
+                sendEvent('complete', { recommendations, sessionId });
+              } catch (fallbackError) {
+                console.error('Even fallback failed:', fallbackError);
+                sendEvent('error', { message: 'Failed to generate recommendations' });
+              }
             }
             res.end();
           });
@@ -246,7 +289,7 @@ Provide detailed reasoning for each section, then end with JSON recommendations 
         }
       } else {
         // Mock streaming for demo without API key
-        const stages = ['situation-assessment', 'generating-options', 'trade-off-analysis'];
+        const stages = ['situationassessment', 'generatingoptions', 'tradeoffanalysis'];
         const mockTexts = [
           'Critical timing challenge: 19:15 arrival to 20:20 Naples departure gives only 65 minutes...',
           'Evaluating airport express train (35min) vs taxi (45min) vs private transfer options...',

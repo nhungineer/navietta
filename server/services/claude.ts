@@ -34,7 +34,7 @@ interface FlightDetails {
 interface Preferences {
   budgetComfort: number;
   energyLevel: number;
-  transitStyle: 'opportunity_maximiser' | 'direct' | 'scenic' | 'budget' | 'comfortable';
+  transitStyle: 'quickly' | 'explore' | 'simple';
 }
 
 interface TravelRecommendations {
@@ -109,7 +109,11 @@ CRITICAL: You must respond with ONLY a valid JSON object. Do not use markdown co
 USER PREFERENCES:
 - Budget vs Comfort preference: ${preferences.budgetComfort}/100 (0=budget focused, 100=comfort focused)
 - Energy level: ${preferences.energyLevel}/100 (0=tired/need rest, 100=energetic/ready to explore)
-- Transit style: ${preferences.transitStyle}
+- Transit style: ${preferences.transitStyle} ${
+  preferences.transitStyle === 'quickly' ? '(prioritize speed and efficiency, direct routes)' :
+  preferences.transitStyle === 'explore' ? '(want to see sights along the way, open to detours and experiences)' :
+  '(prefer simple, straightforward options with minimal complexity)'
+}
 
 Analyze this situation following your structured reasoning approach. Provide exactly 3 distinct options.
 

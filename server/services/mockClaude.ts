@@ -16,7 +16,7 @@ interface FlightDetails {
 interface Preferences {
   budgetComfort: number;
   energyLevel: number;
-  transitStyle: 'opportunity_maximiser' | 'direct' | 'scenic' | 'budget' | 'comfortable';
+  transitStyle: 'quickly' | 'explore' | 'simple';
 }
 
 interface TravelRecommendations {
@@ -61,7 +61,7 @@ export async function generateMockTravelRecommendations(
       
       generatingOptions: `Considering ${preferences.transitStyle} style preferences and ${isComfortFocused ? 'comfort-focused' : 'budget-conscious'} approach. Evaluating direct transfers, overnight stays, and exploration opportunities based on your ${flightDetails.arrivalTime} arrival time.`,
       
-      tradeOffAnalysis: `Balancing your ${preferences.budgetComfort}/100 comfort preference with ${preferences.energyLevel}/100 energy level. ${isEveningArrival ? 'Evening arrival limits exploration but offers good rest options.' : 'Daytime arrival provides more flexibility for activities.'} Time window to ${flightDetails.nextStop} allows for ${preferences.transitStyle === 'opportunity_maximiser' ? 'strategic sightseeing' : 'focused transport'}.`
+      tradeOffAnalysis: `Balancing your ${preferences.budgetComfort}/100 comfort preference with ${preferences.energyLevel}/100 energy level. ${isEveningArrival ? 'Evening arrival limits exploration but offers good rest options.' : 'Daytime arrival provides more flexibility for activities.'} Time window to ${flightDetails.nextStop} allows for ${preferences.transitStyle === 'explore' ? 'strategic sightseeing' : preferences.transitStyle === 'quickly' ? 'direct transport' : 'simple and comfortable transit'}.`
     },
     options: [
       {
@@ -96,7 +96,7 @@ export async function generateMockTravelRecommendations(
         duration: `Total time: ${isComfortFocused ? '90' : '75'} minutes`,
         energyLevel: "Low stress",
         comfortScore: isComfortFocused ? 90 : 75,
-        recommended: !isHighEnergy || preferences.transitStyle === 'direct'
+        recommended: !isHighEnergy || preferences.transitStyle === 'quickly' || preferences.transitStyle === 'simple'
       },
       {
         id: "strategic-stopover",
@@ -138,7 +138,7 @@ export async function generateMockTravelRecommendations(
         duration: isEveningArrival ? "Total time: 3 hours" : "Total time: 4 hours",
         energyLevel: isHighEnergy ? "Medium stress" : "High stress",
         comfortScore: 70,
-        recommended: isHighEnergy && (preferences.transitStyle === 'opportunity_maximiser' || preferences.transitStyle === 'scenic')
+        recommended: isHighEnergy && preferences.transitStyle === 'explore'
       },
       {
         id: "overnight-recovery",

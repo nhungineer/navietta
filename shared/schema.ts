@@ -22,7 +22,7 @@ export const travelSessions = pgTable("travel_sessions", {
   preferences: jsonb("preferences").$type<{
     budgetComfort: number; // 0-100 scale
     energyLevel: number; // 0-100 scale
-    transitStyle: 'opportunity_maximiser' | 'direct' | 'scenic' | 'budget' | 'comfortable';
+    transitStyle: 'quickly' | 'explore' | 'simple';
   }>(),
   aiRecommendations: jsonb("ai_recommendations").$type<{
     reasoning: {
@@ -73,7 +73,7 @@ export const flightDetailsSchema = z.object({
 export const preferencesSchema = z.object({
   budgetComfort: z.number().min(0).max(100),
   energyLevel: z.number().min(0).max(100),
-  transitStyle: z.enum(['opportunity_maximiser', 'direct', 'scenic', 'budget', 'comfortable']),
+  transitStyle: z.enum(['quickly', 'explore', 'simple']),
 });
 
 export type InsertTravelSession = z.infer<typeof insertTravelSessionSchema>;

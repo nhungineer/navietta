@@ -1,25 +1,19 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useTravelContext } from "@/contexts/TravelContext";
 import { preferencesSchema, type Preferences } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { DollarSign, Zap, Rabbit, MapPin, TreePine } from "lucide-react";
 
 export default function PreferencesPage() {
   const { navigateToStep, setPreferences, flightDetails } = useTravelContext();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<Preferences>({
-    budgetComfort: 60,
-    energyLevel: 30,
-    transitStyle: "opportunity_maximiser",
+    budgetComfort: 62,
+    energyLevel: 62,
+    transitStyle: "explore",
   });
 
   const handleSliderChange = (
@@ -92,15 +86,18 @@ export default function PreferencesPage() {
 
         <div className="space-y-8">
           <div>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-2 mb-4">
+              <DollarSign className="text-textPrimary" size={20} />
               <Label className="text-lg font-medium text-textPrimary">
-                Budget
-              </Label>
-              <Label className="text-lg font-medium text-textPrimary">
-                Comfort
+                Budget vs Convenience
               </Label>
             </div>
             <div className="relative">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-textSecondary">0</span>
+                <span className="text-lg font-semibold text-primary">{formData.budgetComfort}</span>
+                <span className="text-sm text-textSecondary">100</span>
+              </div>
               <input
                 type="range"
                 min="0"
@@ -114,20 +111,26 @@ export default function PreferencesPage() {
                   background: `linear-gradient(to right, #00897B 0%, #00897B ${formData.budgetComfort}%, #e5e7eb ${formData.budgetComfort}%, #e5e7eb 100%)`,
                 }}
               />
-              <div className="absolute top-6 left-0 w-full flex justify-between text-xs text-textSecondary px-1">
+              <div className="flex justify-between text-xs text-textSecondary px-1 mt-2">
                 <span>Save money</span>
-                <span>Maximum comfort</span>
+                <span>Max convenience</span>
               </div>
             </div>
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="text-textPrimary" size={20} />
               <Label className="text-lg font-medium text-textPrimary">
                 Energy level
               </Label>
             </div>
             <div className="relative">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-textSecondary">0</span>
+                <span className="text-lg font-semibold text-primary">{formData.energyLevel}</span>
+                <span className="text-sm text-textSecondary">100</span>
+              </div>
               <input
                 type="range"
                 min="0"
@@ -141,36 +144,69 @@ export default function PreferencesPage() {
                   background: `linear-gradient(to right, #00897B 0%, #00897B ${formData.energyLevel}%, #e5e7eb ${formData.energyLevel}%, #e5e7eb 100%)`,
                 }}
               />
-              <div className="absolute top-6 left-0 w-full flex justify-between text-xs text-textSecondary px-1">
-                <span>Tired, need rest</span>
-                <span>Energetic, ready to explore</span>
+              <div className="flex justify-between text-xs text-textSecondary px-1 mt-2">
+                <span>Exhausted</span>
+                <span>Energetic</span>
               </div>
             </div>
           </div>
 
           <div>
-            <Label className="block text-lg font-medium text-textPrimary mb-4">
-              Transit style
-            </Label>
-            <Select
-              value={formData.transitStyle}
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, transitStyle: value as any }))
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select transit style" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="opportunity_maximiser">
-                  Opportunity maximiser
-                </SelectItem>
-                <SelectItem value="direct">Direct and efficient</SelectItem>
-                <SelectItem value="scenic">Scenic route</SelectItem>
-                <SelectItem value="budget">Adventurer</SelectItem>
-                <SelectItem value="comfortable">Casual shopper</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2 mb-4">
+              <MapPin className="text-blue-500" size={20} />
+              <Label className="text-lg font-medium text-textPrimary">
+                Transit style
+              </Label>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <button
+                type="button"
+                onClick={() => setFormData((prev) => ({ ...prev, transitStyle: "quickly" }))}
+                className={`p-4 rounded-lg border-2 text-center transition-all ${
+                  formData.transitStyle === "quickly"
+                    ? "border-primary bg-primary/5"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <Rabbit className="text-amber-600" size={32} />
+                  <span className="font-medium text-textPrimary">Get there</span>
+                  <span className="font-medium text-textPrimary">quickly</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormData((prev) => ({ ...prev, transitStyle: "explore" }))}
+                className={`p-4 rounded-lg border-2 text-center transition-all ${
+                  formData.transitStyle === "explore"
+                    ? "border-primary bg-primary/5"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <MapPin className="text-blue-500" size={32} />
+                  <span className="font-medium text-textPrimary">Explore along</span>
+                  <span className="font-medium text-textPrimary">the way</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormData((prev) => ({ ...prev, transitStyle: "simple" }))}
+                className={`p-4 rounded-lg border-2 text-center transition-all ${
+                  formData.transitStyle === "simple"
+                    ? "border-primary bg-primary/5"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <TreePine className="text-gray-500" size={32} />
+                  <span className="font-medium text-textPrimary">Keep</span>
+                  <span className="font-medium text-textPrimary">it simple</span>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
 

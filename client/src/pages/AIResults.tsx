@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useTravelContext } from '@/contexts/TravelContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
@@ -172,37 +173,55 @@ export default function AIResultsPage() {
           AI Reasoning Process
         </h3>
 
-        <div className="space-y-4">
-          <div className="flex items-start space-x-3">
-            <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center mt-0.5">
-              <Check className="text-white" size={12} />
-            </div>
-            <div className="flex-1">
-              <h4 className="font-medium text-textPrimary">Situation assessment</h4>
-              <p className="text-sm text-textSecondary mt-1">{recommendations.reasoning.situationAssessment}</p>
-            </div>
-          </div>
+        <Accordion type="multiple" className="w-full">
+          <AccordionItem value="situation-assessment">
+            <AccordionTrigger className="text-left">
+              <div className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                  <Check className="text-white" size={12} />
+                </div>
+                <h4 className="font-medium text-textPrimary">Situation assessment</h4>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="ml-9">
+                <p className="text-sm text-textSecondary">{recommendations.reasoning.situationAssessment}</p>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-          <div className="flex items-start space-x-3">
-            <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center mt-0.5">
-              <Check className="text-white" size={12} />
-            </div>
-            <div className="flex-1">
-              <h4 className="font-medium text-textPrimary">Generating options</h4>
-              <p className="text-sm text-textSecondary mt-1">{recommendations.reasoning.generatingOptions}</p>
-            </div>
-          </div>
+          <AccordionItem value="generating-options">
+            <AccordionTrigger className="text-left">
+              <div className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                  <Check className="text-white" size={12} />
+                </div>
+                <h4 className="font-medium text-textPrimary">Generating options</h4>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="ml-9">
+                <p className="text-sm text-textSecondary">{recommendations.reasoning.generatingOptions}</p>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-          <div className="flex items-start space-x-3">
-            <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center mt-0.5">
-              <Check className="text-white" size={12} />
-            </div>
-            <div className="flex-1">
-              <h4 className="font-medium text-textPrimary">Trade-off analysis</h4>
-              <p className="text-sm text-textSecondary mt-1">{recommendations.reasoning.tradeOffAnalysis}</p>
-            </div>
-          </div>
-        </div>
+          <AccordionItem value="trade-off-analysis">
+            <AccordionTrigger className="text-left">
+              <div className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                  <Check className="text-white" size={12} />
+                </div>
+                <h4 className="font-medium text-textPrimary">Trade-off analysis</h4>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="ml-9">
+                <p className="text-sm text-textSecondary">{recommendations.reasoning.tradeOffAnalysis}</p>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
 
       {recommendations.options[0]?.timelineItems && (

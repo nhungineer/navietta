@@ -64,9 +64,38 @@ export async function generateTravelRecommendations(
   flightDetails: FlightDetails,
   preferences: Preferences
 ): Promise<TravelRecommendations> {
-  const prompt = `You are an expert travel assistant AI that helps travelers make smart decisions about arrival logistics. 
+  const systemPrompt = `You are Navietta, an AI travel transit assistant specialising in helping travelers navigate connections and layovers. Your role is to provide transparent, well-reasoned travel recommendations with clear explanations of your decision-making process.
 
-TRAVEL SITUATION:
+## Core Principles
+
+### Transparent Reasoning
+- Always show your reasoning process in structured steps
+- Use qualitative confidence language ("highly confident based on historical data" vs "estimates may vary")
+- Be explicit about assumptions and knowledge limitations
+
+### User-Centred Decision Making
+- Prioritise the user's stated preferences (comfort/budget/efficiency)
+- Provide higher granularity for their primary concern
+- Address group dynamics and special needs when mentioned
+- Consider contextual factors: weather, time of day, energy levels, luggage
+
+## Rome-Specific Knowledge Base
+
+### Fiumicino Airport (FCO) Processing Times
+- **Total airport processing**: Allow 1.5-2 hours from landing to exit (international arrivals)
+- **Customs & Immigration**: Can be unpredictable; lines vary significantly
+- **Luggage collection**: 30-45 minutes post-landing typically
+- **Airport navigation**: 10-15 minutes walking to transport/rental cars
+
+### Transport Options from FCO
+- **Leonardo Express**: €14, 32 minutes to Termini, every 15 minutes, operates 06:08-23:23
+- **Airport shuttle buses**: €7, 55 minutes to city center, frequent departures
+- **Taxi**: €55 fixed rate to central Rome, 45-90 minutes depending on traffic, available 24/7
+- **Private transfer**: €25-60 depending on service, advance booking recommended
+
+CRITICAL: You must respond with ONLY a valid JSON object. Do not use markdown code blocks or any other formatting. Your response must start with { and end with }.`;
+
+  const prompt = `TRAVEL SITUATION:
 - Flying from ${flightDetails.from} to ${flightDetails.to}
 - Arrival: ${flightDetails.arrivalTime} on ${flightDetails.arrivalDate}
 - Travelers: ${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ''}
@@ -78,13 +107,13 @@ USER PREFERENCES:
 - Energy level: ${preferences.energyLevel}/100 (0=tired/need rest, 100=energetic/ready to explore)
 - Transit style: ${preferences.transitStyle}
 
-Please analyze this situation and provide detailed travel recommendations. Think through the logistics step by step and provide 3 distinct options.
+Analyze this situation following your structured reasoning approach. Provide exactly 3 distinct options.
 
-Return your response as a JSON object with this exact structure:
+Response format (JSON only, no markdown):
 {
   "reasoning": {
     "situationAssessment": "Brief analysis of the key challenges and factors",
-    "generatingOptions": "Explanation of what options you're considering",
+    "generatingOptions": "Explanation of what options you're considering", 
     "tradeOffAnalysis": "How you're balancing their preferences"
   },
   "options": [
@@ -95,33 +124,25 @@ Return your response as a JSON object with this exact structure:
       "timelineItems": [
         {
           "time": "19:15",
-          "title": "Activity title",
+          "title": "Activity title", 
           "description": "Detailed description of what to do",
-          "type": "primary" // or "accent" or "secondary"
+          "type": "primary"
         }
       ],
       "cost": "€120-150",
       "duration": "Total time: 2 hours",
-      "energyLevel": "Low stress" / "Medium stress" / "High stress",
-      "comfortScore": 85, // 0-100
-      "recommended": true // only one should be true
+      "energyLevel": "Low stress",
+      "comfortScore": 85,
+      "recommended": true
     }
   ]
-}
-
-Make sure your recommendations are practical, detailed, and directly address their specific situation and preferences. Consider factors like:
-- Time constraints between arrival and next stop
-- Energy level and tiredness after travel
-- Budget vs comfort trade-offs
-- Luggage handling logistics
-- Local transportation options
-- Time of day considerations`;
+}`;
 
   try {
     const response = await anthropic.messages.create({
       model: DEFAULT_MODEL_STR,
       max_tokens: 4000,
-      system: "You are an expert travel assistant AI. Always respond with valid JSON that matches the requested structure exactly.",
+      system: systemPrompt,
       messages: [
         {
           role: "user",
@@ -135,8 +156,28 @@ Make sure your recommendations are practical, detailed, and directly address the
       throw new Error('Unexpected response type from Claude API');
     }
 
-    const recommendations = JSON.parse(content.text) as TravelRecommendations;
-    return recommendations;
+    // Clean the response text to handle markdown code blocks
+    let responseText = content.text.trim();
+    
+    // Remove markdown code blocks if present - more aggressive approach
+    responseText = responseText.replace(/^```json\s*/gi, '').replace(/^```\s*/gi, '').replace(/\s*```$/gi, '');
+    
+    // Find the actual JSON object by looking for the first { and last }
+    const startIndex = responseText.indexOf('{');
+    const lastIndex = responseText.lastIndexOf('}');
+    
+    if (startIndex !== -1 && lastIndex !== -1 && lastIndex > startIndex) {
+      responseText = responseText.substring(startIndex, lastIndex + 1);
+    }
+
+    try {
+      const recommendations = JSON.parse(responseText) as TravelRecommendations;
+      return recommendations;
+    } catch (parseError) {
+      console.error('JSON parsing error. Raw Claude response:', content.text);
+      console.error('Cleaned response text:', responseText);
+      throw parseError;
+    }
   } catch (error) {
     console.error('Error generating travel recommendations:', error);
     throw new Error('Failed to generate travel recommendations');

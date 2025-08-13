@@ -85,8 +85,16 @@ export async function generateTravelRecommendations(
 - Factor in preferred transport mode when generating recommendations
 - Acknowledge luggage handling complexity based on piece count
 
-## Rome-Specific Knowledge Base
+CRITICAL: You must respond with ONLY a valid JSON object. Do not use markdown code blocks or any other formatting. Your response must start with { and end with }.`;
 
+  // Add location-specific knowledge when relevant
+  const getLocationKnowledge = (destination: string): string => {
+    const dest = destination.toLowerCase();
+    
+    if (dest.includes('rome') || dest.includes('fco')) {
+      return `
+
+ROME-SPECIFIC KNOWLEDGE:
 ### Fiumicino Airport (FCO) Processing Times
 - **Total airport processing**: Allow 1.5-2 hours from landing to exit (international arrivals)
 - **Customs & Immigration**: Can be unpredictable; lines vary significantly
@@ -97,9 +105,17 @@ export async function generateTravelRecommendations(
 - **Leonardo Express**: €14, 32 minutes to Termini, every 15 minutes, operates 06:08-23:23
 - **Airport shuttle buses**: €7, 55 minutes to city center, frequent departures
 - **Taxi**: €55 fixed rate to central Rome, 45-90 minutes depending on traffic, available 24/7
-- **Private transfer**: €25-60 depending on service, advance booking recommended
+- **Private transfer**: €25-60 depending on service, advance booking recommended`;
+    }
+    
+    // Future: Add other destination knowledge here as needed
+    // if (dest.includes('paris') || dest.includes('cdg')) { return parisKnowledge; }
+    // if (dest.includes('london') || dest.includes('lhr')) { return londonKnowledge; }
+    
+    return '';
+  };
 
-CRITICAL: You must respond with ONLY a valid JSON object. Do not use markdown code blocks or any other formatting. Your response must start with { and end with }.`;
+  const locationKnowledge = getLocationKnowledge(flightDetails.to);
 
   const prompt = `TRAVEL SITUATION:
 - Flying from ${flightDetails.from} to ${flightDetails.to}
@@ -116,7 +132,7 @@ USER PREFERENCES:
   preferences.transitStyle === 'quickly' ? '(prioritize speed and efficiency, direct routes)' :
   preferences.transitStyle === 'explore' ? '(want to see sights along the way, open to detours and experiences)' :
   '(prefer simple, straightforward options with minimal complexity)'
-}
+}${locationKnowledge}
 
 Analyze this situation following your structured reasoning approach. Provide exactly 3 distinct options.
 

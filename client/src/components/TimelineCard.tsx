@@ -13,12 +13,8 @@ interface TimelineCardProps {
 
 export function TimelineCard({ timelineItems }: TimelineCardProps) {
   const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'primary': return 'bg-primary text-white';
-      case 'accent': return 'bg-blue-500 text-white';
-      case 'secondary': return 'bg-gray-400 text-white';
-      default: return 'bg-gray-400 text-white';
-    }
+    // Use consistent teal color for all time boxes to avoid confusion
+    return 'bg-primary text-white';
   };
 
   return (

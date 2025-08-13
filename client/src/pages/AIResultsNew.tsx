@@ -140,6 +140,7 @@ export default function AIResultsPage() {
         <ExpandableSection 
           title="Option exploration" 
           icon={<span className="text-xs font-bold">2</span>}
+          defaultExpanded
         >
           <div className="space-y-4">
             <p className="text-sm text-textPrimary leading-relaxed mb-4">
@@ -162,6 +163,7 @@ export default function AIResultsPage() {
         <ExpandableSection 
           title="Trade-off analysis" 
           icon={<span className="text-xs font-bold">3</span>}
+          defaultExpanded
         >
           <div className="space-y-4">
             <p className="text-sm text-textPrimary leading-relaxed">

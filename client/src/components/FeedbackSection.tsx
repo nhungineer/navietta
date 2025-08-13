@@ -7,6 +7,7 @@ export function FeedbackSection() {
   const [feedback, setFeedback] = useState('');
   const [conversations, setConversations] = useState<Array<{question: string; response: string}>>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastContext, setLastContext] = useState<string>('');
 
   const handleSubmit = async () => {
     if (!feedback.trim()) return;
@@ -26,14 +27,27 @@ export function FeedbackSection() {
       let aiResponse = '';
       const lowerQuestion = userQuestion.toLowerCase();
       
-      if (lowerQuestion.includes('option b') || lowerQuestion.includes('option 2')) {
+      // Handle follow-up responses (yes, please, more details, etc.)
+      if ((lowerQuestion.includes('yes') || lowerQuestion.includes('please') || lowerQuestion.includes('detail') || lowerQuestion.includes('more')) && lastContext) {
+        if (lastContext === 'option-b-timeline') {
+          aiResponse = "Perfect! Here's your detailed Option B timeline for Rome exploration:\n\n**09:15** - Exit FCO after processing (32 min from landing)\n**09:47** - Board Leonardo Express to Termini\n**10:19** - Arrive Termini, take Metro Line A to Spagna\n**10:34** - Spanish Steps & luxury shopping area (30 min)\n**11:04** - Walk to Trevi Fountain (8 min walk)\n**11:12** - Trevi Fountain visit & photos (25 min)\n**11:37** - Walk to Pantheon via Via del Corso (12 min)\n**11:49** - Pantheon exterior & interior (30 min)\n**12:19** - Lunch at Da Enzo al 29 nearby (45 min)\n**13:04** - Leisurely walk back to Metro (15 min)\n**13:19** - Return to Termini, collect bags\n**13:45** - Board train to Naples\n\nThis gives you 3.5 hours of Rome exploration with comfortable pacing!";
+          setLastContext('');
+        } else if (lastContext === 'rome-exploration') {
+          aiResponse = "Here are more specific details for Rome city center exploration:\n\n**Key Stops:** Spanish Steps (photo op) → Trevi Fountain (must-see) → Pantheon (free entry) → Piazza Navona (if time permits)\n\n**Transport:** Metro Line A is most efficient, day pass €7 covers all trips\n\n**Dining:** Book lunch at Da Enzo al 29 (authentic, near Pantheon) or try Ginger for modern Roman cuisine\n\n**Shopping:** Via del Corso for high street, Via Condotti for luxury\n\n**Pro tips:** Download Roma Pass app for skip-the-line options, carry water bottle (free refills at fountains), wear comfortable shoes for cobblestones\n\nWould you like specific restaurant reservations or attraction timing adjustments?";
+          setLastContext('');
+        } else {
+          aiResponse = "I'd be happy to provide more specific details! Could you clarify which aspect you'd like me to elaborate on - the timeline details, specific attractions, dining recommendations, transport connections, or cost breakdown?";
+        }
+      } else if (lowerQuestion.includes('option b') || lowerQuestion.includes('option 2')) {
         aiResponse = "Great choice! Option B typically focuses on balanced exploration with moderate activity levels. For the timeline, you'd have time for 2-3 key attractions with comfortable breaks. This usually includes Leonardo Express to Termini (32 min), metro to city center (15 min), visit to major sites like the Pantheon or Trevi Fountain (1-2 hours), a leisurely lunch (45 min), and return journey with buffer time. Would you like me to detail specific stops and timing?";
+        setLastContext('option-b-timeline');
       } else if (lowerQuestion.includes('option a') || lowerQuestion.includes('option 1')) {
         aiResponse = "Option A is perfect for efficient transit! This focuses on getting you to your destination quickly and comfortably. The timeline includes direct transport with minimal stops, priority on convenience over exploration. You'd have Leonardo Express to Termini, quick transfer to your onward journey, with strategic rest stops. Total transit time is optimized for your schedule.";
       } else if (lowerQuestion.includes('option c') || lowerQuestion.includes('option 3')) {
         aiResponse = "Option C offers the most comprehensive experience! This gives you maximum exploration time with strategic planning. Timeline includes all major transit connections plus extended sightseeing opportunities, authentic dining experiences, and cultural immersion. Perfect if you want to make the most of your layover time.";
       } else if (lowerQuestion.includes('rome') && (lowerQuestion.includes('explore') || lowerQuestion.includes('city center') || lowerQuestion.includes('mini exploration'))) {
         aiResponse = "For Rome city center exploration, here's what I'd recommend: Take Leonardo Express to Termini (32 min) → Metro Line A to Spagna for Spanish Steps area (12 min) → Walk to Trevi Fountain (8 min) → Continue to Pantheon (12 min walk) → Lunch at traditional trattoria nearby (45 min) → Walk back via Via del Corso for shopping (15 min) → Return to Termini and onward to Naples. Total: about 4 hours with comfortable pacing. Does this timeline work for your schedule?";
+        setLastContext('rome-exploration');
       } else if (lowerQuestion.includes('timeline') && (lowerQuestion.includes('detail') || lowerQuestion.includes('flesh out') || lowerQuestion.includes('specific'))) {
         aiResponse = "I'd be happy to create a detailed timeline! Based on your preferences, I can break down each segment with specific times, transport connections, activity durations, and buffer periods. For example: departure times, walking distances, attraction visit lengths, meal breaks, and return journey timing. Which option would you like me to detail further, and are there any specific activities or constraints I should factor in?";
       } else if (lowerQuestion.includes('eat') || lowerQuestion.includes('food') || lowerQuestion.includes('restaurant') || lowerQuestion.includes('lunch') || lowerQuestion.includes('dinner')) {
@@ -44,6 +58,7 @@ export function FeedbackSection() {
         aiResponse = "For timing adjustments, I can modify departure times, add buffer periods, or change activity durations. Key considerations: airport processing (1.5-2 hours), transport connections (allow 15-30 min between), attraction visits (30-90 min each), meal breaks (30-60 min). What specific timing aspect would you like to adjust - earlier departure, longer at attractions, more rest time, or tighter schedule?";
       } else {
         aiResponse = "I'm here to help optimize your travel experience! I can assist with detailed timelines, activity recommendations, cost breakdowns, transportation options, dining suggestions, or any adjustments to the proposed options. What specific aspect of your journey would you like to discuss or modify?";
+        setLastContext('');
       }
       
       // Update the last conversation entry with the response

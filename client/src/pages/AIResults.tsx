@@ -7,6 +7,7 @@ import { useTravelContext } from '@/contexts/TravelContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Brain, Clock, Check, Loader2, Send, Bot } from 'lucide-react';
+import { ThinkingAnimation } from '@/components/ThinkingAnimation';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -138,50 +139,15 @@ export default function AIResultsPage() {
               </div>
               <div>
                 <h3 className="font-semibold text-textPrimary">Navietta AI Assistant</h3>
-                <p className="text-sm text-textSecondary">Analyzing your travel situation...</p>
+                <p className="text-sm text-textSecondary">Generating your personalized travel recommendations...</p>
               </div>
             </div>
             <Bot className="text-textSecondary" size={24} />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-textPrimary mb-4">
-            <Brain className="text-primary mr-2 inline" size={20} />
-            AI Reasoning Process
-          </h3>
-
-          <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center mt-0.5">
-                <Check className="text-white" size={12} />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-medium text-textPrimary">Situation assessment</h4>
-                <p className="text-sm text-textSecondary mt-1">Analyzing your arrival time, energy level, and destination requirements</p>
-              </div>
-            </div>
-
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center mt-0.5">
-                <Check className="text-white" size={12} />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-medium text-textPrimary">Generating options</h4>
-                <p className="text-sm text-textSecondary mt-1">Evaluating different routes and timing combinations</p>
-              </div>
-            </div>
-
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-secondary rounded-full flex items-center justify-center mt-0.5 animate-pulse">
-                <Loader2 className="text-white animate-spin" size={12} />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-medium text-textPrimary">Finalizing recommendations</h4>
-                <p className="text-sm text-textSecondary mt-1">Creating personalized travel options...</p>
-              </div>
-            </div>
-          </div>
+        <div className="bg-white rounded-xl shadow-sm p-8">
+          <ThinkingAnimation />
         </div>
       </div>
     );

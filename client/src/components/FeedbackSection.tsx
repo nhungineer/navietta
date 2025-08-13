@@ -27,8 +27,13 @@ export function FeedbackSection() {
       let aiResponse = '';
       const lowerQuestion = userQuestion.toLowerCase();
       
+      // Check for timeline requests first (most specific)
+      if (lowerQuestion.includes('timeline') && (lowerQuestion.includes('updated') || lowerQuestion.includes('like you did') || lowerQuestion.includes('similar') || lowerQuestion.includes('format'))) {
+        aiResponse = "Here's your detailed timeline in the same format:\n\n**09:15** - Exit FCO after processing (32 min from landing)\n**09:47** - Board Leonardo Express to Termini\n**10:19** - Arrive Termini, take Metro Line A to Spagna  \n**10:34** - Spanish Steps visit & photos (30 min)\n**11:04** - Walk to Trevi Fountain (8 min)\n**11:12** - Trevi Fountain visit & coin toss (25 min)\n**11:37** - Walk to Pantheon via Via del Corso (12 min)\n**11:49** - Pantheon visit - exterior & interior (30 min)\n**12:19** - Lunch at authentic Roman trattoria (45 min)\n**13:04** - Return walk to Metro station (15 min)\n**13:19** - Metro back to Termini, collect luggage\n**13:45** - Board high-speed train to Naples\n\nTotal Rome exploration: 3.5 hours with comfortable pacing!";
+        setLastContext('');
+      }
       // Handle follow-up responses (yes, please, more details, etc.)
-      if ((lowerQuestion.includes('yes') || lowerQuestion.includes('please') || lowerQuestion.includes('detail') || lowerQuestion.includes('more')) && lastContext) {
+      else if ((lowerQuestion.includes('yes') || lowerQuestion.includes('please') || lowerQuestion.includes('detail') || lowerQuestion.includes('more')) && lastContext) {
         if (lastContext === 'option-b-timeline') {
           aiResponse = "Perfect! Here's your detailed Option B timeline for Rome exploration:\n\n**09:15** - Exit FCO after processing (32 min from landing)\n**09:47** - Board Leonardo Express to Termini\n**10:19** - Arrive Termini, take Metro Line A to Spagna\n**10:34** - Spanish Steps & luxury shopping area (30 min)\n**11:04** - Walk to Trevi Fountain (8 min walk)\n**11:12** - Trevi Fountain visit & photos (25 min)\n**11:37** - Walk to Pantheon via Via del Corso (12 min)\n**11:49** - Pantheon exterior & interior (30 min)\n**12:19** - Lunch at Da Enzo al 29 nearby (45 min)\n**13:04** - Leisurely walk back to Metro (15 min)\n**13:19** - Return to Termini, collect bags\n**13:45** - Board train to Naples\n\nThis gives you 3.5 hours of Rome exploration with comfortable pacing!";
           setLastContext('');

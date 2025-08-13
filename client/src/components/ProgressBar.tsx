@@ -1,10 +1,10 @@
 import { useTravelContext } from '@/contexts/TravelContext';
 
 const steps = [
-  { number: 1, label: 'Start' },
-  { number: 2, label: 'Flight Details' },
+  { number: 1, label: 'Welcome' },
+  { number: 2, label: 'Trip details' },
   { number: 3, label: 'Preferences' },
-  { number: 4, label: 'AI Results' },
+  { number: 4, label: 'Transit plan' },
 ];
 
 export function ProgressBar() {
@@ -13,16 +13,16 @@ export function ProgressBar() {
   const canNavigateToStep = (step: number): boolean => {
     // Always allow going to step 1 (landing)
     if (step === 1) return true;
-    
+
     // Can go to flight details if we're past step 1
     if (step === 2) return currentStep >= 2;
-    
+
     // Can go to preferences if flight details are filled
     if (step === 3) return flightDetails !== null;
-    
+
     // Can go to results if both flight details and preferences are filled
     if (step === 4) return flightDetails !== null && preferences !== null;
-    
+
     return false;
   };
 
@@ -35,7 +35,7 @@ export function ProgressBar() {
   return (
     <div className="bg-white shadow-sm">
       <div className="max-w-6xl mx-auto px-4 py-3">
-        <div className="flex items-center justify-between text-sm text-textSecondary">
+        <div className="flex items-center justify-center text-sm text-textSecondary">
           <div className="flex items-center space-x-8">
             {steps.map((step, index) => (
               <div key={step.number} className="flex items-center space-x-2">

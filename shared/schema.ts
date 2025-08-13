@@ -50,7 +50,9 @@ export const travelSessions = pgTable("travel_sessions", {
       stressLevel: 'Minimal' | 'Low' | 'Moderate' | 'High';
       recommended: boolean;
       summary: string;
-      confidenceReason?: string;
+      confidence: 'high' | 'medium' | 'low';
+      uncertainties: Array<string>;
+      fallbackSuggestion?: string;
     }>;
     finalRecommendation: {
       optionId: string;
@@ -62,6 +64,7 @@ export const travelSessions = pgTable("travel_sessions", {
       preferences: string;
       constraints: string;
     };
+    fallbackMode?: boolean;
   }>(),
   createdAt: timestamp("created_at").defaultNow(),
 });

@@ -13,7 +13,9 @@ interface OptionExplorationCardProps {
     stressLevel: string;
     recommended: boolean;
     summary: string;
-    confidenceReason?: string;
+    confidence: 'high' | 'medium' | 'low';
+    uncertainties: Array<string>;
+    fallbackSuggestion?: string;
   };
   optionLetter: string;
   isRecommended?: boolean;
@@ -87,11 +89,11 @@ export function OptionExplorationCard({ option, optionLetter, isRecommended = fa
         <div className="flex justify-between items-center mb-2">
           <span className="text-xs text-textSecondary">Confidence</span>
           <span className={`text-xs px-2 py-1 rounded ${
-            option.confidenceScore >= 80 ? 'bg-green-100 text-green-800' :
-            option.confidenceScore >= 60 ? 'bg-yellow-100 text-yellow-800' : 
+            option.confidence === 'high' ? 'bg-green-100 text-green-800' :
+            option.confidence === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
             'bg-red-100 text-red-800'
           }`}>
-            {option.confidenceScore >= 80 ? 'High' : option.confidenceScore >= 60 ? 'Medium' : 'Low'}
+            {option.confidence === 'high' ? 'High' : option.confidence === 'medium' ? 'Medium' : 'Low'}
           </span>
         </div>
         <div className="flex gap-1 mb-2">
@@ -99,13 +101,15 @@ export function OptionExplorationCard({ option, optionLetter, isRecommended = fa
             <div 
               key={i} 
               className={`flex-1 h-2 rounded ${
-                i < Math.floor(option.confidenceScore / 20) ? 'bg-teal-500' : 'bg-gray-200'
+                i < (option.confidence === 'high' ? 5 : option.confidence === 'medium' ? 3 : 2) ? 'bg-teal-500' : 'bg-gray-200'
               }`} 
             />
           ))}
         </div>
         <p className="text-xs text-textSecondary">
-          {option.confidenceReason || "Reason for confidence level and where there might be gaps, max 2 lines"}
+          {option.uncertainties && option.uncertainties.length > 0 
+            ? `Uncertainties: ${option.uncertainties.join(', ')}. ${option.fallbackSuggestion || ''}` 
+            : "High confidence in this recommendation with minimal uncertainties."}
         </p>
       </div>
     </div>

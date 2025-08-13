@@ -62,6 +62,10 @@ interface TravelRecommendations {
     confidenceScore: number;
     stressLevel: 'Minimal' | 'Low' | 'Moderate' | 'High';
     recommended: boolean;
+    summary: string;
+    confidence: 'high' | 'medium' | 'low';
+    uncertainties: Array<string>;
+    fallbackSuggestion?: string;
   }>;
   finalRecommendation: {
     optionId: string;
@@ -73,6 +77,7 @@ interface TravelRecommendations {
     preferences: string;
     constraints: string;
   };
+  fallbackMode?: boolean;
 }
 
 export async function generateTravelRecommendations(
@@ -175,10 +180,14 @@ Response format (JSON only, no markdown):
       "duration": "4.5 hours",
       "totalTime": "Total time: 5 hours",
       "energyLevel": "Moderate activity",
-      "comfortLevel": "Comfort",
+      "comfortLevel": "Comfort", 
       "confidenceScore": 85,
       "stressLevel": "Minimal",
-      "recommended": true
+      "recommended": true,
+      "summary": "Brief summary for card display",
+      "confidence": "high",
+      "uncertainties": ["Specific uncertainty 1", "Specific uncertainty 2"], 
+      "fallbackSuggestion": "What to do if this option doesn't work out"
     }
   ],
   "finalRecommendation": {
@@ -190,7 +199,8 @@ Response format (JSON only, no markdown):
     "travelingSituation": "Summary of their travel situation",
     "preferences": "Summary of their stated preferences", 
     "constraints": "Key constraints identified"
-  }
+  },
+  "fallbackMode": false
 }`;
 
   try {

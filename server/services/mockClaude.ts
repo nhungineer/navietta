@@ -45,7 +45,9 @@ interface TravelRecommendations {
     stressLevel: 'Minimal' | 'Low' | 'Moderate' | 'High';
     recommended: boolean;
     summary: string;
-    confidenceReason?: string;
+    confidence: 'high' | 'medium' | 'low';
+    uncertainties: Array<string>;
+    fallbackSuggestion?: string;
   }>;
   finalRecommendation: {
     optionId: string;
@@ -57,6 +59,7 @@ interface TravelRecommendations {
     preferences: string;
     constraints: string;
   };
+  fallbackMode?: boolean;
 }
 
 export async function generateMockTravelRecommendations(
@@ -122,9 +125,13 @@ export async function generateMockTravelRecommendations(
         summary: isComfortFocused ? 
           "Premium direct route with reserved seating and maximum comfort for efficient travel." :
           "Budget-conscious option focusing on direct transit while maintaining reasonable comfort levels.",
-        confidenceReason: isComfortFocused ?
-          "High confidence due to premium service reliability and direct routing minimizing potential delays." :
-          "Strong confidence in public transit schedules, though minor delays possible during peak hours."
+        confidence: isComfortFocused ? 'high' as const : 'high' as const,
+        uncertainties: isComfortFocused ? 
+          ["Traffic conditions during peak hours", "Premium service availability"] :
+          ["Current Leonardo Express pricing", "Peak season crowds"],
+        fallbackSuggestion: isComfortFocused ?
+          "If premium service is unavailable, standard transport offers good reliability with slightly longer journey times." :
+          "I'd recommend checking current train schedules closer to your travel date, or I can search for the latest information if you'd like."
       },
       {
         id: "strategic-stopover",
@@ -176,9 +183,13 @@ export async function generateMockTravelRecommendations(
         summary: isEveningArrival ? 
           "Memorable evening exploration, focusing on the illuminated historic centers and authentic local dining." :
           "Strategic daytime sightseeing, focusing on the main landmarks and authentic local experiences.",
-        confidenceReason: isEveningArrival ?
-          "Medium confidence as evening activities depend on weather and personal energy levels after flight." :
-          "Good confidence in daytime exploration, though luggage storage availability may vary by location."
+        confidence: 'medium' as const,
+        uncertainties: isEveningArrival ? 
+          ["Weather conditions for walking", "Restaurant availability", "Personal energy levels after flight"] :
+          ["Luggage storage availability", "Attraction opening hours", "Walking distances with luggage"],
+        fallbackSuggestion: isEveningArrival ?
+          "If you're too tired for exploration, there are excellent airport hotels nearby for a comfortable overnight stay." :
+          "If exploration feels too ambitious, direct transfer to your accommodation ensures you arrive refreshed."
       },
       {
         id: "overnight-recovery",
@@ -224,7 +235,9 @@ export async function generateMockTravelRecommendations(
         stressLevel: "Minimal" as const,
         recommended: !isHighEnergy && isComfortFocused && isEveningArrival,
         summary: "Complete overnight recovery with premium accommodation, allowing maximum rest before city exploration.",
-        confidenceReason: "Very high confidence as airport hotels provide guaranteed accommodation and direct transport connections."
+        confidence: 'high' as const,
+        uncertainties: ["Hotel room availability", "Airport hotel pricing fluctuations"],
+        fallbackSuggestion: "If airport hotels are fully booked, nearby city hotels offer similar convenience with shuttle services."
       }
     ],
     finalRecommendation: {

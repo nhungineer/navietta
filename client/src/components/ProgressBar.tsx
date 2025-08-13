@@ -36,11 +36,11 @@ export function ProgressBar() {
     <div className="bg-white shadow-sm">
       <div className="max-w-6xl mx-auto px-4 py-3">
         <div className="flex items-center justify-center text-sm text-textSecondary">
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-3 md:space-x-8">
             {steps.map((step, index) => (
               <div key={step.number} className="flex items-center space-x-2">
                 {index > 0 && (
-                  <div className={`w-16 h-0.5 ${currentStep > step.number - 1 ? 'bg-primary' : 'bg-gray-300'}`} />
+                  <div className={`w-8 md:w-16 h-0.5 ${currentStep > step.number - 1 ? 'bg-primary' : 'bg-gray-300'}`} />
                 )}
                 <div 
                   className={`flex items-center space-x-2 ${
@@ -50,7 +50,7 @@ export function ProgressBar() {
                   }`}
                   onClick={() => handleStepClick(step.number)}
                 >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
+                  <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs font-medium ${
                     currentStep >= step.number 
                       ? 'bg-primary text-white' 
                       : 'bg-gray-300 text-textSecondary'

@@ -115,7 +115,7 @@ export function ThinkingAnimation({ onComplete }: ThinkingAnimationProps) {
       </div>
 
       <div className="text-center text-sm text-textSecondary mt-6">
-        <p>This usually takes about 10-15 seconds</p>
+        <p>Hold on tight. This may take up to 1-2 minutes for Navietta to create your perfect transit plan. It will save you hours of hassles and researching.</p>
       </div>
 
 

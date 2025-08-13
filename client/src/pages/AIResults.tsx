@@ -232,7 +232,7 @@ export default function AIResultsPage() {
           <CarouselContent className="-ml-2 md:-ml-4">
             {recommendations.options.map((option, index) => (
               <CarouselItem key={option.id} className="pl-2 md:pl-4 basis-4/5">
-                <div className={`bg-white rounded-xl shadow-sm p-6 h-full ${option.recommended ? 'border-2 border-primary relative' : ''}`}>
+                <div className={`bg-white rounded-xl shadow-sm p-6 h-full ${option.recommended ? 'border-2 border-primary relative pt-8' : ''}`}>
                   {option.recommended && (
                     <div className="absolute -top-3 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
                       Recommended
@@ -287,7 +287,7 @@ export default function AIResultsPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {recommendations.options.map((option, index) => (
-            <div key={option.id} className={`bg-white rounded-xl shadow-sm p-6 ${option.recommended ? 'border-2 border-primary relative' : ''}`}>
+            <div key={option.id} className={`bg-white rounded-xl shadow-sm p-6 ${option.recommended ? 'border-2 border-primary relative pt-8' : ''}`}>
               {option.recommended && (
                 <div className="absolute -top-3 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
                   Recommended

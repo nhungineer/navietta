@@ -50,9 +50,9 @@ export function ThinkingAnimation({ onComplete }: ThinkingAnimationProps) {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-3 bg-primary/10 px-6 py-3 rounded-full">
+        <div className="inline-flex items-center gap-3 bg-primary/10 px-6 py-3 rounded-full animate-breathe">
           <Brain className="text-primary animate-pulse" size={24} />
-          <span className="text-lg font-medium text-textPrimary">
+          <span className="text-lg font-medium text-textPrimary animate-shimmer bg-clip-text">
             Navietta is thinking...
           </span>
         </div>

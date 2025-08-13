@@ -57,7 +57,7 @@ export function ProgressBar() {
                   }`}>
                     {step.number}
                   </div>
-                  <span className={currentStep >= step.number ? 'text-primary font-medium' : ''}>
+                  <span className={`hidden md:inline ${currentStep >= step.number ? 'text-primary font-medium' : ''}`}>
                     {step.label}
                   </span>
                 </div>

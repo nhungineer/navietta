@@ -49,15 +49,6 @@ export function ThinkingAnimation({ onComplete }: ThinkingAnimationProps) {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-3 bg-primary/10 px-6 py-3 rounded-full animate-breathe">
-          <Brain className="text-primary animate-pulse" size={24} />
-          <span className="text-lg font-medium text-textPrimary animate-shimmer bg-clip-text">
-            Navietta is thinking...
-          </span>
-        </div>
-      </div>
-
       <div className="space-y-4">
         {thinkingStages.map((stage, index) => {
           const isActive = index === currentStage;
@@ -118,7 +109,14 @@ export function ThinkingAnimation({ onComplete }: ThinkingAnimationProps) {
         <p>Hold on tight. This may take up to 1-2 minutes for Navietta to create your perfect transit plan. It will save you hours of hassles and researching.</p>
       </div>
 
-
+      <div className="text-center mt-8">
+        <div className="inline-flex items-center gap-3 bg-primary/10 px-6 py-3 rounded-full animate-breathe">
+          <Brain className="text-primary animate-pulse" size={24} />
+          <span className="text-lg font-medium text-textPrimary animate-shimmer bg-clip-text">
+            Navietta is thinking...
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

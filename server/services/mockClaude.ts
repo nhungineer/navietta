@@ -45,6 +45,7 @@ interface TravelRecommendations {
     stressLevel: 'Minimal' | 'Low' | 'Moderate' | 'High';
     recommended: boolean;
     summary: string;
+    confidenceReason?: string;
   }>;
   finalRecommendation: {
     optionId: string;
@@ -120,7 +121,10 @@ export async function generateMockTravelRecommendations(
         recommended: !isHighEnergy || preferences.transitStyle === 'quickly' || preferences.transitStyle === 'simple',
         summary: isComfortFocused ? 
           "Premium direct route with reserved seating and maximum comfort for efficient travel." :
-          "Budget-conscious option focusing on direct transit while maintaining reasonable comfort levels."
+          "Budget-conscious option focusing on direct transit while maintaining reasonable comfort levels.",
+        confidenceReason: isComfortFocused ?
+          "High confidence due to premium service reliability and direct routing minimizing potential delays." :
+          "Strong confidence in public transit schedules, though minor delays possible during peak hours."
       },
       {
         id: "strategic-stopover",
@@ -171,7 +175,10 @@ export async function generateMockTravelRecommendations(
         recommended: isHighEnergy && preferences.transitStyle === 'explore',
         summary: isEveningArrival ? 
           "Memorable evening exploration, focusing on the illuminated historic centers and authentic local dining." :
-          "Strategic daytime sightseeing, focusing on the main landmarks and authentic local experiences."
+          "Strategic daytime sightseeing, focusing on the main landmarks and authentic local experiences.",
+        confidenceReason: isEveningArrival ?
+          "Medium confidence as evening activities depend on weather and personal energy levels after flight." :
+          "Good confidence in daytime exploration, though luggage storage availability may vary by location."
       },
       {
         id: "overnight-recovery",
@@ -216,7 +223,8 @@ export async function generateMockTravelRecommendations(
         confidenceScore: 95,
         stressLevel: "Minimal" as const,
         recommended: !isHighEnergy && isComfortFocused && isEveningArrival,
-        summary: "Complete overnight recovery with premium accommodation, allowing maximum rest before city exploration."
+        summary: "Complete overnight recovery with premium accommodation, allowing maximum rest before city exploration.",
+        confidenceReason: "Very high confidence as airport hotels provide guaranteed accommodation and direct transport connections."
       }
     ],
     finalRecommendation: {

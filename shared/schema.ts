@@ -50,6 +50,7 @@ export const travelSessions = pgTable("travel_sessions", {
       stressLevel: 'Minimal' | 'Low' | 'Moderate' | 'High';
       recommended: boolean;
       summary: string;
+      confidenceReason?: string;
     }>;
     finalRecommendation: {
       optionId: string;

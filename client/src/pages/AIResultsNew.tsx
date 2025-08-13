@@ -5,7 +5,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { Brain, Search, BarChart3, CheckCircle } from 'lucide-react';
 import { ThinkingAnimation } from '@/components/ThinkingAnimation';
 import { ExpandableSection } from '@/components/ExpandableSection';
-import { OptionCard } from '@/components/OptionCard';
+import { OptionExplorationCard } from '@/components/OptionExplorationCard';
 import { UserContextSummary } from '@/components/UserContextSummary';
 import { RecommendationCard } from '@/components/RecommendationCard';
 import { TimelineCard } from '@/components/TimelineCard';
@@ -148,21 +148,12 @@ export default function AIResultsPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {recommendations.options.map((option, index) => (
-                <div key={option.id} className="space-y-3">
-                  <div className="bg-white rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs bg-primary text-white px-2 py-1 rounded">
-                        Option {String.fromCharCode(65 + index)}
-                      </span>
-                      {option.id === recommendations.finalRecommendation.optionId && (
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                          Recommended
-                        </span>
-                      )}
-                    </div>
-                    <OptionCard option={option} />
-                  </div>
-                </div>
+                <OptionExplorationCard
+                  key={option.id}
+                  option={option}
+                  optionLetter={String.fromCharCode(65 + index)}
+                  isRecommended={option.id === recommendations.finalRecommendation.optionId}
+                />
               ))}
             </div>
           </div>

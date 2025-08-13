@@ -1,38 +1,42 @@
 import { Button } from '@/components/ui/button';
 import { useTravelContext } from '@/contexts/TravelContext';
-import { Plane, Upload } from 'lucide-react';
+import { Plane, Upload, Cloud } from 'lucide-react';
 
 export default function Landing() {
   const { navigateToStep } = useTravelContext();
 
   return (
-    <div className="text-center py-16">
+    <div className="text-center py-16 max-w-md mx-auto">
       <div className="mb-12">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full mb-6">
-          <span className="text-2xl font-bold text-white">N</span>
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-6">
+          <span className="text-xl font-bold text-white">N</span>
         </div>
-        <h1 className="text-4xl font-bold text-textPrimary mb-4">Navietta</h1>
-        <p className="text-xl text-textSecondary mb-2">Travel transit, stress free</p>
-        <div className="text-primary text-3xl mb-8">
-          <Plane className="mx-auto" size={48} />
+        <div className="text-primary text-3xl mb-4">
+          <Plane className="mx-auto" size={40} />
         </div>
+        <h1 className="text-3xl font-bold text-textPrimary mb-2">Navietta</h1>
+        <p className="text-lg text-textSecondary">Travel transit, stress-free</p>
       </div>
       
-      <div className="max-w-md mx-auto">
-        <Button className="w-full bg-primary text-white py-4 px-6 rounded-lg font-medium mb-4 hover:bg-primary/90 transition-colors">
-          <Upload className="mr-2" size={16} />
-          UPLOAD ITINERARY
-        </Button>
-        <p className="text-sm text-textSecondary">e.g. screenshots, flight booking etc</p>
+      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-6 bg-gray-50/50">
+        <div className="mb-4">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-lg mb-3">
+            <Upload className="text-white" size={20} />
+          </div>
+        </div>
+        <p className="text-sm text-gray-600 mb-4">
+          Upload or drag and drop your itinerary<br />
+          to get started
+        </p>
         
-        <div className="my-6 text-textSecondary">— OR —</div>
+        <div className="my-4 text-gray-500 text-sm font-medium">--- OR -----</div>
         
         <Button 
-          variant="link" 
-          className="text-accent hover:underline"
+          className="w-full bg-primary text-white py-3 px-6 rounded-lg font-medium hover:bg-primary/90 transition-colors"
           onClick={() => navigateToStep(2)}
+          data-testid="button-enter-trip-details"
         >
-          Enter info manually
+          ENTER TRIP DETAILS
         </Button>
       </div>
     </div>

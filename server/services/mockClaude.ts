@@ -44,6 +44,7 @@ interface TravelRecommendations {
     confidenceScore: number;
     stressLevel: 'Minimal' | 'Low' | 'Moderate' | 'High';
     recommended: boolean;
+    summary: string;
   }>;
   finalRecommendation: {
     optionId: string;
@@ -116,7 +117,10 @@ export async function generateMockTravelRecommendations(
         comfortLevel: isComfortFocused ? "High comfort" : "Comfort",
         confidenceScore: isComfortFocused ? 90 : 75,
         stressLevel: "Minimal" as const,
-        recommended: !isHighEnergy || preferences.transitStyle === 'quickly' || preferences.transitStyle === 'simple'
+        recommended: !isHighEnergy || preferences.transitStyle === 'quickly' || preferences.transitStyle === 'simple',
+        summary: isComfortFocused ? 
+          "Premium direct route with reserved seating and maximum comfort for efficient travel." :
+          "Budget-conscious option focusing on direct transit while maintaining reasonable comfort levels."
       },
       {
         id: "strategic-stopover",
@@ -164,7 +168,10 @@ export async function generateMockTravelRecommendations(
         comfortLevel: "Comfort",
         confidenceScore: 70,
         stressLevel: isHighEnergy ? "Low" as const : "Moderate" as const,
-        recommended: isHighEnergy && preferences.transitStyle === 'explore'
+        recommended: isHighEnergy && preferences.transitStyle === 'explore',
+        summary: isEveningArrival ? 
+          "Memorable evening exploration, focusing on the illuminated historic centers and authentic local dining." :
+          "Strategic daytime sightseeing, focusing on the main landmarks and authentic local experiences."
       },
       {
         id: "overnight-recovery",
@@ -208,7 +215,8 @@ export async function generateMockTravelRecommendations(
         comfortLevel: "High comfort",
         confidenceScore: 95,
         stressLevel: "Minimal" as const,
-        recommended: !isHighEnergy && isComfortFocused && isEveningArrival
+        recommended: !isHighEnergy && isComfortFocused && isEveningArrival,
+        summary: "Complete overnight recovery with premium accommodation, allowing maximum rest before city exploration."
       }
     ],
     finalRecommendation: {

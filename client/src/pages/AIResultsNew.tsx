@@ -130,7 +130,6 @@ export default function AIResultsPage() {
         <ExpandableSection 
           title="Situation assessment" 
           icon={<span className="text-xs font-bold">1</span>}
-          defaultExpanded
         >
           <p className="text-sm text-textPrimary leading-relaxed">
             {recommendations.reasoning.situationAssessment}

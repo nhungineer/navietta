@@ -97,7 +97,7 @@ export default function AIResultsPage() {
       });
 
       const data = await response.json();
-      
+
       // Add AI response to chat
       setChatMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
     } catch (error) {
@@ -112,12 +112,9 @@ export default function AIResultsPage() {
     }
   };
 
-  const getTypeColor = (type: 'primary' | 'accent' | 'secondary') => {
-    switch (type) {
-      case 'primary': return 'text-primary bg-primary/10 border-primary';
-      case 'accent': return 'text-accent bg-accent/10 border-accent';
-      case 'secondary': return 'text-secondary bg-secondary/10 border-secondary';
-    }
+  const getTypeColor = (type: string) => {
+    // Use consistent teal background for all timeline items
+    return 'bg-primary text-white';
   };
 
   const getTypeColorForTimeline = (type: 'primary' | 'accent' | 'secondary') => {
@@ -386,7 +383,7 @@ export default function AIResultsPage() {
             )}
           </div>
         )}
-        
+
         <div className="flex items-center space-x-4">
           <div className="flex-1">
             <Input

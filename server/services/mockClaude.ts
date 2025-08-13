@@ -57,38 +57,36 @@ export async function generateMockTravelRecommendations(
 
   return {
     reasoning: {
-      situationAssessment: `Arriving at ${flightDetails.arrivalTime} in ${flightDetails.to} with ${isEveningArrival ? 'evening' : 'daytime'} arrival. You have ${flightDetails.luggageCount} piece(s) of luggage and need to reach ${flightDetails.nextStop} by ${flightDetails.nextStopTime}. ${isHighEnergy ? 'Your high energy level suggests you can handle more complex transit options.' : 'Your lower energy level indicates you prefer simpler, more direct options.'}`,
+      situationAssessment: `I can see you're arriving at ${flightDetails.arrivalTime} in ${flightDetails.to} - that's ${isEveningArrival ? 'an evening arrival which can be tiring after a long flight' : 'a daytime arrival which gives us good flexibility'}. With ${flightDetails.luggageCount} piece${flightDetails.luggageCount > 1 ? 's' : ''} of luggage and needing to reach ${flightDetails.nextStop} by ${flightDetails.nextStopTime}, ${isHighEnergy ? "I can tell you're feeling energetic, so I'm comfortable suggesting options that involve a bit more activity." : "since you mentioned feeling less energetic, I'm focusing on straightforward options that won't wear you out further."}`,
       
-      generatingOptions: `Considering ${preferences.transitStyle} style preferences and ${isComfortFocused ? 'comfort-focused' : 'budget-conscious'} approach. Evaluating direct transfers, overnight stays, and exploration opportunities based on your ${flightDetails.arrivalTime} arrival time.`,
+      generatingOptions: `Given that you prefer ${preferences.transitStyle === 'quickly' ? 'getting there quickly' : preferences.transitStyle === 'explore' ? 'exploring along the way' : 'keeping things simple'} and you're ${isComfortFocused ? 'willing to spend a bit more for comfort' : 'looking to save money where possible'}, I'm weighing up direct transfers, potential overnight stays, and ${preferences.transitStyle === 'explore' ? 'some interesting exploration opportunities' : 'the most efficient routes'} that work with your ${flightDetails.arrivalTime} arrival.`,
       
-      tradeOffAnalysis: `Balancing your ${preferences.budgetComfort}/100 comfort preference with ${preferences.energyLevel}/100 energy level. ${isEveningArrival ? 'Evening arrival limits exploration but offers good rest options.' : 'Daytime arrival provides more flexibility for activities.'} Time window to ${flightDetails.nextStop} allows for ${preferences.transitStyle === 'explore' ? 'strategic sightseeing' : preferences.transitStyle === 'quickly' ? 'direct transport' : 'simple and comfortable transit'}.`
+      tradeOffAnalysis: `Since you're ${preferences.budgetComfort < 30 ? 'really focused on keeping costs down' : preferences.budgetComfort > 70 ? 'prioritizing comfort and convenience' : 'looking for a good balance between cost and comfort'} and mentioned feeling ${preferences.energyLevel < 30 ? 'quite tired' : preferences.energyLevel > 70 ? 'energetic and ready to explore' : 'moderately energetic'}, I'm ${isEveningArrival ? 'keeping in mind that evening arrivals can limit what you can realistically do, but they do offer good opportunities to rest' : 'taking advantage of your daytime arrival to give you more options'}. The time window to ${flightDetails.nextStop} ${preferences.transitStyle === 'explore' ? 'actually works well for some strategic sightseeing' : preferences.transitStyle === 'quickly' ? 'means we can focus on the most direct routes' : 'gives us room for simple, stress-free transit'}.`
     },
     options: [
       {
         id: "direct-transfer",
-        title: isEveningArrival ? "Direct Evening Transfer" : "Express City Transfer",
-        description: isEveningArrival 
-          ? "Swift airport to accommodation transfer with minimal stops, perfect for tired travelers"
-          : "Efficient city center route with premium transport options",
+        title: isComfortFocused ? "Premium Direct Transfer" : "Budget-Friendly Direct Route",
+        description: `This ${isComfortFocused ? 'comfortable and efficient' : 'cost-effective'} option gets you to ${flightDetails.nextStop} using ${flightDetails.transportMode.replace('_', ' ')} without any detours. ${isEveningArrival ? "Perfect since you're arriving in the evening and probably want to get to your destination without delays." : "A straightforward daytime transfer that'll get you there feeling refreshed."}`,
         timelineItems: [
           {
             time: flightDetails.arrivalTime,
-            title: "Land & Collect Luggage",
-            description: `Arrive at ${flightDetails.to} airport, collect ${flightDetails.luggageCount} piece(s) of luggage`,
+            title: `Your flight lands in ${flightDetails.to}`,
+            description: "Time to stretch your legs and grab your luggage",
             type: "primary"
           },
           {
             time: addMinutes(flightDetails.arrivalTime, 45),
-            title: isComfortFocused ? "Private Transfer" : "Express Train/Bus",
+            title: `Board your ${flightDetails.transportMode.replace('_', ' ')}`,
             description: isComfortFocused 
-              ? "Pre-booked private car with luggage assistance" 
-              : "Fast public transport to city center",
+              ? "I have arranged premium service with reserved seating - relax and enjoy the ride" 
+              : "Scheduled service - I would suggest arriving a few minutes early for the best seats",
             type: "accent"
           },
           {
             time: addMinutes(flightDetails.arrivalTime, isComfortFocused ? 90 : 75),
-            title: `Arrive at ${flightDetails.nextStop}`,
-            description: "Check in and settle in comfortably",
+            title: `You've made it to ${flightDetails.nextStop}!`,
+            description: isComfortFocused ? "Arrive feeling refreshed and ready for what's next" : "Mission accomplished - you've saved both time and money",
             type: "secondary"
           }
         ],
@@ -101,36 +99,34 @@ export async function generateMockTravelRecommendations(
       {
         id: "strategic-stopover",
         title: isEveningArrival ? "Evening Exploration" : "Strategic City Tour",
-        description: isEveningArrival
-          ? "Quick evening highlights tour before settling in"
-          : "Curated sightseeing route to key landmarks en route to accommodation",
+        description: `Since you wanted to ${preferences.transitStyle === 'explore' ? 'explore along the way' : 'make the most of your time'}, this gives you ${isEveningArrival ? 'a lovely evening walk through the historic center before you settle in for the night' : 'a perfectly timed tour of the key landmarks without rushing - you will still get to your destination comfortably'}.`,
         timelineItems: [
           {
             time: flightDetails.arrivalTime,
-            title: "Arrival & Luggage Storage",
-            description: `Store luggage at ${flightDetails.to} airport or central location`,
+            title: "Drop off your luggage",
+            description: `I would recommend storing your ${flightDetails.luggageCount} piece${flightDetails.luggageCount > 1 ? 's' : ''} at ${flightDetails.to} airport or a central location so you can explore hands-free`,
             type: "primary"
           },
           {
             time: addMinutes(flightDetails.arrivalTime, 60),
-            title: isEveningArrival ? "Evening Walk" : "Key Landmarks",
+            title: isEveningArrival ? "Evening stroll through the city" : "Hit the main highlights",
             description: isEveningArrival 
-              ? "Atmospheric evening stroll through historic center" 
-              : "Visit 2-3 must-see attractions with efficient routing",
+              ? "A peaceful evening walk through the historic center - the lighting is beautiful at this time" 
+              : "I have mapped out 2-3 must-see spots that are perfectly positioned on your route",
             type: "accent"
           },
           {
             time: addMinutes(flightDetails.arrivalTime, isEveningArrival ? 120 : 180),
-            title: "Dinner & Culture",
+            title: isEveningArrival ? "Authentic local dinner" : "Local food experience", 
             description: isEveningArrival 
-              ? "Traditional local dinner experience" 
-              : "Local lunch and brief cultural immersion",
+              ? "Time for a traditional dinner - I know a few spots the locals love" 
+              : "Perfect opportunity to try the local cuisine and soak up some culture",
             type: "secondary"
           },
           {
             time: subtractMinutes(flightDetails.nextStopTime, 30),
-            title: `Head to ${flightDetails.nextStop}`,
-            description: "Collect luggage and transfer to accommodation",
+            title: `Time to head to ${flightDetails.nextStop}`,
+            description: "Grab your luggage and make your way to your final destination - you'll arrive with some great stories!",
             type: "primary"
           }
         ],

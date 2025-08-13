@@ -180,7 +180,7 @@ export default function FlightDetailsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-8 h-8 p-0"
+                className="w-8 h-8 p-0 hover:bg-primary hover:text-white"
                 onClick={() => updateTravelers("adults", false)}
               >
                 <Minus size={12} />
@@ -189,9 +189,9 @@ export default function FlightDetailsPage() {
                 {formData.adults}
               </span>
               <Button
-                variant="default"
+                variant="outline"
                 size="sm"
-                className="w-8 h-8 p-0 bg-secondary hover:bg-secondary/90"
+                className="w-8 h-8 p-0 hover:bg-primary hover:text-white"
                 onClick={() => updateTravelers("adults", true)}
               >
                 <Plus size={12} />
@@ -202,7 +202,7 @@ export default function FlightDetailsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-8 h-8 p-0"
+                className="w-8 h-8 p-0 hover:bg-primary hover:text-white"
                 onClick={() => updateTravelers("children", false)}
               >
                 <Minus size={12} />
@@ -211,9 +211,9 @@ export default function FlightDetailsPage() {
                 {formData.children}
               </span>
               <Button
-                variant="default"
+                variant="outline"
                 size="sm"
-                className="w-8 h-8 p-0 bg-secondary hover:bg-secondary/90"
+                className="w-8 h-8 p-0 hover:bg-primary hover:text-white"
                 onClick={() => updateTravelers("children", true)}
               >
                 <Plus size={12} />
@@ -235,7 +235,7 @@ export default function FlightDetailsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-8 h-8 p-0"
+                className="w-8 h-8 p-0 hover:bg-primary hover:text-white"
                 onClick={() => updateLuggage(false)}
               >
                 <Minus size={12} />
@@ -244,9 +244,9 @@ export default function FlightDetailsPage() {
                 {formData.luggageCount}
               </span>
               <Button
-                variant="default"
+                variant="outline"
                 size="sm"
-                className="w-8 h-8 p-0 bg-secondary hover:bg-secondary/90"
+                className="w-8 h-8 p-0 hover:bg-primary hover:text-white"
                 onClick={() => updateLuggage(true)}
               >
                 <Plus size={12} />

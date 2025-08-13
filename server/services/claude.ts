@@ -47,6 +47,7 @@ interface TravelRecommendations {
     id: string;
     title: string;
     description: string;
+    highlights: Array<string>;
     timelineItems: Array<{
       time: string;
       title: string;
@@ -55,10 +56,23 @@ interface TravelRecommendations {
     }>;
     cost: string;
     duration: string;
+    totalTime: string;
     energyLevel: string;
-    comfortScore: number;
+    comfortLevel: string;
+    confidenceScore: number;
+    stressLevel: 'Minimal' | 'Low' | 'Moderate' | 'High';
     recommended: boolean;
   }>;
+  finalRecommendation: {
+    optionId: string;
+    reasoning: string;
+    confidence: number;
+  };
+  userContext: {
+    travelingSituation: string;
+    preferences: string;
+    constraints: string;
+  };
 }
 
 export async function generateTravelRecommendations(
@@ -146,8 +160,9 @@ Response format (JSON only, no markdown):
   "options": [
     {
       "id": "option-1",
-      "title": "Option Title",
+      "title": "Option Title", 
       "description": "Brief description of this travel option",
+      "highlights": ["Key benefit 1", "Key benefit 2", "Key benefit 3"],
       "timelineItems": [
         {
           "time": "19:15",
@@ -156,13 +171,26 @@ Response format (JSON only, no markdown):
           "type": "primary"
         }
       ],
-      "cost": "€120-150",
-      "duration": "Total time: 2 hours",
-      "energyLevel": "Low stress",
-      "comfortScore": 85,
+      "cost": "€75-90 total",
+      "duration": "4.5 hours",
+      "totalTime": "Total time: 5 hours",
+      "energyLevel": "Moderate activity",
+      "comfortLevel": "Comfort",
+      "confidenceScore": 85,
+      "stressLevel": "Minimal",
       "recommended": true
     }
-  ]
+  ],
+  "finalRecommendation": {
+    "optionId": "option-1",
+    "reasoning": "Clear explanation of why this option is recommended",
+    "confidence": 85
+  },
+  "userContext": {
+    "travelingSituation": "Summary of their travel situation",
+    "preferences": "Summary of their stated preferences", 
+    "constraints": "Key constraints identified"
+  }
 }`;
 
   try {

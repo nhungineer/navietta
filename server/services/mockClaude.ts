@@ -29,6 +29,7 @@ interface TravelRecommendations {
     id: string;
     title: string;
     description: string;
+    highlights: Array<string>;
     timelineItems: Array<{
       time: string;
       title: string;
@@ -37,10 +38,23 @@ interface TravelRecommendations {
     }>;
     cost: string;
     duration: string;
+    totalTime: string;
     energyLevel: string;
-    comfortScore: number;
+    comfortLevel: string;
+    confidenceScore: number;
+    stressLevel: 'Minimal' | 'Low' | 'Moderate' | 'High';
     recommended: boolean;
   }>;
+  finalRecommendation: {
+    optionId: string;
+    reasoning: string;
+    confidence: number;
+  };
+  userContext: {
+    travelingSituation: string;
+    preferences: string;
+    constraints: string;
+  };
 }
 
 export async function generateMockTravelRecommendations(
@@ -90,10 +104,18 @@ export async function generateMockTravelRecommendations(
             type: "secondary"
           }
         ],
-        cost: isComfortFocused ? "€80-120" : "€25-45",
-        duration: `Total time: ${isComfortFocused ? '90' : '75'} minutes`,
-        energyLevel: "Low stress",
-        comfortScore: isComfortFocused ? 90 : 75,
+        highlights: [
+          isComfortFocused ? "Premium comfort with reserved seating" : "Budget-friendly direct route",
+          `Fast ${isComfortFocused ? '90' : '75'}-minute journey`,
+          `Using preferred ${flightDetails.transportMode.replace('_', ' ')} transport`
+        ],
+        cost: isComfortFocused ? "€80-120" : "€25-45", 
+        duration: `${isComfortFocused ? '90' : '75'} min`,
+        totalTime: `Total time: ${isComfortFocused ? '90' : '75'} minutes`,
+        energyLevel: "Low activity",
+        comfortLevel: isComfortFocused ? "High comfort" : "Comfort",
+        confidenceScore: isComfortFocused ? 90 : 75,
+        stressLevel: "Minimal" as const,
         recommended: !isHighEnergy || preferences.transitStyle === 'quickly' || preferences.transitStyle === 'simple'
       },
       {
@@ -130,10 +152,18 @@ export async function generateMockTravelRecommendations(
             type: "primary"
           }
         ],
+        highlights: [
+          "Authentic local experiences",
+          isEveningArrival ? "Evening exploration with dinner" : "Strategic sightseeing tour",
+          "Luggage storage included"
+        ],
         cost: "€45-85",
-        duration: isEveningArrival ? "Total time: 3 hours" : "Total time: 4 hours",
-        energyLevel: isHighEnergy ? "Medium stress" : "High stress",
-        comfortScore: 70,
+        duration: isEveningArrival ? "3 hours" : "4 hours",
+        totalTime: isEveningArrival ? "Total time: 3 hours" : "Total time: 4 hours",
+        energyLevel: "Moderate activity",
+        comfortLevel: "Comfort",
+        confidenceScore: 70,
+        stressLevel: isHighEnergy ? "Low" as const : "Moderate" as const,
         recommended: isHighEnergy && preferences.transitStyle === 'explore'
       },
       {
@@ -166,14 +196,60 @@ export async function generateMockTravelRecommendations(
             type: "primary"
           }
         ],
+        highlights: [
+          "Complete rest and recovery overnight",
+          "Airport hotel convenience",
+          "Fresh start for city exploration"
+        ],
         cost: "€120-180",
-        duration: "Total time: Overnight",
-        energyLevel: "No stress",
-        comfortScore: 95,
+        duration: "Overnight",
+        totalTime: "Total time: Overnight stay",
+        energyLevel: "Minimal activity",
+        comfortLevel: "High comfort",
+        confidenceScore: 95,
+        stressLevel: "Minimal" as const,
         recommended: !isHighEnergy && isComfortFocused && isEveningArrival
       }
-    ]
+    ],
+    finalRecommendation: {
+      optionId: preferences.transitStyle === 'explore' && isHighEnergy 
+        ? "strategic-stopover" 
+        : !isHighEnergy && isComfortFocused && isEveningArrival 
+        ? "overnight-recovery" 
+        : "direct-transfer",
+      reasoning: `Based on your ${preferences.energyLevel < 50 ? 'lower energy level' : 'high energy level'} and ${preferences.budgetComfort > 70 ? 'comfort-focused' : 'budget-conscious'} preferences, ${
+        preferences.transitStyle === 'explore' && isHighEnergy ? 'the strategic exploration option gives you the perfect balance of sightseeing and efficiency' :
+        !isHighEnergy && isComfortFocused && isEveningArrival ? 'an overnight stay will leave you completely refreshed for your next day' :
+        'the direct transfer option provides the best balance of cost, comfort, and simplicity for your situation'
+      }.`,
+      confidence: preferences.transitStyle === 'explore' && isHighEnergy ? 85 : 
+                  !isHighEnergy && isComfortFocused && isEveningArrival ? 90 : 80
+    },
+    userContext: {
+      travelingSituation: `Flying from ${flightDetails.from} to ${flightDetails.to} with ${flightDetails.adults + flightDetails.children} traveler(s) and ${flightDetails.luggageCount} piece(s) of luggage, arriving at ${flightDetails.arrivalTime} and needing to reach ${flightDetails.nextStop} by ${flightDetails.nextStopTime}.`,
+      preferences: `You prefer ${preferences.transitStyle === 'quickly' ? 'quick and efficient travel' : preferences.transitStyle === 'explore' ? 'exploring and experiencing local culture' : 'simple, straightforward options'} with a ${preferences.budgetComfort > 70 ? 'comfort-focused' : preferences.budgetComfort > 30 ? 'balanced' : 'budget-conscious'} approach and ${preferences.energyLevel > 70 ? 'high' : preferences.energyLevel > 30 ? 'moderate' : 'low'} energy levels.`,
+      constraints: `Time window of ${calculateTimeDifference(flightDetails.arrivalTime, flightDetails.nextStopTime)} between arrival and next destination, ${isEveningArrival ? 'evening arrival time limiting some activities' : 'daytime arrival providing good flexibility'}, and managing ${flightDetails.luggageCount} piece(s) of luggage during transit.`
+    }
   };
+}
+
+function calculateTimeDifference(startTime: string, endTime: string): string {
+  const [startHours, startMins] = startTime.split(':').map(Number);
+  const [endHours, endMins] = endTime.split(':').map(Number);
+  
+  let diffHours = endHours - startHours;
+  let diffMins = endMins - startMins;
+  
+  if (diffMins < 0) {
+    diffMins += 60;
+    diffHours -= 1;
+  }
+  
+  if (diffHours < 0) {
+    diffHours += 24;
+  }
+  
+  return `${diffHours}h ${diffMins}m`;
 }
 
 function addMinutes(time: string, minutes: number): string {

@@ -8,7 +8,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 import Landing from "@/pages/Landing";
 import FlightDetails from "@/pages/FlightDetails";
 import Preferences from "@/pages/Preferences";
-import AIResults from "@/pages/AIResults";
+import AIResults from "@/pages/AIResultsNew";
 import NotFound from "@/pages/not-found";
 
 function Router() {

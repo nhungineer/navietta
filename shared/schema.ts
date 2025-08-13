@@ -34,6 +34,7 @@ export const travelSessions = pgTable("travel_sessions", {
       id: string;
       title: string;
       description: string;
+      highlights: Array<string>;
       timelineItems: Array<{
         time: string;
         title: string;
@@ -42,10 +43,23 @@ export const travelSessions = pgTable("travel_sessions", {
       }>;
       cost: string;
       duration: string;
+      totalTime: string;
       energyLevel: string;
-      comfortScore: number;
+      comfortLevel: string;
+      confidenceScore: number; // 0-100
+      stressLevel: 'Minimal' | 'Low' | 'Moderate' | 'High';
       recommended: boolean;
     }>;
+    finalRecommendation: {
+      optionId: string;
+      reasoning: string;
+      confidence: number; // 0-100
+    };
+    userContext: {
+      travelingSituation: string;
+      preferences: string;
+      constraints: string;
+    };
   }>(),
   createdAt: timestamp("created_at").defaultNow(),
 });

@@ -10,6 +10,9 @@ Navietta is a travel transit application that helps users find optimal layover r
 - ✅ Enhanced markdown rendering in chat responses with proper formatting for bold text, lists, and typography
 - ✅ Added preprocessing to convert bullet point characters to proper markdown lists for better readability
 - ✅ Optimized chat response spacing and styling for improved user experience
+- ✅ Fixed timeline display to show start times only (HH:MM format) instead of duration ranges
+- ✅ Improved chat bullet point spacing with tighter line height and reduced list spacing
+- ✅ Added explicit Claude prompt instructions for consistent time formatting across all responses
 
 # User Preferences
 

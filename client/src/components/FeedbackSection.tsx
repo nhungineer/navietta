@@ -25,16 +25,14 @@ export function FeedbackSection({ sessionId }: FeedbackSectionProps) {
     
     try {
       // Call the unified Claude API for contextual responses
-      const response = await apiRequest('/api/travel/chat', {
-        method: 'POST',
-        body: {
-          sessionId,
-          question: userQuestion,
-          conversationHistory: conversations
-        }
+      const response = await apiRequest('POST', '/api/travel/chat', {
+        sessionId,
+        question: userQuestion,
+        conversationHistory: conversations
       });
 
-      const aiResponse = response.response || "I'm sorry, I couldn't generate a response. Please try again.";
+      const data = await response.json();
+      const aiResponse = data.response || "I'm sorry, I couldn't generate a response. Please try again.";
       
       // Update the last conversation entry with the response
       setConversations(prev => {

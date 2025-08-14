@@ -12,8 +12,8 @@ function preprocessMarkdown(text: string): string {
     .replace(/^•\s+/gm, '- ')
     // Convert numbered items with bullet points
     .replace(/(\d+\.\s+)•\s+/g, '$1')
-    // Ensure proper spacing around lists
-    .replace(/^-\s+/gm, '\n- ')
+    // Ensure proper spacing around lists - removed extra newline
+    .replace(/^-\s+/gm, '- ')
     .replace(/^\n+/, '') // Remove leading newlines
     .trim();
 }
@@ -103,9 +103,9 @@ export function FeedbackSection({ sessionId }: FeedbackSectionProps) {
                         p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
                         strong: ({ children }) => <strong className="font-semibold text-textPrimary">{children}</strong>,
                         em: ({ children }) => <em className="italic">{children}</em>,
-                        ul: ({ children }) => <ul className="list-disc list-inside mb-2 ml-2 space-y-0.5">{children}</ul>,
-                        ol: ({ children }) => <ol className="list-decimal list-inside mb-2 ml-2 space-y-0.5">{children}</ol>,
-                        li: ({ children }) => <li className="text-textPrimary">{children}</li>,
+                        ul: ({ children }) => <ul className="list-disc list-inside mb-2 ml-2">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal list-inside mb-2 ml-2">{children}</ol>,
+                        li: ({ children }) => <li className="text-textPrimary leading-tight">{children}</li>,
                         h1: ({ children }) => <h1 className="text-lg font-semibold mb-2 text-textPrimary">{children}</h1>,
                         h2: ({ children }) => <h2 className="text-base font-semibold mb-2 text-textPrimary">{children}</h2>,
                         h3: ({ children }) => <h3 className="text-sm font-semibold mb-1 text-textPrimary">{children}</h3>,

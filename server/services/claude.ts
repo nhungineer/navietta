@@ -150,6 +150,7 @@ ${newQuestion}
 - For lists, use proper markdown format with dashes (- item) or numbers (1. item)
 - Use **bold** for emphasis on important details like times, places, or key recommendations
 - Format timelines as proper markdown lists for better readability
+- When mentioning times, use ONLY start times in HH:MM format (e.g., "12:00"), NEVER duration ranges (e.g., NOT "12:00-13:30")
 
 Respond directly as Navietta - no JSON formatting needed, just your natural response.`;
 
@@ -273,6 +274,8 @@ Response format (JSON only, no markdown):
           "type": "primary"
         }
       ],
+      
+IMPORTANT TIME FORMAT: Use ONLY start times in HH:MM format (e.g., "19:15"), NOT duration ranges (e.g., NOT "19:15-20:30").
       "cost": "€75-90 total",
       "duration": "4.5 hours",
       "totalTime": "Total time: 5 hours",

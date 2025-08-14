@@ -80,6 +80,100 @@ interface TravelRecommendations {
   fallbackMode?: boolean;
 }
 
+export async function generateFollowUpResponse(
+  originalRecommendations: TravelRecommendations,
+  flightDetails: FlightDetails,
+  preferences: Preferences,
+  conversationHistory: Array<{question: string; response: string}>,
+  newQuestion: string
+): Promise<string> {
+  // Create compressed context from original recommendations
+  const contextSummary = {
+    destination: flightDetails.to,
+    nextDestination: flightDetails.nextStop,
+    arrivalTime: flightDetails.arrivalTime,
+    arrivalDate: flightDetails.arrivalDate,
+    nextStopTime: flightDetails.nextStopTime,
+    travelers: `${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ''}`,
+    luggage: `${flightDetails.luggageCount} piece(s)`,
+    transportMode: flightDetails.transportMode.replace('_', ' '),
+    preferences: {
+      budgetComfort: preferences.budgetComfort,
+      energyLevel: preferences.energyLevel,
+      transitStyle: preferences.transitStyle
+    },
+    recommendedOption: originalRecommendations.finalRecommendation.optionId,
+    options: originalRecommendations.options.map(opt => ({
+      id: opt.id,
+      title: opt.title,
+      description: opt.description,
+      cost: opt.cost,
+      duration: opt.duration,
+      recommended: opt.recommended
+    }))
+  };
+
+  // Create conversation context
+  const conversationContext = conversationHistory.length > 0 
+    ? conversationHistory.map((msg, i) => `Q${i+1}: ${msg.question}\nA${i+1}: ${msg.response}`).join('\n\n')
+    : '';
+
+  const followUpPrompt = `You are Navietta, continuing a conversation about travel recommendations you previously provided.
+
+## Original Travel Context
+- Flying from ${flightDetails.from} to ${contextSummary.destination} on ${contextSummary.arrivalDate} at ${contextSummary.arrivalTime}
+- Next destination: ${contextSummary.nextDestination} at ${contextSummary.nextStopTime}
+- Travelers: ${contextSummary.travelers} with ${contextSummary.luggage} of luggage
+- Transport preference: ${contextSummary.transportMode}
+- User preferences: ${contextSummary.preferences.budgetComfort}/100 budget-comfort, ${contextSummary.preferences.energyLevel}/100 energy, ${contextSummary.preferences.transitStyle} style
+
+## Your Previous Recommendations Summary
+You provided these ${contextSummary.options.length} options:
+${contextSummary.options.map(opt => `- **${opt.title}**: ${opt.description} (${opt.cost}, ${opt.duration})${opt.recommended ? ' [RECOMMENDED]' : ''}`).join('\n')}
+
+Your recommended option was: ${contextSummary.recommendedOption}
+
+## Recent Conversation
+${conversationContext || 'This is the first follow-up question.'}
+
+## Current Question
+${newQuestion}
+
+## Instructions
+- Answer naturally using "you" and "I" like continuing a conversation with a friend
+- Reference the specific recommendations you made previously
+- Use the actual destination (${contextSummary.destination}) and travel details
+- Be helpful and specific to their situation
+- If asked for timeline details, provide specific times and locations
+- If asked about other options, reference the ones you actually recommended
+- Keep responses conversational but informative (2-3 paragraphs max)
+
+Respond directly as Navietta - no JSON formatting needed, just your natural response.`;
+
+  try {
+    const response = await anthropic.messages.create({
+      model: DEFAULT_MODEL_STR,
+      max_tokens: 1000,
+      messages: [
+        {
+          role: "user",
+          content: followUpPrompt
+        }
+      ]
+    });
+
+    const content = response.content[0];
+    if (content.type !== 'text') {
+      throw new Error('Unexpected response type from Claude API');
+    }
+
+    return content.text.trim();
+  } catch (error) {
+    console.error('Error generating follow-up response:', error);
+    throw new Error('Failed to generate follow-up response');
+  }
+}
+
 export async function generateTravelRecommendations(
   flightDetails: FlightDetails,
   preferences: Preferences

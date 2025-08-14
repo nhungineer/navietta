@@ -37,6 +37,10 @@ interface ExtendedAIRecommendations {
     confidenceScore: number;
     stressLevel: 'Minimal' | 'Low' | 'Moderate' | 'High';
     recommended: boolean;
+    summary: string;
+    confidence: 'high' | 'medium' | 'low';
+    uncertainties: Array<string>;
+    fallbackSuggestion?: string;
   }>;
   finalRecommendation: {
     optionId: string;
@@ -218,7 +222,7 @@ export default function AIResultsPage() {
         </ExpandableSection>
 
         {/* Feedback Section */}
-        <FeedbackSection />
+        {sessionId && <FeedbackSection sessionId={sessionId} />}
       </div>
     </div>
   );

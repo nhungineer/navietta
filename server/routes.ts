@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateTravelRecommendations } from "./services/claude";
+import { generateTravelRecommendations, generateFollowUpResponse } from "./services/claude";
 import { generateMockTravelRecommendations } from "./services/mockClaude";
 import { flightDetailsSchema, preferencesSchema } from "@shared/schema";
 import { z } from "zod";
@@ -18,6 +18,15 @@ const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
 const generateRecommendationsSchema = z.object({
   flightDetails: flightDetailsSchema,
   preferences: preferencesSchema,
+});
+
+const chatSchema = z.object({
+  sessionId: z.string(),
+  question: z.string(),
+  conversationHistory: z.array(z.object({
+    question: z.string(),
+    response: z.string()
+  })).optional().default([])
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -75,59 +84,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Chat with AI about travel recommendations
+  // Chat with AI about travel recommendations using unified Claude service
   app.post("/api/travel/chat", async (req, res) => {
     try {
-      const { sessionId, message } = req.body;
-      
-      if (!sessionId || !message) {
-        return res.status(400).json({ message: 'Session ID and message are required' });
-      }
+      const { sessionId, question, conversationHistory } = chatSchema.parse(req.body);
 
+      // Retrieve the travel session
       const session = await storage.getTravelSession(sessionId);
       if (!session) {
-        return res.status(404).json({ message: 'Travel session not found' });
+        return res.status(404).json({ error: 'Travel session not found' });
       }
 
-      // Generate chat response using Claude
+      // Generate follow-up response using Claude AI
       let response;
       if (process.env.ANTHROPIC_API_KEY) {
         try {
-          const chatResponse = await anthropic.messages.create({
-            model: DEFAULT_MODEL_STR,
-            max_tokens: 1000,
-            system: `You are Navietta, the AI travel assistant. The user has already received travel recommendations for their trip from ${session.flightDetails?.from} to ${session.flightDetails?.to}, arriving at ${session.flightDetails?.arrivalTime} with next stop at ${session.flightDetails?.nextStop} at ${session.flightDetails?.nextStopTime}.
-
-Their current recommendations include:
-${session.aiRecommendations?.options.map((opt, i) => `${i+1}. ${opt.title}: ${opt.description} (${opt.cost}, ${opt.duration})`).join('\n')}
-
-Answer their follow-up question helpfully and conversationally. Keep responses concise but informative.`,
-            messages: [
-              {
-                role: "user",
-                content: message
-              }
-            ]
-          });
-
-          const content = chatResponse.content[0];
-          if (content.type === 'text') {
-            response = content.text;
-          } else {
-            response = "I'm having trouble processing your question right now. Could you try rephrasing it?";
-          }
+          response = await generateFollowUpResponse(
+            session.aiRecommendations,
+            session.flightDetails,
+            session.preferences,
+            conversationHistory || [],
+            question
+          );
         } catch (error) {
-          console.error('Claude API error in chat:', error);
-          response = "I'm having trouble connecting to my AI systems right now. Please try again in a moment.";
+          console.error('Claude API error for follow-up:', error);
+          response = "I'm having trouble processing your question right now. Could you try rephrasing it, or ask me about specific aspects of your travel options like timing, costs, or activities?";
         }
       } else {
-        response = "I'm currently running in demo mode. In the full version, I'd analyze your question and provide personalized travel advice based on your specific itinerary and preferences.";
+        response = "I'd be happy to help with more details about your travel options, but I need the AI service to provide personalized responses. Please ask the administrator to configure the API key.";
       }
 
       res.json({ response });
     } catch (error) {
       console.error('Error in chat endpoint:', error);
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ error: 'Failed to process chat message' });
     }
   });
 

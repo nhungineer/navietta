@@ -5,6 +5,19 @@ import { Send, MessageCircle } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import ReactMarkdown from 'react-markdown';
 
+// Helper function to convert bullet points and improve markdown formatting
+function preprocessMarkdown(text: string): string {
+  return text
+    // Convert bullet points (•) to markdown list items
+    .replace(/^•\s+/gm, '- ')
+    // Convert numbered items with bullet points
+    .replace(/(\d+\.\s+)•\s+/g, '$1')
+    // Ensure proper spacing around lists
+    .replace(/^-\s+/gm, '\n- ')
+    .replace(/^\n+/, '') // Remove leading newlines
+    .trim();
+}
+
 interface FeedbackSectionProps {
   sessionId: string;
 }
@@ -87,15 +100,18 @@ export function FeedbackSection({ sessionId }: FeedbackSectionProps) {
                   <div className="text-sm text-textPrimary bg-blue-50 rounded-lg p-3 flex-1 prose prose-sm max-w-none">
                     <ReactMarkdown
                       components={{
-                        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                        p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
                         strong: ({ children }) => <strong className="font-semibold text-textPrimary">{children}</strong>,
                         em: ({ children }) => <em className="italic">{children}</em>,
-                        ul: ({ children }) => <ul className="list-disc list-inside mb-2">{children}</ul>,
-                        ol: ({ children }) => <ol className="list-decimal list-inside mb-2">{children}</ol>,
-                        li: ({ children }) => <li className="mb-1">{children}</li>,
+                        ul: ({ children }) => <ul className="list-disc list-inside mb-3 ml-2 space-y-1">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal list-inside mb-3 ml-2 space-y-1">{children}</ol>,
+                        li: ({ children }) => <li className="text-textPrimary">{children}</li>,
+                        h1: ({ children }) => <h1 className="text-lg font-semibold mb-2 text-textPrimary">{children}</h1>,
+                        h2: ({ children }) => <h2 className="text-base font-semibold mb-2 text-textPrimary">{children}</h2>,
+                        h3: ({ children }) => <h3 className="text-sm font-semibold mb-1 text-textPrimary">{children}</h3>,
                       }}
                     >
-                      {conv.response}
+                      {preprocessMarkdown(conv.response)}
                     </ReactMarkdown>
                   </div>
                 </div>

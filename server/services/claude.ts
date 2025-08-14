@@ -147,6 +147,9 @@ ${newQuestion}
 - If asked for timeline details, provide specific times and locations
 - If asked about other options, reference the ones you actually recommended
 - Keep responses conversational but informative (2-3 paragraphs max)
+- For lists, use proper markdown format with dashes (- item) or numbers (1. item)
+- Use **bold** for emphasis on important details like times, places, or key recommendations
+- Format timelines as proper markdown lists for better readability
 
 Respond directly as Navietta - no JSON formatting needed, just your natural response.`;
 

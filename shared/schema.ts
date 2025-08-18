@@ -92,7 +92,7 @@ export const flightDetailsSchema = z.object({
   adults: z.number().min(1, "At least 1 adult required").max(10),
   children: z.number().min(0).max(10),
   luggageCount: z.number().min(0).max(20),
-  stops: z.array(stopSchema).min(1, "At least one stop is required"),
+  stops: z.array(stopSchema).length(2, "Exactly 2 stops are required for this transit planner"),
 });
 
 export const preferencesSchema = z.object({

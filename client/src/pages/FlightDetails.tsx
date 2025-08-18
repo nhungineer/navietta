@@ -37,6 +37,11 @@ export default function FlightDetailsPage() {
         arrivalTime: "15:30",
         arrivalDate: "2025-08-23",
       },
+      {
+        location: "Amsterdam",
+        arrivalTime: "18:00",
+        arrivalDate: "2025-08-23",
+      },
     ],
   });
 
@@ -60,28 +65,26 @@ export default function FlightDetailsPage() {
     }));
   };
 
-  const addStop = () => {
-    setFormData((prev) => ({
-      ...prev,
-      stops: [
-        ...prev.stops,
-        {
-          location: "",
-          arrivalTime: "",
-          arrivalDate: prev.stops[prev.stops.length - 1]?.arrivalDate || "2025-08-23",
-        },
-      ],
-    }));
+  // Date constraint logic for Stop 2
+  const getMaxDateForStop2 = (stop1Date: string): string => {
+    const date = new Date(stop1Date);
+    date.setDate(date.getDate() + 1); // Allow only same day or next day
+    return date.toISOString().split('T')[0];
   };
 
-  const removeStop = (index: number) => {
-    if (formData.stops.length > 1) {
-      setFormData((prev) => ({
-        ...prev,
-        stops: prev.stops.filter((_, i) => i !== index),
-      }));
+  const handleStop2DateChange = (newDate: string) => {
+    const stop1Date = formData.stops[0]?.arrivalDate;
+    if (stop1Date) {
+      const maxDate = getMaxDateForStop2(stop1Date);
+      const minDate = stop1Date; // Same day as stop 1
+      
+      if (newDate >= minDate && newDate <= maxDate) {
+        handleStopChange(1, 'arrivalDate', newDate);
+      }
     }
   };
+
+  // No remove stop function needed - exactly 2 stops required
 
   const handleSubmit = () => {
     try {
@@ -278,7 +281,20 @@ export default function FlightDetailsPage() {
                   <Input
                     type="date"
                     value={stop.arrivalDate}
-                    onChange={(e) => handleStopChange(index, "arrivalDate", e.target.value)}
+                    onChange={(e) => {
+                      if (index === 1) {
+                        handleStop2DateChange(e.target.value);
+                      } else {
+                        handleStopChange(index, "arrivalDate", e.target.value);
+                        // Auto-update Stop 2 date when Stop 1 changes
+                        if (index === 0 && formData.stops[1]) {
+                          const newDate = e.target.value;
+                          handleStopChange(1, "arrivalDate", newDate);
+                        }
+                      }
+                    }}
+                    min={index === 1 ? formData.stops[0]?.arrivalDate : undefined}
+                    max={index === 1 ? getMaxDateForStop2(formData.stops[0]?.arrivalDate || "") : undefined}
                     className="pl-10 text-lg h-12"
                     data-testid={`input-stop-date-${index}`}
                   />
@@ -287,16 +303,10 @@ export default function FlightDetailsPage() {
             </div>
           ))}
 
-          {/* Add Stop Button */}
-          <Button
-            variant="outline"
-            className="flex items-center gap-2 text-lg"
-            onClick={addStop}
-            data-testid="button-add-stop"
-          >
-            <Plus size={20} className="bg-black text-white rounded-full p-1" />
-            Add stop
-          </Button>
+          {/* Transit Planning Note */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+            <p><strong>Transit Planning:</strong> This tool is designed for short-term transit planning with exactly 2 stops over 1-2 days. For longer multi-city itineraries, please use our extended trip planner.</p>
+          </div>
         </div>
 
         {/* Next Button */}

@@ -6,12 +6,12 @@ Navietta is a travel transit application that helps users find optimal layover r
 
 - ✅ Successfully completed schema migration from single-stop to multi-stop structure
 - ✅ Fixed all TypeScript errors across mockClaude.ts, claude.ts, and Preferences.tsx
-- ✅ Updated FlightDetails schema to support multiple stops with location, arrival time, and date
-- ✅ Removed deprecated `nextStop`, `nextStopTime`, and `transportMode` properties
-- ✅ Enhanced AI services to use new stops array structure for recommendations
-- ✅ Fixed Preferences page to display first stop information correctly
-- ✅ Resolved all LSP diagnostics and syntax errors from schema migration
-- ✅ Application now running successfully with new multi-stop architecture
+- ✅ Constrained trip planning to exactly 2 stops (Start → Stop 1 → Stop 2)
+- ✅ Removed "Add Stop" functionality to maintain focused 3-step transit planning
+- ✅ Implemented date constraints: Stop 2 can only be same day or +1 day from Stop 1
+- ✅ Added user guidance explaining the tool's scope for short-term transit planning
+- ✅ Enhanced UI with date validation and automatic Stop 2 date synchronization
+- ✅ Application optimized for 1-2 day transit recommendations rather than extended travel
 
 # User Preferences
 

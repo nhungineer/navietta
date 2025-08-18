@@ -15,9 +15,11 @@ export const travelSessions = pgTable("travel_sessions", {
     adults: number;
     children: number;
     luggageCount: number;
-    nextStop: string;
-    nextStopTime: string;
-    transportMode: 'flight' | 'taxi' | 'train' | 'bus' | 'hired_car' | 'other';
+    stops: Array<{
+      location: string;
+      arrivalTime: string;
+      arrivalDate: string;
+    }>;
   }>(),
   preferences: jsonb("preferences").$type<{
     budgetComfort: number; // 0-100 scale
@@ -74,6 +76,12 @@ export const insertTravelSessionSchema = createInsertSchema(travelSessions).omit
   createdAt: true,
 });
 
+export const stopSchema = z.object({
+  location: z.string().min(1, "Stop location is required"),
+  arrivalTime: z.string().min(1, "Arrival time is required"),
+  arrivalDate: z.string().min(1, "Arrival date is required"),
+});
+
 export const flightDetailsSchema = z.object({
   from: z.string().min(1, "From location is required"),
   to: z.string().min(1, "To location is required"),
@@ -84,9 +92,7 @@ export const flightDetailsSchema = z.object({
   adults: z.number().min(1, "At least 1 adult required").max(10),
   children: z.number().min(0).max(10),
   luggageCount: z.number().min(0).max(20),
-  nextStop: z.string().min(1, "Next stop is required"),
-  nextStopTime: z.string().min(1, "Next stop time is required"),
-  transportMode: z.enum(['flight', 'taxi', 'train', 'bus', 'hired_car', 'other']),
+  stops: z.array(stopSchema).min(1, "At least one stop is required"),
 });
 
 export const preferencesSchema = z.object({
@@ -97,5 +103,6 @@ export const preferencesSchema = z.object({
 
 export type InsertTravelSession = z.infer<typeof insertTravelSessionSchema>;
 export type TravelSession = typeof travelSessions.$inferSelect;
+export type Stop = z.infer<typeof stopSchema>;
 export type FlightDetails = z.infer<typeof flightDetailsSchema>;
 export type Preferences = z.infer<typeof preferencesSchema>;

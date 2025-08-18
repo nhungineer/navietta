@@ -2,15 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useTravelContext } from "@/contexts/TravelContext";
-import { flightDetailsSchema, type FlightDetails } from "@shared/schema";
+import { flightDetailsSchema, type FlightDetails, type Stop } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import {
   Plane,
@@ -18,6 +11,9 @@ import {
   Minus,
   Plus,
   MapPin,
+  Clock,
+  Calendar,
+  Users,
   Luggage,
 } from "lucide-react";
 
@@ -35,9 +31,13 @@ export default function FlightDetailsPage() {
     adults: 2,
     children: 0,
     luggageCount: 2,
-    nextStop: "Naples",
-    nextStopTime: "15:30",
-    transportMode: "train",
+    stops: [
+      {
+        location: "Naples",
+        arrivalTime: "15:30",
+        arrivalDate: "2025-08-23",
+      },
+    ],
   });
 
   const handleInputChange = (
@@ -45,6 +45,42 @@ export default function FlightDetailsPage() {
     value: string | number,
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleStopChange = (
+    index: number,
+    field: keyof Stop,
+    value: string,
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      stops: prev.stops.map((stop, i) =>
+        i === index ? { ...stop, [field]: value } : stop
+      ),
+    }));
+  };
+
+  const addStop = () => {
+    setFormData((prev) => ({
+      ...prev,
+      stops: [
+        ...prev.stops,
+        {
+          location: "",
+          arrivalTime: "",
+          arrivalDate: prev.stops[prev.stops.length - 1]?.arrivalDate || "2025-08-23",
+        },
+      ],
+    }));
+  };
+
+  const removeStop = (index: number) => {
+    if (formData.stops.length > 1) {
+      setFormData((prev) => ({
+        ...prev,
+        stops: prev.stops.filter((_, i) => i !== index),
+      }));
+    }
   };
 
   const handleSubmit = () => {
@@ -81,232 +117,193 @@ export default function FlightDetailsPage() {
     <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-xl shadow-sm p-8">
         <h2 className="text-2xl font-semibold text-textPrimary mb-6">
-          Flight Details
+          Trip details
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Travelers and Luggage Section - Moved to Top */}
+        <div className="grid grid-cols-3 gap-6 mb-8">
           <div>
-            <Label className="block text-sm font-medium text-textSecondary mb-2">
-              From
+            <Label className="text-lg font-medium text-textPrimary mb-4 block">
+              Adults
             </Label>
-            <div className="relative">
-              <PlaneTakeoff
-                className="absolute left-3 top-3 text-textSecondary"
-                size={16}
-              />
-              <Input
-                type="text"
-                value={formData.from}
-                onChange={(e) => handleInputChange("from", e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label className="block text-sm font-medium text-textSecondary mb-2">
-              To
-            </Label>
-            <div className="relative">
-              <Plane
-                className="absolute left-3 top-3 text-textSecondary"
-                size={16}
-              />
-              <Input
-                type="text"
-                value={formData.to}
-                onChange={(e) => handleInputChange("to", e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label className="block text-sm font-medium text-textSecondary mb-2">
-              Departure
-            </Label>
-            <Input
-              type="time"
-              value={formData.departureTime}
-              onChange={(e) =>
-                handleInputChange("departureTime", e.target.value)
-              }
-            />
-          </div>
-
-          <div>
-            <Label className="block text-sm font-medium text-textSecondary mb-2">
-              Arrival
-            </Label>
-            <Input
-              type="time"
-              value={formData.arrivalTime}
-              onChange={(e) => handleInputChange("arrivalTime", e.target.value)}
-            />
-          </div>
-
-          <div>
-            <Label className="block text-sm font-medium text-textSecondary mb-2">
-              Departure Date
-            </Label>
-            <Input
-              type="date"
-              value={formData.departureDate}
-              onChange={(e) =>
-                handleInputChange("departureDate", e.target.value)
-              }
-            />
-          </div>
-
-          <div>
-            <Label className="block text-sm font-medium text-textSecondary mb-2">
-              Arrival Date
-            </Label>
-            <Input
-              type="date"
-              value={formData.arrivalDate}
-              onChange={(e) => handleInputChange("arrivalDate", e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="mt-8">
-          <h3 className="text-lg font-medium text-textPrimary mb-4">
-            Travelers
-          </h3>
-          <div className="flex items-center space-x-4">
-            <span className="text-textSecondary">Adults</span>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center">
               <Button
                 variant="outline"
                 size="sm"
-                className="w-8 h-8 p-0 hover:bg-primary hover:text-white"
+                className="w-10 h-10 p-0 bg-gray-400 text-white hover:bg-gray-500 rounded-l-md rounded-r-none"
                 onClick={() => updateTravelers("adults", false)}
+                data-testid="button-decrease-adults"
               >
-                <Minus size={12} />
+                <Minus size={16} />
               </Button>
-              <span className="w-8 text-center font-medium">
+              <div className="w-16 h-10 flex items-center justify-center bg-white border-t border-b text-lg font-medium">
                 {formData.adults}
-              </span>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
-                className="w-8 h-8 p-0 hover:bg-primary hover:text-white"
+                className="w-10 h-10 p-0 bg-gray-400 text-white hover:bg-gray-500 rounded-r-md rounded-l-none"
                 onClick={() => updateTravelers("adults", true)}
+                data-testid="button-increase-adults"
               >
-                <Plus size={12} />
+                <Plus size={16} />
               </Button>
             </div>
-            <span className="ml-8 text-textSecondary">Children</span>
-            <div className="flex items-center space-x-2">
+          </div>
+
+          <div>
+            <Label className="text-lg font-medium text-textPrimary mb-4 block">
+              Children
+            </Label>
+            <div className="flex items-center">
               <Button
                 variant="outline"
                 size="sm"
-                className="w-8 h-8 p-0 hover:bg-primary hover:text-white"
+                className="w-10 h-10 p-0 bg-gray-400 text-white hover:bg-gray-500 rounded-l-md rounded-r-none"
                 onClick={() => updateTravelers("children", false)}
+                data-testid="button-decrease-children"
               >
-                <Minus size={12} />
+                <Minus size={16} />
               </Button>
-              <span className="w-8 text-center font-medium">
+              <div className="w-16 h-10 flex items-center justify-center bg-white border-t border-b text-lg font-medium">
                 {formData.children}
-              </span>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
-                className="w-8 h-8 p-0 hover:bg-primary hover:text-white"
+                className="w-10 h-10 p-0 bg-gray-400 text-white hover:bg-gray-500 rounded-r-md rounded-l-none"
                 onClick={() => updateTravelers("children", true)}
+                data-testid="button-increase-children"
               >
-                <Plus size={12} />
+                <Plus size={16} />
               </Button>
             </div>
           </div>
-        </div>
 
-        <div className="mt-8">
-          <h3 className="text-lg font-medium text-textPrimary mb-4">
-            Check-in luggage
-          </h3>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Luggage className="text-textSecondary" size={16} />
-              <span className="text-textSecondary">Pieces of luggage</span>
-            </div>
-            <div className="flex items-center space-x-2">
+          <div>
+            <Label className="text-lg font-medium text-textPrimary mb-4 block">
+              Luggage
+            </Label>
+            <div className="flex items-center">
               <Button
                 variant="outline"
                 size="sm"
-                className="w-8 h-8 p-0 hover:bg-primary hover:text-white"
+                className="w-10 h-10 p-0 bg-gray-400 text-white hover:bg-gray-500 rounded-l-md rounded-r-none"
                 onClick={() => updateLuggage(false)}
+                data-testid="button-decrease-luggage"
               >
-                <Minus size={12} />
+                <Minus size={16} />
               </Button>
-              <span className="w-8 text-center font-medium">
+              <div className="w-16 h-10 flex items-center justify-center bg-white border-t border-b text-lg font-medium">
                 {formData.luggageCount}
-              </span>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
-                className="w-8 h-8 p-0 hover:bg-primary hover:text-white"
+                className="w-10 h-10 p-0 bg-gray-400 text-white hover:bg-gray-500 rounded-r-md rounded-l-none"
                 onClick={() => updateLuggage(true)}
+                data-testid="button-increase-luggage"
               >
-                <Plus size={12} />
+                <Plus size={16} />
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="mt-8">
-          <h3 className="text-lg font-medium text-textPrimary mb-4">
-            Immediate next stop
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <MapPin
-                className="absolute left-3 top-3 text-textSecondary"
-                size={16}
-              />
-              <Input
-                type="text"
-                placeholder="Hotel name or location"
-                value={formData.nextStop}
-                onChange={(e) => handleInputChange("nextStop", e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Input
-              type="time"
-              value={formData.nextStopTime}
-              onChange={(e) =>
-                handleInputChange("nextStopTime", e.target.value)
-              }
+        {/* Start Location */}
+        <div className="mb-6">
+          <Label className="text-lg font-medium text-textPrimary mb-3 block">
+            Start
+          </Label>
+          <div className="relative">
+            <MapPin
+              className="absolute left-3 top-3 text-gray-400"
+              size={16}
             />
-            <Select
-              value={formData.transportMode}
-              onValueChange={(value) =>
-                handleInputChange(
-                  "transportMode",
-                  value as FlightDetails["transportMode"],
-                )
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Mode of transport" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="flight">Flight</SelectItem>
-                <SelectItem value="taxi">Taxi/Rideshare</SelectItem>
-                <SelectItem value="train">Train</SelectItem>
-                <SelectItem value="bus">Bus</SelectItem>
-                <SelectItem value="hired_car">Hired car</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
+            <Input
+              type="text"
+              value={formData.from}
+              onChange={(e) => handleInputChange("from", e.target.value)}
+              className="pl-10 text-lg h-12"
+              placeholder="Melbourne"
+              data-testid="input-start-location"
+            />
           </div>
         </div>
 
+        {/* Stops Section */}
+        <div className="space-y-6">
+          {formData.stops.map((stop, index) => (
+            <div key={index}>
+              <Label className="text-lg font-medium text-textPrimary mb-3 block">
+                Stop {index + 1}
+              </Label>
+              
+              {/* Location */}
+              <div className="relative mb-3">
+                <MapPin
+                  className="absolute left-3 top-3 text-gray-400"
+                  size={16}
+                />
+                <Input
+                  type="text"
+                  value={stop.location}
+                  onChange={(e) => handleStopChange(index, "location", e.target.value)}
+                  className="pl-10 text-lg h-12"
+                  placeholder="Rome"
+                  data-testid={`input-stop-location-${index}`}
+                />
+              </div>
+
+              {/* Time and Date */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="relative">
+                  <Clock
+                    className="absolute left-3 top-3 text-gray-400"
+                    size={16}
+                  />
+                  <Input
+                    type="time"
+                    value={stop.arrivalTime}
+                    onChange={(e) => handleStopChange(index, "arrivalTime", e.target.value)}
+                    className="pl-10 text-lg h-12"
+                    data-testid={`input-stop-time-${index}`}
+                  />
+                </div>
+                <div className="relative">
+                  <Calendar
+                    className="absolute left-3 top-3 text-gray-400"
+                    size={16}
+                  />
+                  <Input
+                    type="date"
+                    value={stop.arrivalDate}
+                    onChange={(e) => handleStopChange(index, "arrivalDate", e.target.value)}
+                    className="pl-10 text-lg h-12"
+                    data-testid={`input-stop-date-${index}`}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* Add Stop Button */}
+          <Button
+            variant="outline"
+            className="flex items-center gap-2 text-lg"
+            onClick={addStop}
+            data-testid="button-add-stop"
+          >
+            <Plus size={20} className="bg-black text-white rounded-full p-1" />
+            Add stop
+          </Button>
+        </div>
+
+        {/* Next Button */}
         <Button
-          className="w-full mt-8 bg-primary text-white hover:bg-primary/90"
+          className="w-full mt-8 bg-primary text-white hover:bg-primary/90 h-12 text-lg font-medium"
           onClick={handleSubmit}
+          data-testid="button-next"
         >
           NEXT
         </Button>

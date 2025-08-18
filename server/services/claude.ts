@@ -90,13 +90,12 @@ export async function generateFollowUpResponse(
   // Create compressed context from original recommendations
   const contextSummary = {
     destination: flightDetails.to,
-    nextDestination: flightDetails.nextStop,
+    nextDestination: flightDetails.stops[0]?.location || 'destination',
     arrivalTime: flightDetails.arrivalTime,
     arrivalDate: flightDetails.arrivalDate,
-    nextStopTime: flightDetails.nextStopTime,
+    nextStopTime: flightDetails.stops[0]?.arrivalTime || 'time not specified',
     travelers: `${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ''}`,
     luggage: `${flightDetails.luggageCount} piece(s)`,
-    transportMode: flightDetails.transportMode.replace('_', ' '),
     preferences: {
       budgetComfort: preferences.budgetComfort,
       energyLevel: preferences.energyLevel,
@@ -124,7 +123,7 @@ export async function generateFollowUpResponse(
 - Flying from ${flightDetails.from} to ${contextSummary.destination} on ${contextSummary.arrivalDate} at ${contextSummary.arrivalTime}
 - Next destination: ${contextSummary.nextDestination} at ${contextSummary.nextStopTime}
 - Travelers: ${contextSummary.travelers} with ${contextSummary.luggage} of luggage
-- Transport preference: ${contextSummary.transportMode}
+- AI will recommend optimal transport based on preferences
 - User preferences: ${contextSummary.preferences.budgetComfort}/100 budget-comfort, ${contextSummary.preferences.energyLevel}/100 energy, ${contextSummary.preferences.transitStyle} style
 
 ## Your Previous Recommendations Summary
@@ -234,13 +233,17 @@ ROME-SPECIFIC KNOWLEDGE:
 
   const locationKnowledge = getLocationKnowledge(flightDetails.to);
 
+  const stopsText = flightDetails.stops.map((stop: any, index: number) => 
+    `- Stop ${index + 1}: ${stop.location} at ${stop.arrivalTime} on ${stop.arrivalDate}`
+  ).join('\n');
+
   const prompt = `TRAVEL SITUATION:
 - Flying from ${flightDetails.from} to ${flightDetails.to}
 - Arrival: ${flightDetails.arrivalTime} on ${flightDetails.arrivalDate}
 - Travelers: ${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ''}
 - Luggage: ${flightDetails.luggageCount} piece(s) of check-in luggage
-- Next destination: ${flightDetails.nextStop} at ${flightDetails.nextStopTime}
-- Preferred transport mode: ${flightDetails.transportMode.replace('_', ' ')}
+- Planned stops:
+${stopsText}
 
 USER PREFERENCES:
 - Budget vs Comfort preference: ${preferences.budgetComfort}/100 (0=budget focused, 100=comfort focused)

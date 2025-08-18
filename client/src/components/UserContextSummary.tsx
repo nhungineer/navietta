@@ -29,7 +29,7 @@ export function UserContextSummary({ userContext, flightDetails, preferences }: 
       </div>
       
       <div className="text-sm text-gray-700">
-        Next stop is <strong>{flightDetails.nextStop}</strong> at <strong>{flightDetails.nextStopTime}</strong> by <strong>{flightDetails.transportMode.replace('_', ' ')}</strong>.
+        Next stop is <strong>{flightDetails.stops[0]?.location}</strong> at <strong>{flightDetails.stops[0]?.arrivalTime}</strong>.
       </div>
     </div>
   );

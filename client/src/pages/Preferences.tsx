@@ -76,9 +76,8 @@ export default function PreferencesPage() {
                 {formatTime(flightDetails.arrivalTime)} on{" "}
                 {formatDate(flightDetails.arrivalDate)}
               </strong>
-              . Your next stop is <strong>{flightDetails.nextStop}</strong> at{" "}
-              <strong>{formatTime(flightDetails.nextStopTime)}</strong> by{" "}
-              <strong>{flightDetails.transportMode.replace('_', ' ')}</strong>. What
+              . Your next stop is <strong>{flightDetails.stops[0]?.location}</strong> at{" "}
+              <strong>{formatTime(flightDetails.stops[0]?.arrivalTime)}</strong>. What
               are your preferences?
             </p>
           )}

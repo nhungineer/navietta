@@ -12,6 +12,10 @@ Navietta is a travel transit application that helps users find optimal layover r
 - ✅ Added user guidance explaining the tool's scope for short-term transit planning
 - ✅ Enhanced UI with date validation and automatic Stop 2 date synchronization
 - ✅ Application optimized for 1-2 day transit recommendations rather than extended travel
+- ✅ Fixed AI prompt structure to correctly understand multi-stop transit planning
+- ✅ Resolved issue where AI confused transit waypoints with final destinations
+- ✅ Cleaned up context summary to remove redundant departure time/date fields
+- ✅ Updated UI to clearly show: Start → Final Destination via Transit Stop
 
 # User Preferences
 

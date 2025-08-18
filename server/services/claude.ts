@@ -238,7 +238,6 @@ ROME-SPECIFIC KNOWLEDGE:
 
   const prompt = `TRAVEL SITUATION:
 - Starting location: ${flightDetails.from}
-- Departure: ${flightDetails.departureTime} on ${flightDetails.departureDate}
 - Travelers: ${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ''}
 - Luggage: ${flightDetails.luggageCount} piece(s) of luggage
 

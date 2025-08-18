@@ -336,11 +336,14 @@ IMPORTANT TIME FORMAT: Use ONLY start times in HH:MM format (e.g., "19:15"), NOT
     });
     
     console.log('Claude API responded successfully');
-
+    
     const content = response.content[0];
     if (content.type !== 'text') {
       throw new Error('Unexpected response type from Claude API');
     }
+    
+    // Log a snippet of the raw AI response to debug
+    console.log('RAW AI RESPONSE (first 500 chars):', content.text.substring(0, 500));
 
     // Clean the response text to handle markdown code blocks
     let responseText = content.text.trim();

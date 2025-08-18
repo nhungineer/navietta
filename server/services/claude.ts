@@ -307,6 +307,9 @@ IMPORTANT TIME FORMAT: Use ONLY start times in HH:MM format (e.g., "19:15"), NOT
 }`;
 
   try {
+    console.log('Making request to Claude API...');
+    console.log('Prompt length:', prompt.length, 'characters');
+    
     const response = await anthropic.messages.create({
       model: DEFAULT_MODEL_STR,
       max_tokens: 4000,
@@ -318,6 +321,8 @@ IMPORTANT TIME FORMAT: Use ONLY start times in HH:MM format (e.g., "19:15"), NOT
         }
       ]
     });
+    
+    console.log('Claude API responded successfully');
 
     const content = response.content[0];
     if (content.type !== 'text') {

@@ -37,16 +37,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Try Claude AI first, fallback to mock if API key is missing
       let recommendations;
+      console.log('Starting recommendation generation...');
+      
       if (process.env.ANTHROPIC_API_KEY) {
         try {
+          console.log('Using Claude API for recommendations');
           recommendations = await generateTravelRecommendations(flightDetails, preferences);
+          console.log('Claude API completed successfully');
         } catch (error) {
           console.error('Claude API error, falling back to mock data:', error);
           recommendations = await generateMockTravelRecommendations(flightDetails, preferences);
+          console.log('Fallback to mock data completed');
         }
       } else {
         console.log('No ANTHROPIC_API_KEY found, using mock data');
         recommendations = await generateMockTravelRecommendations(flightDetails, preferences);
+        console.log('Mock data generation completed');
       }
 
       // Create a new travel session

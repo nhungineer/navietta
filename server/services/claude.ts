@@ -26,9 +26,11 @@ interface FlightDetails {
   adults: number;
   children: number;
   luggageCount: number;
-  nextStop: string;
-  nextStopTime: string;
-  transportMode: 'flight' | 'taxi' | 'train' | 'bus' | 'hired_car' | 'other';
+  stops: Array<{
+    location: string;
+    arrivalTime: string;
+    arrivalDate: string;
+  }>;
 }
 
 interface Preferences {
@@ -239,11 +241,14 @@ ROME-SPECIFIC KNOWLEDGE:
 
   const prompt = `TRAVEL SITUATION:
 - Flying from ${flightDetails.from} to ${flightDetails.to}
-- Arrival: ${flightDetails.arrivalTime} on ${flightDetails.arrivalDate}
+- Flight arrival: ${flightDetails.arrivalTime} on ${flightDetails.arrivalDate}
 - Travelers: ${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ''}
 - Luggage: ${flightDetails.luggageCount} piece(s) of check-in luggage
-- Planned stops:
+
+TRANSIT PLAN - The user needs transit recommendations from their arrival airport to their next destinations:
 ${stopsText}
+
+This is a SHORT-TERM TRANSIT PLANNING request focusing on the immediate next stop (${flightDetails.stops[0]?.location}) at ${flightDetails.stops[0]?.arrivalTime} on ${flightDetails.stops[0]?.arrivalDate}.
 
 USER PREFERENCES:
 - Budget vs Comfort preference: ${preferences.budgetComfort}/100 (0=budget focused, 100=comfort focused)

@@ -18,11 +18,8 @@ const anthropic = new Anthropic({
 
 interface FlightDetails {
   from: string;
-  to: string;
   departureTime: string;
-  arrivalTime: string;
   departureDate: string;
-  arrivalDate: string;
   adults: number;
   children: number;
   luggageCount: number;
@@ -91,11 +88,11 @@ export async function generateFollowUpResponse(
 ): Promise<string> {
   // Create compressed context from original recommendations
   const contextSummary = {
-    destination: flightDetails.to,
-    nextDestination: flightDetails.stops[0]?.location || 'destination',
-    arrivalTime: flightDetails.arrivalTime,
-    arrivalDate: flightDetails.arrivalDate,
-    nextStopTime: flightDetails.stops[0]?.arrivalTime || 'time not specified',
+    startLocation: flightDetails.from,
+    firstDestination: flightDetails.stops[0]?.location || 'destination',
+    departureTime: flightDetails.departureTime,
+    departureDate: flightDetails.departureDate,
+    firstStopTime: flightDetails.stops[0]?.arrivalTime || 'time not specified',
     travelers: `${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ''}`,
     luggage: `${flightDetails.luggageCount} piece(s)`,
     preferences: {
@@ -122,8 +119,8 @@ export async function generateFollowUpResponse(
   const followUpPrompt = `You are Navietta, continuing a conversation about travel recommendations you previously provided.
 
 ## Original Travel Context
-- Flying from ${flightDetails.from} to ${contextSummary.destination} on ${contextSummary.arrivalDate} at ${contextSummary.arrivalTime}
-- Next destination: ${contextSummary.nextDestination} at ${contextSummary.nextStopTime}
+- Starting from ${flightDetails.from} departing on ${contextSummary.departureDate} at ${contextSummary.departureTime}
+- First destination: ${contextSummary.firstDestination} at ${contextSummary.firstStopTime}
 - Travelers: ${contextSummary.travelers} with ${contextSummary.luggage} of luggage
 - AI will recommend optimal transport based on preferences
 - User preferences: ${contextSummary.preferences.budgetComfort}/100 budget-comfort, ${contextSummary.preferences.energyLevel}/100 energy, ${contextSummary.preferences.transitStyle} style
@@ -143,7 +140,7 @@ ${newQuestion}
 ## Instructions
 - Answer naturally using "you" and "I" like continuing a conversation with a friend
 - Reference the specific recommendations you made previously
-- Use the actual destination (${contextSummary.destination}) and travel details
+- Use the actual destinations (${contextSummary.firstDestination}) and travel details
 - Be helpful and specific to their situation
 - If asked for timeline details, provide specific times and locations
 - If asked about other options, reference the ones you actually recommended
@@ -240,20 +237,19 @@ ROME-SPECIFIC KNOWLEDGE:
   ).join('\n');
 
   const prompt = `TRAVEL SITUATION:
-- Flying from ${flightDetails.from} to ${flightDetails.to}
-- Flight arrival: ${flightDetails.arrivalTime} on ${flightDetails.arrivalDate}
+- Starting location: ${flightDetails.from}
+- Departure: ${flightDetails.departureTime} on ${flightDetails.departureDate}
 - Travelers: ${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ''}
-- Luggage: ${flightDetails.luggageCount} piece(s) of check-in luggage
+- Luggage: ${flightDetails.luggageCount} piece(s) of luggage
 
-TRANSIT PLAN - The user needs transit recommendations from their arrival airport (${flightDetails.to}) to their next destinations:
+TRANSIT PLAN - The user needs transit recommendations for their journey:
 ${stopsText}
 
 This is a SHORT-TERM TRANSIT PLANNING request. The user's journey is:
-1. Flight: ${flightDetails.from} → ${flightDetails.to} (arriving ${flightDetails.arrivalTime} on ${flightDetails.arrivalDate})
-2. Transit needed: ${flightDetails.to} → ${flightDetails.stops[0]?.location} (target arrival: ${flightDetails.stops[0]?.arrivalTime} on ${flightDetails.stops[0]?.arrivalDate})
-3. Next transit: ${flightDetails.stops[0]?.location} → ${flightDetails.stops[1]?.location} (target arrival: ${flightDetails.stops[1]?.arrivalTime} on ${flightDetails.stops[1]?.arrivalDate})
+1. Travel: ${flightDetails.from} → ${flightDetails.stops[0]?.location} (target arrival: ${flightDetails.stops[0]?.arrivalTime} on ${flightDetails.stops[0]?.arrivalDate})
+2. Next transit: ${flightDetails.stops[0]?.location} → ${flightDetails.stops[1]?.location} (target arrival: ${flightDetails.stops[1]?.arrivalTime} on ${flightDetails.stops[1]?.arrivalDate})
 
-FOCUS: Provide transit options from ${flightDetails.to} to ${flightDetails.stops[0]?.location}.
+FOCUS: Provide transit options from ${flightDetails.from} to ${flightDetails.stops[0]?.location}.
 
 USER PREFERENCES:
 - Budget vs Comfort preference: ${preferences.budgetComfort}/100 (0=budget focused, 100=comfort focused)
@@ -319,8 +315,8 @@ IMPORTANT TIME FORMAT: Use ONLY start times in HH:MM format (e.g., "19:15"), NOT
   try {
     console.log('Making request to Claude API...');
     console.log('Prompt length:', prompt.length, 'characters');
-    console.log('DEBUGGING - Flight details sent to AI:');
-    console.log('From:', flightDetails.from, 'To:', flightDetails.to);
+    console.log('DEBUGGING - Transit details sent to AI:');
+    console.log('From:', flightDetails.from);
     console.log('Stops:', flightDetails.stops.map(s => `${s.location} at ${s.arrivalTime} on ${s.arrivalDate}`).join(', '));
     
     const response = await anthropic.messages.create({

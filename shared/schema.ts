@@ -83,12 +83,9 @@ export const stopSchema = z.object({
 });
 
 export const flightDetailsSchema = z.object({
-  from: z.string().min(1, "From location is required"),
-  to: z.string().min(1, "To location is required"),
+  from: z.string().min(1, "Starting location is required"),
   departureTime: z.string().min(1, "Departure time is required"),
-  arrivalTime: z.string().min(1, "Arrival time is required"),
   departureDate: z.string().min(1, "Departure date is required"),
-  arrivalDate: z.string().min(1, "Arrival date is required"),
   adults: z.number().min(1, "At least 1 adult required").max(10),
   children: z.number().min(0).max(10),
   luggageCount: z.number().min(0).max(20),

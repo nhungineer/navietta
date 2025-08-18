@@ -23,11 +23,8 @@ export default function FlightDetailsPage() {
 
   const [formData, setFormData] = useState<FlightDetails>({
     from: "Melbourne",
-    to: "Rome",
     departureTime: "07:00",
-    arrivalTime: "07:15",
     departureDate: "2025-08-22",
-    arrivalDate: "2025-08-23",
     adults: 2,
     children: 0,
     luggageCount: 2,

@@ -25,7 +25,7 @@ export function UserContextSummary({ userContext, flightDetails, preferences }: 
         {flightDetails.children > 0 && (
           <span> and <strong>{flightDetails.children} child{flightDetails.children > 1 ? 'ren' : ''}</strong></span>
         )}
-        <span> travelling from <strong>{flightDetails.from}</strong> to <strong>{flightDetails.to}</strong>, arriving at <strong>{flightDetails.arrivalTime} on {formatDate(flightDetails.arrivalDate)}</strong>.</span>
+        <span> starting from <strong>{flightDetails.from}</strong> on <strong>{flightDetails.departureTime} {formatDate(flightDetails.departureDate)}</strong>.</span>
       </div>
       
       <div className="text-sm text-gray-700">

@@ -245,10 +245,15 @@ ROME-SPECIFIC KNOWLEDGE:
 - Travelers: ${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ''}
 - Luggage: ${flightDetails.luggageCount} piece(s) of check-in luggage
 
-TRANSIT PLAN - The user needs transit recommendations from their arrival airport to their next destinations:
+TRANSIT PLAN - The user needs transit recommendations from their arrival airport (${flightDetails.to}) to their next destinations:
 ${stopsText}
 
-This is a SHORT-TERM TRANSIT PLANNING request focusing on the immediate next stop (${flightDetails.stops[0]?.location}) at ${flightDetails.stops[0]?.arrivalTime} on ${flightDetails.stops[0]?.arrivalDate}.
+This is a SHORT-TERM TRANSIT PLANNING request. The user's journey is:
+1. Flight: ${flightDetails.from} → ${flightDetails.to} (arriving ${flightDetails.arrivalTime} on ${flightDetails.arrivalDate})
+2. Transit needed: ${flightDetails.to} → ${flightDetails.stops[0]?.location} (target arrival: ${flightDetails.stops[0]?.arrivalTime} on ${flightDetails.stops[0]?.arrivalDate})
+3. Next transit: ${flightDetails.stops[0]?.location} → ${flightDetails.stops[1]?.location} (target arrival: ${flightDetails.stops[1]?.arrivalTime} on ${flightDetails.stops[1]?.arrivalDate})
+
+FOCUS: Provide transit options from ${flightDetails.to} to ${flightDetails.stops[0]?.location}.
 
 USER PREFERENCES:
 - Budget vs Comfort preference: ${preferences.budgetComfort}/100 (0=budget focused, 100=comfort focused)
@@ -314,6 +319,9 @@ IMPORTANT TIME FORMAT: Use ONLY start times in HH:MM format (e.g., "19:15"), NOT
   try {
     console.log('Making request to Claude API...');
     console.log('Prompt length:', prompt.length, 'characters');
+    console.log('DEBUGGING - Flight details sent to AI:');
+    console.log('From:', flightDetails.from, 'To:', flightDetails.to);
+    console.log('Stops:', flightDetails.stops.map(s => `${s.location} at ${s.arrivalTime} on ${s.arrivalDate}`).join(', '));
     
     const response = await anthropic.messages.create({
       model: DEFAULT_MODEL_STR,

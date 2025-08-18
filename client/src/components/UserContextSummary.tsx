@@ -29,7 +29,7 @@ export function UserContextSummary({ userContext, flightDetails, preferences }: 
       </div>
       
       <div className="text-sm text-gray-700">
-        Next stop is <strong>{flightDetails.stops[0]?.location}</strong> at <strong>{flightDetails.stops[0]?.arrivalTime}</strong>.
+        Next stop is <strong>{flightDetails.stops[0]?.location}</strong> at <strong>{flightDetails.stops[0]?.arrivalTime} on {formatDate(flightDetails.stops[0]?.arrivalDate)}</strong>.
       </div>
     </div>
   );

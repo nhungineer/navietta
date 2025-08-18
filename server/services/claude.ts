@@ -245,11 +245,16 @@ ROME-SPECIFIC KNOWLEDGE:
 TRANSIT PLAN - The user needs transit recommendations for their journey:
 ${stopsText}
 
-This is a SHORT-TERM TRANSIT PLANNING request. The user's journey is:
-1. Travel: ${flightDetails.from} → ${flightDetails.stops[0]?.location} (target arrival: ${flightDetails.stops[0]?.arrivalTime} on ${flightDetails.stops[0]?.arrivalDate})
-2. Next transit: ${flightDetails.stops[0]?.location} → ${flightDetails.stops[1]?.location} (target arrival: ${flightDetails.stops[1]?.arrivalTime} on ${flightDetails.stops[1]?.arrivalDate})
+This is a MULTI-STOP TRANSIT PLANNING request. The user's complete journey is:
+${flightDetails.from} → ${flightDetails.stops[0]?.location} → ${flightDetails.stops[1]?.location}
 
-FOCUS: Provide transit options from ${flightDetails.from} to ${flightDetails.stops[0]?.location}.
+Journey breakdown:
+1. First leg: ${flightDetails.from} → ${flightDetails.stops[0]?.location} (arrive by ${flightDetails.stops[0]?.arrivalTime} on ${flightDetails.stops[0]?.arrivalDate})
+2. Second leg: ${flightDetails.stops[0]?.location} → ${flightDetails.stops[1]?.location} (arrive by ${flightDetails.stops[1]?.arrivalTime} on ${flightDetails.stops[1]?.arrivalDate})
+
+IMPORTANT: ${flightDetails.stops[1]?.location} is the FINAL DESTINATION. ${flightDetails.stops[0]?.location} is a transit stop, not the end goal.
+
+FOCUS: Provide transit options for the COMPLETE journey from ${flightDetails.from} through ${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location}.
 
 USER PREFERENCES:
 - Budget vs Comfort preference: ${preferences.budgetComfort}/100 (0=budget focused, 100=comfort focused)

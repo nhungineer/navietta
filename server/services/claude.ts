@@ -204,7 +204,7 @@ CRITICAL: You must respond with ONLY a valid JSON object. Do not use markdown co
 
   // Add location-specific knowledge when relevant
   const getLocationKnowledge = (destination: string): string => {
-    const dest = destination.toLowerCase();
+    const dest = destination?.toLowerCase() || '';
     
     if (dest.includes('rome') || dest.includes('fco')) {
       return `
@@ -230,7 +230,7 @@ ROME-SPECIFIC KNOWLEDGE:
     return '';
   };
 
-  const locationKnowledge = getLocationKnowledge(flightDetails.to);
+  const locationKnowledge = getLocationKnowledge(flightDetails.stops[0]?.location || '');
 
   const stopsText = flightDetails.stops.map((stop: any, index: number) => 
     `- Stop ${index + 1}: ${stop.location} at ${stop.arrivalTime} on ${stop.arrivalDate}`

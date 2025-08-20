@@ -18,6 +18,17 @@ import {
   X,
 } from "lucide-react";
 
+// Define a type for errors
+type FormErrors = {
+  from?: string;
+  stops?: { location?: string; arrivalTime?: string; arrivalDate?: string }[];
+  departureTime?: string;
+  departureDate?: string;
+  adults?: string;
+  children?: string;
+  luggageCount?: string;
+};
+
 export default function FlightDetailsPage() {
   const { navigateToStep, setFlightDetails } = useTravelContext();
   const { toast } = useToast();
@@ -43,11 +54,19 @@ export default function FlightDetailsPage() {
     ],
   });
 
+  const [errors, setErrors] = useState<FormErrors>({});
+
   const handleInputChange = (
     field: keyof FlightDetails,
     value: string | number,
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error for this field on input change
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[field as keyof FormErrors];
+      return newErrors;
+    });
   };
 
   const handleStopChange = (
@@ -61,6 +80,20 @@ export default function FlightDetailsPage() {
         i === index ? { ...stop, [field]: value } : stop
       ),
     }));
+    // Clear error for the specific stop field on input change
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      if (newErrors.stops && newErrors.stops[index]) {
+        delete newErrors.stops[index][field as keyof typeof newErrors.stops[0]];
+        if (Object.keys(newErrors.stops[index]).length === 0) {
+          delete newErrors.stops[index];
+        }
+        if (Object.keys(newErrors).length === 0) {
+          return {};
+        }
+      }
+      return newErrors;
+    });
   };
 
   // Date constraint logic for Stop 2
@@ -75,7 +108,7 @@ export default function FlightDetailsPage() {
     if (stop1Date) {
       const maxDate = getMaxDateForStop2(stop1Date);
       const minDate = stop1Date; // Same day as stop 1
-      
+
       if (newDate >= minDate && newDate <= maxDate) {
         handleStopChange(1, 'arrivalDate', newDate);
       }
@@ -85,55 +118,29 @@ export default function FlightDetailsPage() {
   // No remove stop function needed - exactly 2 stops required
 
   const handleSubmit = () => {
-    // Check if start location is filled and not just whitespace
-    if (!formData.from || formData.from.trim() === "") {
-      toast({
-        title: "Validation Error",
-        description: "Please enter a start location.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check if all stop locations are filled and not just whitespace
-    for (let i = 0; i < formData.stops.length; i++) {
-      if (!formData.stops[i].location || formData.stops[i].location.trim() === "") {
-        toast({
-          title: "Validation Error",
-          description: `Please enter a location for Stop ${i + 1}.`,
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-
-    // Check if departure date is filled
-    if (!formData.departureDate) {
-      toast({
-        title: "Validation Error",
-        description: "Please select a departure date.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check if all stop dates are filled
-    for (let i = 0; i < formData.stops.length; i++) {
-      if (!formData.stops[i].arrivalDate) {
-        toast({
-          title: "Validation Error",
-          description: `Please select an arrival date for Stop ${i + 1}.`,
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-
     try {
       const validated = flightDetailsSchema.parse(formData);
       setFlightDetails(validated);
       navigateToStep(3);
-    } catch (error) {
+    } catch (error: any) {
+      const validationErrors: FormErrors = {};
+      if (error.errors) {
+        error.errors.forEach((err: any) => {
+          const path = err.path.join('.');
+          if (path.startsWith('stops.')) {
+            const parts = path.split('.');
+            const stopIndex = parseInt(parts[1], 10);
+            const field = parts[2];
+            if (!validationErrors.stops) validationErrors.stops = [];
+            if (!validationErrors.stops[stopIndex]) validationErrors.stops[stopIndex] = {};
+            validationErrors.stops[stopIndex][field as keyof typeof validationErrors.stops[0]] = err.message;
+          } else {
+            validationErrors[path as keyof FormErrors] = err.message;
+          }
+        });
+      }
+      setErrors(validationErrors);
+
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields correctly.",
@@ -269,7 +276,7 @@ export default function FlightDetailsPage() {
               type="text"
               value={formData.from}
               onChange={(e) => handleInputChange("from", e.target.value)}
-              className="pl-10 pr-10 text-lg h-12"
+              className={`pl-10 pr-10 text-lg h-12 ${errors.from ? 'border-red-500' : ''}`}
               placeholder="Melbourne"
               data-testid="input-start-location"
             />
@@ -284,6 +291,9 @@ export default function FlightDetailsPage() {
               </button>
             )}
           </div>
+          {errors.from && (
+            <p className="text-red-500 text-sm mt-1">{errors.from}</p>
+          )}
         </div>
 
         {/* Stops Section */}
@@ -293,7 +303,7 @@ export default function FlightDetailsPage() {
               <Label className="text-lg font-medium text-textPrimary mb-3 block">
                 Stop {index + 1}
               </Label>
-              
+
               {/* Location */}
               <div className="relative mb-3">
                 <MapPin
@@ -304,7 +314,7 @@ export default function FlightDetailsPage() {
                   type="text"
                   value={stop.location}
                   onChange={(e) => handleStopChange(index, "location", e.target.value)}
-                  className="pl-10 pr-10 text-lg h-12"
+                  className={`pl-10 pr-10 text-lg h-12 ${errors.stops?.[index]?.location ? 'border-red-500' : ''}`}
                   placeholder="Rome"
                   data-testid={`input-stop-location-${index}`}
                 />
@@ -319,6 +329,9 @@ export default function FlightDetailsPage() {
                   </button>
                 )}
               </div>
+              {errors.stops?.[index]?.location && (
+                <p className="text-red-500 text-sm mt-1">{errors.stops[index].location}</p>
+              )}
 
               {/* Time and Date */}
               <div className="grid grid-cols-2 gap-3">
@@ -331,9 +344,12 @@ export default function FlightDetailsPage() {
                     type="time"
                     value={stop.arrivalTime}
                     onChange={(e) => handleStopChange(index, "arrivalTime", e.target.value)}
-                    className="pl-10 text-lg h-12"
+                    className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.arrivalTime ? 'border-red-500' : ''}`}
                     data-testid={`input-stop-time-${index}`}
                   />
+                  {errors.stops?.[index]?.arrivalTime && (
+                    <p className="text-red-500 text-sm mt-1">{errors.stops[index].arrivalTime}</p>
+                  )}
                 </div>
                 <div className="relative">
                   <Calendar
@@ -357,9 +373,12 @@ export default function FlightDetailsPage() {
                     }}
                     min={index === 1 ? formData.stops[0]?.arrivalDate : undefined}
                     max={index === 1 ? getMaxDateForStop2(formData.stops[0]?.arrivalDate || "") : undefined}
-                    className="pl-10 text-lg h-12"
+                    className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.arrivalDate ? 'border-red-500' : ''}`}
                     data-testid={`input-stop-date-${index}`}
                   />
+                  {errors.stops?.[index]?.arrivalDate && (
+                    <p className="text-red-500 text-sm mt-1">{errors.stops[index].arrivalDate}</p>
+                  )}
                 </div>
               </div>
             </div>

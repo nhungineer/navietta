@@ -232,7 +232,7 @@ export default function FlightDetailsPage() {
             {formData.from && (
               <button
                 type="button"
-                onClick={() => handleInputChange("from", "")}
+                onClick={() => handleInputChange("from", " ")}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 data-testid="button-clear-start-location"
               >
@@ -267,7 +267,7 @@ export default function FlightDetailsPage() {
                 {stop.location && (
                   <button
                     type="button"
-                    onClick={() => handleStopChange(index, "location", "")}
+                    onClick={() => handleStopChange(index, "location", " ")}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     data-testid={`button-clear-stop-location-${index}`}
                   >

@@ -130,7 +130,7 @@ export default function FlightDetailsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-10 h-10 p-0 bg-gray-400 text-white hover:bg-gray-500 rounded-l-md rounded-r-none"
+                className="w-10 h-10 p-0 bg-gray-300 text-gray-600 hover:bg-primary hover:text-white rounded-l-md rounded-r-none"
                 onClick={() => updateTravelers("adults", false)}
                 data-testid="button-decrease-adults"
               >
@@ -142,7 +142,7 @@ export default function FlightDetailsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-10 h-10 p-0 bg-gray-400 text-white hover:bg-gray-500 rounded-r-md rounded-l-none"
+                className="w-10 h-10 p-0 bg-gray-300 text-gray-600 hover:bg-primary hover:text-white rounded-r-md rounded-l-none"
                 onClick={() => updateTravelers("adults", true)}
                 data-testid="button-increase-adults"
               >
@@ -159,7 +159,7 @@ export default function FlightDetailsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-10 h-10 p-0 bg-gray-400 text-white hover:bg-gray-500 rounded-l-md rounded-r-none"
+                className="w-10 h-10 p-0 bg-gray-300 text-gray-600 hover:bg-primary hover:text-white rounded-l-md rounded-r-none"
                 onClick={() => updateTravelers("children", false)}
                 data-testid="button-decrease-children"
               >
@@ -171,7 +171,7 @@ export default function FlightDetailsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-10 h-10 p-0 bg-gray-400 text-white hover:bg-gray-500 rounded-r-md rounded-l-none"
+                className="w-10 h-10 p-0 bg-gray-300 text-gray-600 hover:bg-primary hover:text-white rounded-r-md rounded-l-none"
                 onClick={() => updateTravelers("children", true)}
                 data-testid="button-increase-children"
               >
@@ -188,7 +188,7 @@ export default function FlightDetailsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-10 h-10 p-0 bg-gray-400 text-white hover:bg-gray-500 rounded-l-md rounded-r-none"
+                className="w-10 h-10 p-0 bg-gray-300 text-gray-600 hover:bg-primary hover:text-white rounded-l-md rounded-r-none"
                 onClick={() => updateLuggage(false)}
                 data-testid="button-decrease-luggage"
               >
@@ -200,7 +200,7 @@ export default function FlightDetailsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-10 h-10 p-0 bg-gray-400 text-white hover:bg-gray-500 rounded-r-md rounded-l-none"
+                className="w-10 h-10 p-0 bg-gray-300 text-gray-600 hover:bg-primary hover:text-white rounded-l-md rounded-r-none"
                 onClick={() => updateLuggage(true)}
                 data-testid="button-increase-luggage"
               >

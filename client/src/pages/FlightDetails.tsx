@@ -121,7 +121,7 @@ export default function FlightDetailsPage() {
     const validationErrors: FormErrors = {};
 
     // Check if start location is filled and not just whitespace
-    if (!formData.from || formData.from.trim() === "" || formData.from.trim() === " ") {
+    if (!formData.from || formData.from.trim() === "") {
       validationErrors.from = "Start location is required";
     }
 
@@ -133,7 +133,7 @@ export default function FlightDetailsPage() {
     // Check if all stop locations and dates are filled
     if (!validationErrors.stops) validationErrors.stops = [];
     for (let i = 0; i < formData.stops.length; i++) {
-      if (!formData.stops[i].location || formData.stops[i].location.trim() === "" || formData.stops[i].location.trim() === " ") {
+      if (!formData.stops[i].location || formData.stops[i].location.trim() === "") {
         if (!validationErrors.stops[i]) validationErrors.stops[i] = {};
         validationErrors.stops[i].location = "Location is required";
       }
@@ -323,7 +323,7 @@ export default function FlightDetailsPage() {
             {formData.from && (
               <button
                 type="button"
-                onClick={() => handleInputChange("from", " ")}
+                onClick={() => handleInputChange("from", "")}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 data-testid="button-clear-start-location"
               >
@@ -384,7 +384,7 @@ export default function FlightDetailsPage() {
                 {stop.location && (
                   <button
                     type="button"
-                    onClick={() => handleStopChange(index, "location", " ")}
+                    onClick={() => handleStopChange(index, "location", "")}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     data-testid={`button-clear-stop-location-${index}`}
                   >

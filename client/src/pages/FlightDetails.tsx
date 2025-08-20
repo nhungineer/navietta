@@ -15,6 +15,7 @@ import {
   Calendar,
   Users,
   Luggage,
+  X,
 } from "lucide-react";
 
 export default function FlightDetailsPage() {
@@ -224,10 +225,20 @@ export default function FlightDetailsPage() {
               type="text"
               value={formData.from}
               onChange={(e) => handleInputChange("from", e.target.value)}
-              className="pl-10 text-lg h-12"
+              className="pl-10 pr-10 text-lg h-12"
               placeholder="Melbourne"
               data-testid="input-start-location"
             />
+            {formData.from && (
+              <button
+                type="button"
+                onClick={() => handleInputChange("from", "")}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                data-testid="button-clear-start-location"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -249,10 +260,20 @@ export default function FlightDetailsPage() {
                   type="text"
                   value={stop.location}
                   onChange={(e) => handleStopChange(index, "location", e.target.value)}
-                  className="pl-10 text-lg h-12"
+                  className="pl-10 pr-10 text-lg h-12"
                   placeholder="Rome"
                   data-testid={`input-stop-location-${index}`}
                 />
+                {stop.location && (
+                  <button
+                    type="button"
+                    onClick={() => handleStopChange(index, "location", "")}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    data-testid={`button-clear-stop-location-${index}`}
+                  >
+                    <X size={16} />
+                  </button>
+                )}
               </div>
 
               {/* Time and Date */}

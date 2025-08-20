@@ -107,6 +107,28 @@ export default function FlightDetailsPage() {
       }
     }
 
+    // Check if departure date is filled
+    if (!formData.departureDate) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a departure date.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if all stop dates are filled
+    for (let i = 0; i < formData.stops.length; i++) {
+      if (!formData.stops[i].arrivalDate) {
+        toast({
+          title: "Validation Error",
+          description: `Please select an arrival date for Stop ${i + 1}.`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     try {
       const validated = flightDetailsSchema.parse(formData);
       setFlightDetails(validated);

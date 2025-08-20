@@ -85,6 +85,28 @@ export default function FlightDetailsPage() {
   // No remove stop function needed - exactly 2 stops required
 
   const handleSubmit = () => {
+    // Check if start location is filled and not just whitespace
+    if (!formData.from || formData.from.trim() === "") {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a start location.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if all stop locations are filled and not just whitespace
+    for (let i = 0; i < formData.stops.length; i++) {
+      if (!formData.stops[i].location || formData.stops[i].location.trim() === "") {
+        toast({
+          title: "Validation Error",
+          description: `Please enter a location for Stop ${i + 1}.`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     try {
       const validated = flightDetailsSchema.parse(formData);
       setFlightDetails(validated);

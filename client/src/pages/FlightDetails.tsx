@@ -217,7 +217,7 @@ export default function FlightDetailsPage() {
           </Label>
           <div className="relative">
             <MapPin
-              className="absolute left-3 top-3 text-gray-400"
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
               size={16}
             />
             <Input
@@ -242,7 +242,7 @@ export default function FlightDetailsPage() {
               {/* Location */}
               <div className="relative mb-3">
                 <MapPin
-                  className="absolute left-3 top-3 text-gray-400"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                   size={16}
                 />
                 <Input
@@ -259,7 +259,7 @@ export default function FlightDetailsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="relative">
                   <Clock
-                    className="absolute left-3 top-3 text-gray-400"
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                     size={16}
                   />
                   <Input
@@ -272,7 +272,7 @@ export default function FlightDetailsPage() {
                 </div>
                 <div className="relative">
                   <Calendar
-                    className="absolute left-3 top-3 text-gray-400"
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                     size={16}
                   />
                   <Input

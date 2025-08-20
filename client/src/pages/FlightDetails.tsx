@@ -118,12 +118,52 @@ export default function FlightDetailsPage() {
   // No remove stop function needed - exactly 2 stops required
 
   const handleSubmit = () => {
+    const validationErrors: FormErrors = {};
+
+    // Check if start location is filled and not just whitespace
+    if (!formData.from || formData.from.trim() === "" || formData.from.trim() === " ") {
+      validationErrors.from = "Start location is required";
+    }
+
+    // Check if departure date is filled
+    if (!formData.departureDate) {
+      validationErrors.departureDate = "Departure date is required";
+    }
+
+    // Check if all stop locations and dates are filled
+    if (!validationErrors.stops) validationErrors.stops = [];
+    for (let i = 0; i < formData.stops.length; i++) {
+      if (!formData.stops[i].location || formData.stops[i].location.trim() === "" || formData.stops[i].location.trim() === " ") {
+        if (!validationErrors.stops[i]) validationErrors.stops[i] = {};
+        validationErrors.stops[i].location = "Location is required";
+      }
+      
+      if (!formData.stops[i].arrivalDate) {
+        if (!validationErrors.stops[i]) validationErrors.stops[i] = {};
+        validationErrors.stops[i].arrivalDate = "Arrival date is required";
+      }
+    }
+
+    // If there are validation errors, set them and show toast
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields correctly.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Clear any existing errors
+    setErrors({});
+
     try {
       const validated = flightDetailsSchema.parse(formData);
       setFlightDetails(validated);
       navigateToStep(3);
     } catch (error: any) {
-      const validationErrors: FormErrors = {};
+      const zodValidationErrors: FormErrors = {};
       if (error.errors) {
         error.errors.forEach((err: any) => {
           const path = err.path.join('.');
@@ -131,15 +171,15 @@ export default function FlightDetailsPage() {
             const parts = path.split('.');
             const stopIndex = parseInt(parts[1], 10);
             const field = parts[2];
-            if (!validationErrors.stops) validationErrors.stops = [];
-            if (!validationErrors.stops[stopIndex]) validationErrors.stops[stopIndex] = {};
-            validationErrors.stops[stopIndex][field as keyof typeof validationErrors.stops[0]] = err.message;
+            if (!zodValidationErrors.stops) zodValidationErrors.stops = [];
+            if (!zodValidationErrors.stops[stopIndex]) zodValidationErrors.stops[stopIndex] = {};
+            zodValidationErrors.stops[stopIndex][field as keyof typeof zodValidationErrors.stops[0]] = err.message;
           } else {
-            validationErrors[path as keyof FormErrors] = err.message;
+            zodValidationErrors[path as keyof FormErrors] = err.message;
           }
         });
       }
-      setErrors(validationErrors);
+      setErrors(zodValidationErrors);
 
       toast({
         title: "Validation Error",
@@ -293,6 +333,29 @@ export default function FlightDetailsPage() {
           </div>
           {errors.from && (
             <p className="text-red-500 text-sm mt-1">{errors.from}</p>
+          )}
+        </div>
+
+        {/* Departure Date */}
+        <div className="mb-6">
+          <Label className="text-lg font-medium text-textPrimary mb-3 block">
+            Departure Date
+          </Label>
+          <div className="relative">
+            <Calendar
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={16}
+            />
+            <Input
+              type="date"
+              value={formData.departureDate}
+              onChange={(e) => handleInputChange("departureDate", e.target.value)}
+              className={`pl-10 text-lg h-12 ${errors.departureDate ? 'border-red-500' : ''}`}
+              data-testid="input-departure-date"
+            />
+          </div>
+          {errors.departureDate && (
+            <p className="text-red-500 text-sm mt-1">{errors.departureDate}</p>
           )}
         </div>
 

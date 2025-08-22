@@ -27,11 +27,6 @@ export function ConfidenceField({
   const isExtracted = extractedField?.source === 'extracted';
   const confidence = extractedField?.confidence || 0;
   
-  // Debug confidence indicators
-  if (extractedField && confidence > 0) {
-    console.log('ConfidenceField debug:', { label, value, isExtracted, confidence, extractedField });
-  }
-  
   // Determine confidence level styling
   const getConfidenceStyle = () => {
     if (!isExtracted) return '';

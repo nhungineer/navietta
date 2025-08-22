@@ -7,6 +7,7 @@ import { flightDetailsSchema, preferencesSchema } from "@shared/schema";
 import { z } from "zod";
 import Anthropic from '@anthropic-ai/sdk';
 import multer from 'multer';
+// pdf-parse will be imported dynamically to avoid startup issues
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || "",
@@ -16,88 +17,7 @@ const anthropic = new Anthropic({
 const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
 // </important_do_not_delete>
 
-// Generate mock PDF text based on the sample travel documents provided
-function generateMockPdfText(filename: string): string {
-  // Use actual text from the sample travel documents for realistic testing
-  if (filename.includes('Berlin') || filename.includes('BER') || filename.includes('Prague')) {
-    return `
-      TICKET eTiket
-      Praha hl.n. @ Děčín hl.n.
-      21/12 12:18 @ 22/12 24:00
-      Nhung Nguyen
-      Osob: 3
-      1 x OneTicket Jednosměrná
-      1 x OneTicket Jednosm. zvýhodněná (Osoba 65+)
-      1 x OneTicket Jednosm. zvýhodněná (Dítě 6-15)
-      Cena 545 Kč
-      Datum: 21.12.2024
-      Počet osob: 3
-    `;
-  }
-  
-  if (filename.includes('Seville') || filename.includes('Faro')) {
-    return `
-      ALSA INTERNACIONAL S.L.U.
-      12 November 2024
-      15:00 SEVILLE (Plaza de Armas) 17:00 FARO
-      Bus 3455 Seat 20
-      Nguyen, Ari
-      Niños 4-12 años
-      Total: 20.00€
-      Line: Algeciras-Sevilla-Lisboa
-    `;
-  }
-  
-  if (filename.includes('Etihad') || filename.includes('Rome')) {
-    return `
-      Boarding pass
-      Mast Nguyen / Ari (Child passenger - MSTR)
-      15:15 MEL AUH 23:25
-      Melbourne International Airport Zayed International Airport
-      Flight EY463 Date 30 September 2024 Economy
-      Seat 41K
-      Reference O72ETA
-      CHD - Child passenger
-      
-      Flight EY85 01 October 2024
-      02:25 AUH FCO 06:35
-      Abu Dhabi Zayed International Airport Rome Fiumicino International Airport
-      Seat 42D
-      1 Child passenger
-    `;
-  }
-  
-  if (filename.includes('Lufthansa') || filename.includes('Frankfurt')) {
-    return `
-      Boarding pass for your flight | FRA to BER on November 27, 2024
-      NGUYEN, ARI
-      Economy
-      27NOV24 LH 194
-      FRA Frankfurt BER Berlin/Brandenburg
-      17:45 18:55
-      Terminal 1 Boarding 17:15 Gate closes 17:30
-      Seat 23F Boarding Group GROUP 3
-      Booking code MTN3PQ
-    `;
-  }
-  
-  // Default travel document template
-  return `
-    E-Ticket, Itinerary, Receipts and Tax Invoice
-    TICKET NUMBER 7952112988374
-    GUEST NAME NGUYEN/ARI MSTR (Child passenger)
-    NAME REF CHD
-    ISSUE DATE 06 AUG 2025
-    FLIGHT VA 745
-    MELBOURNE, AUSTRALIA (MEL) Melbourne International Airport GOLD COAST, AUSTRALIA (OOL) Gold Coast Airport
-    TERMINAL 3 TERMINAL 1
-    24/Sep/2025 2:00pm 24/Sep/2025 4:05pm
-    Economy Class
-    Fare AUD 115.62
-    Total/Transaction AUD 124.20
-    1 Child passenger
-  `;
-}
+
 
 const generateRecommendationsSchema = z.object({
   flightDetails: flightDetailsSchema,
@@ -246,18 +166,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Processing PDF upload: ${req.file.originalname}, size: ${req.file.size} bytes`);
       
-      // For now, use the file name to simulate different travel document types
-      // In a real implementation, you would use a PDF parsing library
-      const mockPdfText = generateMockPdfText(req.file.originalname);
+      // Extract text from the actual PDF file
+      const pdfBuffer = req.file.buffer;
+      console.log(`Extracting text from actual PDF file`);
       
-      console.log(`Using mock text extraction for PDF processing`);
-      
+      // Extract text from PDF buffer using dynamic import
+      let pdfText;
+      try {
+        const pdfParse = (await import('pdf-parse')).default;
+        const pdfData = await pdfParse(pdfBuffer);
+        pdfText = pdfData.text;
+        console.log(`Extracted ${pdfText.length} characters from PDF`);
+      } catch (pdfError) {
+        console.error('PDF parsing error:', pdfError);
+        return res.status(400).json({ 
+          message: 'Failed to read PDF file. Please ensure it\'s a valid PDF document.',
+          fallback: true
+        });
+      }
+
       // Extract travel data using Claude AI
       let extractedData;
       if (process.env.ANTHROPIC_API_KEY) {
         try {
           console.log('Using Claude API for PDF extraction');
-          extractedData = await extractTravelDataFromPDF(mockPdfText);
+          extractedData = await extractTravelDataFromPDF(pdfText);
           console.log('Claude PDF extraction completed successfully');
         } catch (error) {
           console.error('Claude API error for PDF extraction:', error);

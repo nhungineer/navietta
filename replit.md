@@ -2,8 +2,20 @@
 
 Navietta is a travel transit application that helps users find optimal layover recommendations between flights. The application uses AI (Anthropic Claude 4.0 Sonnet) to analyze flight details and user preferences to generate personalized transit options with transparent, step-by-step reasoning. It follows a 4-screen wizard flow where users input flight information, set preferences, and receive AI-generated recommendations with detailed timelines and trade-off analysis.
 
-## Recent Changes (August 18, 2025)
+## Recent Changes (August 22, 2025)
 
+### PDF Document Extraction System
+- ✅ Implemented real PDF text extraction using pdf-parse library
+- ✅ Replaced mock data system with actual document parsing
+- ✅ Fixed extraction accuracy issues - now reads actual PDF content instead of filename-based mock data
+- ✅ Enhanced Claude AI prompts for improved location name formatting (full names with airport codes)
+- ✅ Improved child passenger detection from boarding pass titles
+- ✅ Fixed UI layout issues with overlapping time/date input fields using Flexbox
+- ✅ Cleaned up redundant field labels and improved form styling
+- ✅ Fixed luggage counter to properly handle AI-extracted data
+- ✅ Added confidence indicators for AI-extracted fields
+
+### Previous Architecture (August 18, 2025)
 - ✅ Successfully completed schema migration from single-stop to multi-stop structure
 - ✅ Fixed all TypeScript errors across mockClaude.ts, claude.ts, and Preferences.tsx
 - ✅ Constrained trip planning to exactly 2 stops (Start → Stop 1 → Stop 2)

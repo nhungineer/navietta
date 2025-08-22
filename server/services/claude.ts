@@ -500,7 +500,7 @@ ${pdfText}`
   }
 }
 
-export async function extractTravelDataFromPDFVision(pdfBase64: string, filename: string): Promise<PDFExtraction> {
+export async function extractTravelDataFromPDFDirect(pdfBase64: string, filename: string): Promise<PDFExtraction> {
   const systemPrompt = `You are a travel document analyzer that extracts structured travel information from travel documents. Your task is to extract travel details while strictly protecting privacy.
 
 ## CRITICAL PRIVACY REQUIREMENTS:
@@ -589,8 +589,12 @@ Return ONLY valid JSON with this exact structure. Omit fields if not found or co
               text: `Extract travel information from this PDF document: ${filename}. Follow the privacy requirements strictly and return only the JSON structure with travel logistics.`
             },
             {
-              type: "text", 
-              text: "PDF content will be extracted using PDF.js and processed as text."
+              type: "document",
+              source: {
+                type: "base64",
+                media_type: "application/pdf",
+                data: pdfBase64
+              }
             }
           ]
         }

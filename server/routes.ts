@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateTravelRecommendations, generateFollowUpResponse, extractTravelDataFromPDF, extractTravelDataFromPDFVision } from "./services/claude";
+import { generateTravelRecommendations, generateFollowUpResponse, extractTravelDataFromPDFDirect } from "./services/claude";
 import { generateMockTravelRecommendations } from "./services/mockClaude";
 import { flightDetailsSchema, preferencesSchema } from "@shared/schema";
 import { z } from "zod";
@@ -168,40 +168,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pdfBuffer = req.file.buffer;
       console.log(`Extracting text from actual PDF file`);
       
-      // Extract text from PDF using PDF.js
-      let pdfText;
-      try {
-        const pdfjs = await import('pdfjs-dist');
-        const loadingTask = pdfjs.getDocument({ data: pdfBuffer });
-        const pdf = await loadingTask.promise;
-        
-        let fullText = '';
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          const pageText = content.items
-            .filter((item: any) => 'str' in item)
-            .map((item: any) => item.str)
-            .join(' ');
-          fullText += pageText + ' ';
-        }
-        
-        pdfText = fullText.trim();
-        console.log(`Extracted ${pdfText.length} characters from PDF using PDF.js`);
-      } catch (pdfError) {
-        console.error('PDF.js parsing error:', pdfError);
-        return res.status(400).json({ 
-          message: 'Failed to read PDF file. Please ensure it\'s a valid PDF document.',
-          fallback: true
-        });
-      }
+      // Use Claude's native PDF processing capability
+      const pdfBase64 = pdfBuffer.toString('base64');
+      
+      console.log(`Sending PDF directly to Claude for processing: ${req.file.originalname}`);
 
       // Extract travel data using Claude AI
       let extractedData;
       if (process.env.ANTHROPIC_API_KEY) {
         try {
           console.log('Using Claude API for PDF extraction');
-          extractedData = await extractTravelDataFromPDF(pdfText);
+          extractedData = await extractTravelDataFromPDFDirect(pdfBase64, req.file.originalname);
           console.log('Claude PDF extraction completed successfully');
         } catch (error) {
           console.error('Claude API error for PDF extraction:', error);

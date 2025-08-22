@@ -10,7 +10,16 @@ interface UserContextSummaryProps {
 
 export function UserContextSummary({ userContext, flightDetails, preferences }: UserContextSummaryProps) {
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    if (!dateStr) return 'Invalid Date';
+    
+    // Handle ISO date strings (YYYY-MM-DD format)
+    const date = new Date(dateStr + 'T00:00:00');
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date';
+    }
+    
     return date.toLocaleDateString('en-GB', { 
       day: '2-digit', 
       month: 'short', 

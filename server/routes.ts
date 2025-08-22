@@ -25,8 +25,9 @@ function generateSmartExtraction(filename: string, fileSize: number): string {
   // Extract potential airport codes (3-letter codes in uppercase)
   const airportCodes = filename.match(/[A-Z]{3}/g) || [];
   
-  // Extract potential dates
-  const datePatterns = filename.match(/\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|\d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}/g) || [];
+  // Extract potential dates and times
+  const datePatterns = filename.match(/\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|\d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}|september|sep|october|oct|november|nov/gi) || [];
+  const timePatterns = filename.match(/\d{1,2}:\d{2}|\d{1,2}\.\d{2}|departure|arrival/gi) || [];
   
   // Determine document type
   let docType = "travel document";
@@ -38,14 +39,18 @@ function generateSmartExtraction(filename: string, fileSize: number): string {
     docType = "travel receipt";
   }
   
-  // Detect locations from filename
+  // Detect locations from filename with more comprehensive patterns
   let routeInfo = "";
   if (lowerFilename.includes("tia") && lowerFilename.includes("ber")) {
     routeInfo = "Route appears to be: Tirana (TIA) → Berlin (BER)";
   } else if (lowerFilename.includes("mel") && lowerFilename.includes("fco")) {
-    routeInfo = "Route appears to be: Melbourne (MEL) → Rome (FCO)";
+    routeInfo = "Route appears to be: Melbourne (MEL) → Rome (FCO) - likely connecting via Abu Dhabi";
+  } else if (lowerFilename.includes("mel") && lowerFilename.includes("rome")) {
+    routeInfo = "Route appears to be: Melbourne → Rome - check for connecting flights via Abu Dhabi";
   } else if (lowerFilename.includes("fra") && lowerFilename.includes("ber")) {
     routeInfo = "Route appears to be: Frankfurt (FRA) → Berlin (BER)";
+  } else if (lowerFilename.includes("gold") && lowerFilename.includes("coast")) {
+    routeInfo = "Route appears to involve Gold Coast destination";
   }
   
   // Detect airline or transport provider
@@ -66,14 +71,29 @@ ${provider ? `- Provider: ${provider}` : ""}
 ${routeInfo ? `- ${routeInfo}` : ""}
 ${airportCodes.length > 0 ? `- Detected Airport Codes: ${airportCodes.join(", ")}` : ""}
 ${datePatterns.length > 0 ? `- Detected Date Patterns: ${datePatterns.join(", ")}` : ""}
+${timePatterns.length > 0 ? `- Detected Time Patterns: ${timePatterns.join(", ")}` : ""}
 
-Please analyze this travel document and extract structured travel information. Focus on:
-1. Route information (departure and arrival locations)
-2. Travel dates and times
-3. Passenger information (number of adults, children)
-4. Any additional travel details
+Please analyze this travel document and extract ALL available travel information. Extract from the filename patterns and infer standard travel details:
 
-Use standard airport/city naming conventions with codes in parentheses (e.g., "Melbourne International Airport (MEL)").`;
+CRITICAL REQUIREMENTS:
+1. Extract COMPLETE route information including ALL stops/connections
+2. For multi-leg flights (e.g., Melbourne → Abu Dhabi → Rome), extract ALL segments
+3. Extract precise dates and times for departures/arrivals
+4. Extract passenger counts (adults, children, infants)
+5. Extract flight numbers, airlines, terminal information
+6. Extract any baggage/luggage allowances
+
+NAMING CONVENTIONS:
+- Use full airport names with IATA codes: "Melbourne International Airport (MEL)"
+- For connecting flights, identify ALL intermediate stops
+- Include specific terminal information when available
+
+CONFIDENCE SCORING:
+- Rate confidence 10-100 based on clarity of information
+- Lower confidence for inferred vs. explicit data
+- Higher confidence for clear airport codes and standard formats
+
+Return detailed structured data for ALL extracted fields.`;
 }
 
 const generateRecommendationsSchema = z.object({

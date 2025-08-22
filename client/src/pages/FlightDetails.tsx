@@ -378,7 +378,7 @@ export default function FlightDetailsPage() {
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-textPrimary mb-3">Start</h2>
           <ConfidenceField
-            label=""
+            label="Departure Location"
             value={formData.from}
             onChange={(value) => handleInputChange("from", value)}
             extractedField={extractedData?.from}
@@ -422,7 +422,7 @@ export default function FlightDetailsPage() {
               {/* Location */}
               <div className="mb-4">
                 <ConfidenceField
-                  label=""
+                  label={`Stop ${index + 1} Location`}
                   value={stop.location}
                   onChange={(value) => handleStopChange(index, "location", value)}
                   extractedField={extractedData?.stops?.[index]?.location}

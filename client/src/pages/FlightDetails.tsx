@@ -34,8 +34,8 @@ export default function FlightDetailsPage() {
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<FlightDetails>({
-    from: "Melbourne",
-    departureTime: "07:00",
+    from: "Rome",
+    departureTime: "08:00",
     departureDate: "2025-08-22",
     adults: 2,
     children: 0,

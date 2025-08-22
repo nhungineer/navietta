@@ -37,21 +37,31 @@ export default function PreferencesPage() {
     }
   };
 
-  const formatTime = (time: string) => {
-    return new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
+  const formatTime = (timeStr: string) => {
+    if (!timeStr) return 'Invalid Time';
+    try {
+      const [hours, minutes] = timeStr.split(':');
+      const hour24 = parseInt(hours, 10);
+      const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+      const ampm = hour24 >= 12 ? 'pm' : 'am';
+      return `${hour12}:${minutes}${ampm}`;
+    } catch {
+      return 'Invalid Time';
+    }
   };
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return 'Invalid Date';
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return 'Invalid Date';
+      return date.toLocaleDateString('en-GB', { 
+        day: 'numeric', 
+        month: 'short'
+      });
+    } catch {
+      return 'Invalid Date';
+    }
   };
 
   return (
@@ -69,12 +79,12 @@ export default function PreferencesPage() {
                 ` and ${flightDetails.children} child${flightDetails.children > 1 ? "ren" : ""}`}{" "}
               travelling from{" "}
               <strong>
-                {flightDetails.from} to {flightDetails.to}
+                {flightDetails.from} to {flightDetails.stops[1]?.location}
               </strong>
               , arriving at{" "}
               <strong>
-                {formatTime(flightDetails.arrivalTime)} on{" "}
-                {formatDate(flightDetails.arrivalDate)}
+                {formatTime(flightDetails.stops[1]?.arrivalTime)} on{" "}
+                {formatDate(flightDetails.stops[1]?.arrivalDate)}
               </strong>
               . Your next stop is <strong>{flightDetails.stops[0]?.location}</strong> at{" "}
               <strong>{formatTime(flightDetails.stops[0]?.arrivalTime)}</strong>. What

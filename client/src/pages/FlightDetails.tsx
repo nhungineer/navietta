@@ -37,8 +37,11 @@ export default function FlightDetailsPage() {
 
   const [formData, setFormData] = useState<FlightDetails>({
     from: "",
+    to: "",
     departureTime: "08:00",
+    arrivalTime: "18:00",
     departureDate: "2025-08-22",
+    arrivalDate: "2025-08-23",
     adults: 2,
     children: 0,
     luggageCount: 2,
@@ -87,8 +90,11 @@ export default function FlightDetailsPage() {
     if (extractedData) {
       const newFormData: FlightDetails = {
         from: applyExtractedStringField(extractedData.from, ''),
+        to: applyExtractedStringField(extractedData.stops?.[1]?.location, ''),
         departureTime: applyExtractedStringField(extractedData.departureTime, '08:00'),
+        arrivalTime: applyExtractedStringField(extractedData.stops?.[1]?.arrivalTime, '18:00'),
         departureDate: applyExtractedStringField(extractedData.departureDate, '2025-08-22'),
+        arrivalDate: applyExtractedStringField(extractedData.stops?.[1]?.arrivalDate, '2025-08-23'),
         adults: applyExtractedNumberField(extractedData.adults, 2),
         children: applyExtractedNumberField(extractedData.children, 0),
         luggageCount: applyExtractedNumberField(extractedData.luggageCount, 2),

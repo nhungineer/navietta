@@ -374,8 +374,8 @@ IMPORTANT TIME FORMAT: Use ONLY start times in HH:MM format (e.g., "19:15"), NOT
   }
 }
 
-export async function extractTravelDataFromPDF(pdfBase64: string): Promise<PDFExtraction> {
-  const systemPrompt = `You are a travel document analyzer that extracts structured travel information from PDFs. Your task is to extract travel details while strictly protecting privacy.
+export async function extractTravelDataFromPDF(pdfText: string): Promise<PDFExtraction> {
+  const systemPrompt = `You are a travel document analyzer that extracts structured travel information from travel documents. Your task is to extract travel details while strictly protecting privacy.
 
 ## CRITICAL PRIVACY REQUIREMENTS:
 - DO NOT extract, store, or return any PII including: names, passport numbers, ID numbers, credit card details, date of birth, phone numbers, email addresses, addresses
@@ -430,7 +430,7 @@ Return ONLY valid JSON with this exact structure. Omit fields if not found or co
 }`;
 
   try {
-    console.log('Extracting travel data from PDF using Claude API...');
+    console.log('Extracting travel data from PDF text using Claude API...');
     
     const response = await anthropic.messages.create({
       model: DEFAULT_MODEL_STR,
@@ -439,20 +439,10 @@ Return ONLY valid JSON with this exact structure. Omit fields if not found or co
       messages: [
         {
           role: "user",
-          content: [
-            {
-              type: "text",
-              text: "Extract travel information from this travel document PDF. Follow the privacy requirements strictly and return only the JSON structure with travel logistics."
-            },
-            {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: "application/pdf",
-                data: pdfBase64
-              }
-            }
-          ]
+          content: `Extract travel information from this travel document text. Follow the privacy requirements strictly and return only the JSON structure with travel logistics.
+
+Travel Document Text:
+${pdfText}`
         }
       ]
     });

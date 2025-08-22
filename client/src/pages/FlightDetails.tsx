@@ -34,7 +34,7 @@ export default function FlightDetailsPage() {
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<FlightDetails>({
-    from: "Rome",
+    from: "",
     departureTime: "08:00",
     departureDate: "2025-08-22",
     adults: 2,
@@ -42,12 +42,12 @@ export default function FlightDetailsPage() {
     luggageCount: 2,
     stops: [
       {
-        location: "Naples",
+        location: "",
         arrivalTime: "15:30",
         arrivalDate: "2025-08-23",
       },
       {
-        location: "Amsterdam",
+        location: "",
         arrivalTime: "18:00",
         arrivalDate: "2025-08-23",
       },

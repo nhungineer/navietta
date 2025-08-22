@@ -386,22 +386,40 @@ export async function extractTravelDataFromPDF(pdfText: string): Promise<PDFExtr
 Extract these travel logistics with confidence scores (0-100):
 
 1. **Departure Information:**
-   - from: Starting location (city, airport code, or transport hub)
+   - from: Starting location in format "Full Airport/City Name (CODE)" e.g., "Melbourne International Airport (MEL)" or "Paris Charles de Gaulle Airport (CDG)"
    - departureDate: Departure date (YYYY-MM-DD format)
    - departureTime: Departure time (HH:MM format, 24-hour)
 
-2. **Traveler Counts:**
-   - adults: Number of adult travelers
-   - children: Number of child travelers  
-   - luggageCount: Number of checked bags/luggage pieces
+2. **Traveler Counts (CRITICAL - Analyze passenger titles and context):**
+   - adults: Number of adult travelers (look for "MR", "MRS", "MS", adult names without child indicators)
+   - children: Number of child travelers (look for "MSTR", "Master", child age indicators like "4-12 años", "CHD", titles indicating minors)
+   - luggageCount: Number of checked bags/luggage pieces mentioned
 
 3. **Journey Stops (maximum 2):**
-   - stops[0].location: First destination
+   - stops[0].location: First destination in format "Full Airport/City Name (CODE)"
    - stops[0].arrivalTime: Arrival time (HH:MM, 24-hour)
    - stops[0].arrivalDate: Arrival date (YYYY-MM-DD)
-   - stops[1].location: Final destination  
+   - stops[1].location: Final destination in format "Full Airport/City Name (CODE)"
    - stops[1].arrivalTime: Final arrival time
    - stops[1].arrivalDate: Final arrival date
+
+## LOCATION NAME FORMATTING:
+Always provide full location names with airport codes in parentheses:
+- MEL → "Melbourne International Airport (MEL)"
+- AUH → "Abu Dhabi Zayed International Airport (AUH)"
+- FCO → "Rome Fiumicino International Airport (FCO)"
+- BER → "Berlin Brandenburg Airport (BER)"
+- FRA → "Frankfurt Airport (FRA)"
+- CDG → "Paris Charles de Gaulle Airport (CDG)"
+- LHR → "London Heathrow Airport (LHR)"
+
+## PASSENGER TYPE DETECTION:
+Pay close attention to passenger classifications:
+- "MSTR" or "Master" = Child passenger
+- "CHD" = Child
+- Age indicators (e.g., "4-12 años", "6-14 Jahre") = Child
+- "MR", "MRS", "MS" without age restrictions = Adult
+- Names with "Mast" prefix typically indicate children
 
 ## CONFIDENCE SCORING:
 - 90-100: Explicitly stated information

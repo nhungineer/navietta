@@ -51,17 +51,19 @@ function generateMockPdfText(filename: string): string {
   if (filename.includes('Etihad') || filename.includes('Rome')) {
     return `
       Boarding pass
-      Mast Nguyen / Ari
+      Mast Nguyen / Ari (Child passenger - MSTR)
       15:15 MEL AUH 23:25
-      Melbourne Airport Zayed International
-      Flight EY463 Date 30 September Economy
+      Melbourne International Airport Zayed International Airport
+      Flight EY463 Date 30 September 2024 Economy
       Seat 41K
       Reference O72ETA
+      CHD - Child passenger
       
-      Flight EY85 01 October
+      Flight EY85 01 October 2024
       02:25 AUH FCO 06:35
-      Zayed International Rome Fiumicino
+      Abu Dhabi Zayed International Airport Rome Fiumicino International Airport
       Seat 42D
+      1 Child passenger
     `;
   }
   
@@ -83,15 +85,17 @@ function generateMockPdfText(filename: string): string {
   return `
     E-Ticket, Itinerary, Receipts and Tax Invoice
     TICKET NUMBER 7952112988374
-    GUEST NAME NGUYEN/ARI MSTR
+    GUEST NAME NGUYEN/ARI MSTR (Child passenger)
+    NAME REF CHD
     ISSUE DATE 06 AUG 2025
     FLIGHT VA 745
-    MELBOURNE, AUSTRALIA (MEL) GOLD COAST, AUSTRALIA (OOL)
+    MELBOURNE, AUSTRALIA (MEL) Melbourne International Airport GOLD COAST, AUSTRALIA (OOL) Gold Coast Airport
     TERMINAL 3 TERMINAL 1
     24/Sep/2025 2:00pm 24/Sep/2025 4:05pm
     Economy Class
     Fare AUD 115.62
     Total/Transaction AUD 124.20
+    1 Child passenger
   `;
 }
 

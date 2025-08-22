@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { useLocation } from 'wouter';
-import type { FlightDetails, Preferences } from '@shared/schema';
+import type { FlightDetails, Preferences, PDFExtraction } from '@shared/schema';
 
 interface TravelContextType {
   currentStep: number;
@@ -12,6 +12,9 @@ interface TravelContextType {
   setSessionId: (id: string) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
+  extractedData: PDFExtraction | null;
+  setExtractedData: (data: PDFExtraction | null) => void;
+  hasExtractedData: boolean;
   navigateToStep: (step: number) => void;
 }
 
@@ -23,6 +26,9 @@ export function TravelProvider({ children }: { children: ReactNode }) {
   const [preferences, setPreferences] = useState<Preferences | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [extractedData, setExtractedData] = useState<PDFExtraction | null>(null);
+  
+  const hasExtractedData = extractedData !== null;
 
   const getCurrentStep = (): number => {
     switch (location) {
@@ -52,6 +58,9 @@ export function TravelProvider({ children }: { children: ReactNode }) {
       setSessionId,
       isLoading,
       setIsLoading,
+      extractedData,
+      setExtractedData,
+      hasExtractedData,
       navigateToStep,
     }}>
       {children}

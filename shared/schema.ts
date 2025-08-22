@@ -98,8 +98,43 @@ export const preferencesSchema = z.object({
   transitStyle: z.enum(['quickly', 'explore', 'simple']),
 });
 
+// PDF Extraction schemas
+export const extractedFieldSchema = z.object({
+  value: z.string(),
+  confidence: z.number().min(0).max(100),
+  source: z.enum(['manual', 'extracted']).default('extracted'),
+});
+
+export const pdfExtractionSchema = z.object({
+  from: extractedFieldSchema.optional(),
+  departureTime: extractedFieldSchema.optional(),
+  departureDate: extractedFieldSchema.optional(),
+  adults: z.object({
+    value: z.number(),
+    confidence: z.number().min(0).max(100),
+    source: z.enum(['manual', 'extracted']).default('extracted'),
+  }).optional(),
+  children: z.object({
+    value: z.number(),
+    confidence: z.number().min(0).max(100),
+    source: z.enum(['manual', 'extracted']).default('extracted'),
+  }).optional(),
+  luggageCount: z.object({
+    value: z.number(),
+    confidence: z.number().min(0).max(100),
+    source: z.enum(['manual', 'extracted']).default('extracted'),
+  }).optional(),
+  stops: z.array(z.object({
+    location: extractedFieldSchema.optional(),
+    arrivalTime: extractedFieldSchema.optional(),
+    arrivalDate: extractedFieldSchema.optional(),
+  })).length(2).optional(),
+});
+
 export type InsertTravelSession = z.infer<typeof insertTravelSessionSchema>;
 export type TravelSession = typeof travelSessions.$inferSelect;
 export type Stop = z.infer<typeof stopSchema>;
 export type FlightDetails = z.infer<typeof flightDetailsSchema>;
 export type Preferences = z.infer<typeof preferencesSchema>;
+export type ExtractedField = z.infer<typeof extractedFieldSchema>;
+export type PDFExtraction = z.infer<typeof pdfExtractionSchema>;

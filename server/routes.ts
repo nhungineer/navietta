@@ -1,11 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateTravelRecommendations, generateFollowUpResponse } from "./services/claude";
+import { generateTravelRecommendations, generateFollowUpResponse, extractTravelDataFromPDF } from "./services/claude";
 import { generateMockTravelRecommendations } from "./services/mockClaude";
 import { flightDetailsSchema, preferencesSchema } from "@shared/schema";
 import { z } from "zod";
 import Anthropic from '@anthropic-ai/sdk';
+import multer from 'multer';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || "",
@@ -27,6 +28,21 @@ const chatSchema = z.object({
     question: z.string(),
     response: z.string()
   })).optional().default([])
+});
+
+// Configure multer for PDF uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 1024 * 1024, // 1MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'));
+    }
+  },
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -124,6 +140,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error in chat endpoint:', error);
       res.status(500).json({ error: 'Failed to process chat message' });
+    }
+  });
+
+  // PDF travel document extraction endpoint
+  app.post("/api/travel/extract-pdf", upload.single('pdf'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ 
+          message: 'No PDF file uploaded' 
+        });
+      }
+
+      // Convert PDF buffer to base64
+      const pdfBase64 = req.file.buffer.toString('base64');
+      
+      console.log(`Processing PDF upload: ${req.file.originalname}, size: ${req.file.size} bytes`);
+      
+      // Extract travel data using Claude AI
+      let extractedData;
+      if (process.env.ANTHROPIC_API_KEY) {
+        try {
+          console.log('Using Claude API for PDF extraction');
+          extractedData = await extractTravelDataFromPDF(pdfBase64);
+          console.log('Claude PDF extraction completed successfully');
+        } catch (error) {
+          console.error('Claude API error for PDF extraction:', error);
+          return res.status(500).json({ 
+            message: 'Failed to extract travel data from PDF. Please try manual input.',
+            fallback: true
+          });
+        }
+      } else {
+        console.log('No ANTHROPIC_API_KEY found, cannot process PDF');
+        return res.status(500).json({ 
+          message: 'PDF processing is not available. Please use manual input.',
+          fallback: true
+        });
+      }
+
+      // Log successful extraction (without PII)
+      console.log('PDF extraction successful. Fields extracted:', Object.keys(extractedData).length);
+      
+      res.json({
+        success: true,
+        extractedData,
+        message: 'Travel document processed successfully. Please verify all details.'
+      });
+    } catch (error) {
+      console.error('Error processing PDF upload:', error);
+      
+      if (error instanceof multer.MulterError) {
+        if (error.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ 
+            message: 'File too large. Please upload a PDF smaller than 1MB.' 
+          });
+        }
+      }
+      
+      res.status(500).json({ 
+        message: 'Failed to process PDF. Please try manual input.',
+        fallback: true
+      });
     }
   });
 

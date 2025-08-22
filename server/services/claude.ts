@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { PDFExtraction } from '@shared/schema';
 
 /*
 <important_code_snippet_instructions>
@@ -370,5 +371,123 @@ IMPORTANT TIME FORMAT: Use ONLY start times in HH:MM format (e.g., "19:15"), NOT
   } catch (error) {
     console.error('Error generating travel recommendations:', error);
     throw new Error('Failed to generate travel recommendations');
+  }
+}
+
+export async function extractTravelDataFromPDF(pdfBase64: string): Promise<PDFExtraction> {
+  const systemPrompt = `You are a travel document analyzer that extracts structured travel information from PDFs. Your task is to extract travel details while strictly protecting privacy.
+
+## CRITICAL PRIVACY REQUIREMENTS:
+- DO NOT extract, store, or return any PII including: names, passport numbers, ID numbers, credit card details, date of birth, phone numbers, email addresses, addresses
+- Only extract travel logistics: locations, dates, times, counts
+- If you encounter PII, redact it completely from your analysis
+
+## EXTRACTION TARGETS:
+Extract these travel logistics with confidence scores (0-100):
+
+1. **Departure Information:**
+   - from: Starting location (city, airport code, or transport hub)
+   - departureDate: Departure date (YYYY-MM-DD format)
+   - departureTime: Departure time (HH:MM format, 24-hour)
+
+2. **Traveler Counts:**
+   - adults: Number of adult travelers
+   - children: Number of child travelers  
+   - luggageCount: Number of checked bags/luggage pieces
+
+3. **Journey Stops (maximum 2):**
+   - stops[0].location: First destination
+   - stops[0].arrivalTime: Arrival time (HH:MM, 24-hour)
+   - stops[0].arrivalDate: Arrival date (YYYY-MM-DD)
+   - stops[1].location: Final destination  
+   - stops[1].arrivalTime: Final arrival time
+   - stops[1].arrivalDate: Final arrival date
+
+## CONFIDENCE SCORING:
+- 90-100: Explicitly stated information
+- 70-89: Clearly implied or derived information
+- 50-69: Reasonably inferred information
+- 30-49: Uncertain but possible
+- 0-29: Very uncertain or unclear
+
+## RESPONSE FORMAT:
+Return ONLY valid JSON with this exact structure. Omit fields if not found or confidence < 30:
+
+{
+  "from": {"value": "string", "confidence": number},
+  "departureDate": {"value": "YYYY-MM-DD", "confidence": number},
+  "departureTime": {"value": "HH:MM", "confidence": number},
+  "adults": {"value": number, "confidence": number},
+  "children": {"value": number, "confidence": number},
+  "luggageCount": {"value": number, "confidence": number},
+  "stops": [
+    {
+      "location": {"value": "string", "confidence": number},
+      "arrivalTime": {"value": "HH:MM", "confidence": number},
+      "arrivalDate": {"value": "YYYY-MM-DD", "confidence": number}
+    }
+  ]
+}`;
+
+  try {
+    console.log('Extracting travel data from PDF using Claude API...');
+    
+    const response = await anthropic.messages.create({
+      model: DEFAULT_MODEL_STR,
+      max_tokens: 2000,
+      system: systemPrompt,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Extract travel information from this travel document PDF. Follow the privacy requirements strictly and return only the JSON structure with travel logistics."
+            },
+            {
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: "application/pdf",
+                data: pdfBase64
+              }
+            }
+          ]
+        }
+      ]
+    });
+
+    console.log('Claude API responded for PDF extraction');
+    
+    const content = response.content[0];
+    if (content.type !== 'text') {
+      throw new Error('Unexpected response type from Claude API');
+    }
+
+    // Clean the response text to handle markdown code blocks
+    let responseText = content.text.trim();
+    responseText = responseText.replace(/^```json\s*/gi, '').replace(/^```\s*/gi, '').replace(/\s*```$/gi, '');
+    
+    // Find the actual JSON object
+    const startIndex = responseText.indexOf('{');
+    const lastIndex = responseText.lastIndexOf('}');
+    
+    if (startIndex !== -1 && lastIndex !== -1 && lastIndex > startIndex) {
+      responseText = responseText.substring(startIndex, lastIndex + 1);
+    }
+
+    console.log('Raw PDF extraction response (first 300 chars):', responseText.substring(0, 300));
+
+    try {
+      const extractedData = JSON.parse(responseText) as PDFExtraction;
+      return extractedData;
+    } catch (parseError) {
+      console.error('JSON parsing error for PDF extraction. Raw response:', content.text);
+      console.error('Cleaned response text:', responseText);
+      throw parseError;
+    }
+  } catch (error) {
+    console.error('Error extracting travel data from PDF:', error);
+    throw new Error('Failed to extract travel data from PDF');
   }
 }

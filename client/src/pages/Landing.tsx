@@ -1,9 +1,14 @@
 import { Button } from '@/components/ui/button';
 import { useTravelContext } from '@/contexts/TravelContext';
-import { Plane, Upload, Cloud } from 'lucide-react';
+import { Plane } from 'lucide-react';
+import { PDFUpload } from '@/components/PDFUpload';
 
 export default function Landing() {
-  const { navigateToStep } = useTravelContext();
+  const { navigateToStep, setExtractedData } = useTravelContext();
+
+  const handlePDFSuccess = (data: any) => {
+    setExtractedData(data);
+  };
 
   return (
     <div className="text-center py-16 max-w-md mx-auto">
@@ -18,27 +23,17 @@ export default function Landing() {
         <p className="text-lg text-textSecondary">Travel transit, stress-free</p>
       </div>
       
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-6 bg-gray-50/50">
-        <div className="mb-4">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-lg mb-3">
-            <Upload className="text-white" size={20} />
-          </div>
-        </div>
-        <p className="text-sm text-gray-600 mb-4">
-          Upload or drag and drop your itinerary<br />
-          to get started
-        </p>
-        
-        <div className="my-4 text-gray-500 text-sm font-medium">--- OR -----</div>
-        
-        <Button 
-          className="w-full bg-primary text-white py-3 px-6 rounded-lg font-medium hover:bg-primary/90 transition-colors"
-          onClick={() => navigateToStep(2)}
-          data-testid="button-enter-trip-details"
-        >
-          ENTER TRIP DETAILS
-        </Button>
-      </div>
+      <PDFUpload onSuccess={handlePDFSuccess} />
+      
+      <div className="my-4 text-gray-500 text-sm font-medium">--- OR -----</div>
+      
+      <Button 
+        className="w-full bg-primary text-white py-3 px-6 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+        onClick={() => navigateToStep(2)}
+        data-testid="button-enter-trip-details"
+      >
+        ENTER TRIP DETAILS MANUALLY
+      </Button>
     </div>
   );
 }

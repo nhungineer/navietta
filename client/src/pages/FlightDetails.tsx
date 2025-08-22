@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTravelContext } from "@/contexts/TravelContext";
-import { flightDetailsSchema, type FlightDetails, type Stop } from "@shared/schema";
+import { flightDetailsSchema, type FlightDetails, type Stop, type ExtractedField } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { ConfidenceField } from "@/components/ConfidenceField";
+import { VerificationBanner } from "@/components/VerificationBanner";
 import {
   Plane,
   PlaneTakeoff,
@@ -30,7 +32,7 @@ type FormErrors = {
 };
 
 export default function FlightDetailsPage() {
-  const { navigateToStep, setFlightDetails } = useTravelContext();
+  const { navigateToStep, setFlightDetails, extractedData, hasExtractedData } = useTravelContext();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<FlightDetails>({
@@ -55,6 +57,58 @@ export default function FlightDetailsPage() {
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
+
+  // Helper function to apply extracted string field data
+  const applyExtractedStringField = (extractedField: ExtractedField | undefined, fallbackValue: string): string => {
+    if (!extractedField) return fallbackValue;
+    
+    const confidence = extractedField.confidence;
+    if (confidence < 50) {
+      return '';
+    }
+    
+    return extractedField.value;
+  };
+
+  // Helper function to apply extracted number field data
+  const applyExtractedNumberField = (extractedField: { value: number; confidence: number; source: 'manual' | 'extracted' } | undefined, fallbackValue: number): number => {
+    if (!extractedField) return fallbackValue;
+    
+    const confidence = extractedField.confidence;
+    if (confidence < 50) {
+      return fallbackValue;
+    }
+    
+    return extractedField.value;
+  };
+
+  // Apply extracted data when available
+  useEffect(() => {
+    if (extractedData) {
+      const newFormData: FlightDetails = {
+        from: applyExtractedStringField(extractedData.from, ''),
+        departureTime: applyExtractedStringField(extractedData.departureTime, '08:00'),
+        departureDate: applyExtractedStringField(extractedData.departureDate, '2025-08-22'),
+        adults: applyExtractedNumberField(extractedData.adults, 2),
+        children: applyExtractedNumberField(extractedData.children, 0),
+        luggageCount: applyExtractedNumberField(extractedData.luggageCount, 2),
+        stops: [
+          {
+            location: applyExtractedStringField(extractedData.stops?.[0]?.location, ''),
+            arrivalTime: applyExtractedStringField(extractedData.stops?.[0]?.arrivalTime, '15:30'),
+            arrivalDate: applyExtractedStringField(extractedData.stops?.[0]?.arrivalDate, '2025-08-23'),
+          },
+          {
+            location: applyExtractedStringField(extractedData.stops?.[1]?.location, ''),
+            arrivalTime: applyExtractedStringField(extractedData.stops?.[1]?.arrivalTime, '18:00'),
+            arrivalDate: applyExtractedStringField(extractedData.stops?.[1]?.arrivalDate, '2025-08-23'),
+          },
+        ],
+      };
+      
+      setFormData(newFormData);
+    }
+  }, [extractedData]);
 
   const handleInputChange = (
     field: keyof FlightDetails,
@@ -222,6 +276,8 @@ export default function FlightDetailsPage() {
           Trip details
         </h2>
 
+        <VerificationBanner hasExtractedData={hasExtractedData} />
+
         {/* Travelers and Luggage Section - Moved to Top */}
         <div className="grid grid-cols-3 gap-6 mb-8">
           <div>
@@ -314,33 +370,15 @@ export default function FlightDetailsPage() {
 
         {/* Start Location */}
         <div className="mb-6">
-          <Label className="text-lg font-medium text-textPrimary mb-3 block">
-            Start
-          </Label>
-          <div className="relative">
-            <MapPin
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              size={16}
-            />
-            <Input
-              type="text"
-              value={formData.from}
-              onChange={(e) => handleInputChange("from", e.target.value)}
-              className={`pl-10 pr-10 text-lg h-12 ${errors.from ? 'border-red-500' : ''}`}
-              placeholder="Melbourne"
-              data-testid="input-start-location"
-            />
-            {formData.from && (
-              <button
-                type="button"
-                onClick={() => handleInputChange("from", "")}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                data-testid="button-clear-start-location"
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
+          <ConfidenceField
+            label="Start"
+            value={formData.from}
+            onChange={(value) => handleInputChange("from", value)}
+            extractedField={extractedData?.from}
+            placeholder="Enter departure location (e.g., Melbourne)"
+            data-testid="input-start-location"
+            className="text-lg h-12"
+          />
           {errors.from && (
             <p className="text-red-500 text-sm mt-1">{errors.from}</p>
           )}
@@ -378,33 +416,20 @@ export default function FlightDetailsPage() {
               </Label>
 
               {/* Location */}
-              <div className="relative mb-3">
-                <MapPin
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  size={16}
-                />
-                <Input
-                  type="text"
+              <div className="mb-3">
+                <ConfidenceField
+                  label={`Stop ${index + 1} Location`}
                   value={stop.location}
-                  onChange={(e) => handleStopChange(index, "location", e.target.value)}
-                  className={`pl-10 pr-10 text-lg h-12 ${errors.stops?.[index]?.location ? 'border-red-500' : ''}`}
-                  placeholder="Rome"
+                  onChange={(value) => handleStopChange(index, "location", value)}
+                  extractedField={extractedData?.stops?.[index]?.location}
+                  placeholder={`Enter stop ${index + 1} location (e.g., ${index === 0 ? 'Rome' : 'Amsterdam'})`}
                   data-testid={`input-stop-location-${index}`}
+                  className="text-lg h-12"
                 />
-                {stop.location && (
-                  <button
-                    type="button"
-                    onClick={() => handleStopChange(index, "location", "")}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    data-testid={`button-clear-stop-location-${index}`}
-                  >
-                    <X size={16} />
-                  </button>
+                {errors.stops?.[index]?.location && (
+                  <p className="text-red-500 text-sm mt-1">{errors.stops[index].location}</p>
                 )}
               </div>
-              {errors.stops?.[index]?.location && (
-                <p className="text-red-500 text-sm mt-1">{errors.stops[index].location}</p>
-              )}
 
               {/* Time and Date */}
               <div className="grid grid-cols-2 gap-3">

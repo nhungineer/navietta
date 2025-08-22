@@ -376,8 +376,9 @@ export default function FlightDetailsPage() {
 
         {/* Start Location */}
         <div className="mb-6">
+          <h2 className="text-xl font-semibold text-textPrimary mb-3">Start</h2>
           <ConfidenceField
-            label="Start"
+            label=""
             value={formData.from}
             onChange={(value) => handleInputChange("from", value)}
             extractedField={extractedData?.from}
@@ -392,9 +393,6 @@ export default function FlightDetailsPage() {
 
         {/* Departure Date */}
         <div className="mb-6">
-          <Label className="text-lg font-medium text-textPrimary mb-3 block">
-            Departure Date
-          </Label>
           <div className="relative">
             <Calendar
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -417,14 +415,14 @@ export default function FlightDetailsPage() {
         <div className="space-y-6">
           {formData.stops.map((stop, index) => (
             <div key={index}>
-              <Label className="text-lg font-medium text-textPrimary mb-3 block">
+              <h3 className="text-xl font-semibold text-textPrimary mb-3">
                 Stop {index + 1}
-              </Label>
+              </h3>
 
               {/* Location */}
-              <div className="mb-3">
+              <div className="mb-4">
                 <ConfidenceField
-                  label={`Stop ${index + 1} Location`}
+                  label=""
                   value={stop.location}
                   onChange={(value) => handleStopChange(index, "location", value)}
                   extractedField={extractedData?.stops?.[index]?.location}

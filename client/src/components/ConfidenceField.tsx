@@ -63,17 +63,29 @@ export function ConfidenceField({
 
   return (
     <div className={cn("space-y-2", className)}>
-      <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-        {label}
-        {isExtracted && (
-          <div className="flex items-center gap-1">
-            {getConfidenceIcon()}
-            <span className="text-xs text-gray-500">
-              {confidence >= 70 ? 'AI-extracted' : 'AI-extracted (verify)'}
-            </span>
-          </div>
-        )}
-      </label>
+      {label && (
+        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+          {label}
+          {isExtracted && (
+            <div className="flex items-center gap-1">
+              {getConfidenceIcon()}
+              <span className="text-xs text-gray-500">
+                {confidence >= 70 ? 'AI-extracted' : 'AI-extracted (verify)'}
+              </span>
+            </div>
+          )}
+        </label>
+      )}
+      
+      {/* Show confidence indicator without label when label is empty */}
+      {!label && isExtracted && (
+        <div className="flex items-center gap-1 mb-1">
+          {getConfidenceIcon()}
+          <span className="text-xs text-gray-500">
+            {confidence >= 70 ? 'AI-extracted' : 'AI-extracted (verify)'}
+          </span>
+        </div>
+      )}
       
       <div className="relative">
         <Input

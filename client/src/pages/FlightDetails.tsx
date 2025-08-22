@@ -126,22 +126,32 @@ export default function FlightDetailsPage() {
     }
 
     // Check if departure date is filled
-    if (!formData.departureDate) {
+    if (!formData.departureDate || formData.departureDate.trim() === "") {
       validationErrors.departureDate = "Departure date is required";
     }
 
     // Check if all stop locations and dates are filled
-    if (!validationErrors.stops) validationErrors.stops = [];
+    const stopsErrors: { location?: string; arrivalTime?: string; arrivalDate?: string }[] = [];
+    let hasStopErrors = false;
+    
     for (let i = 0; i < formData.stops.length; i++) {
+      const stopErrors: { location?: string; arrivalTime?: string; arrivalDate?: string } = {};
+      
       if (!formData.stops[i].location || formData.stops[i].location.trim() === "") {
-        if (!validationErrors.stops[i]) validationErrors.stops[i] = {};
-        validationErrors.stops[i].location = "Location is required";
+        stopErrors.location = "Location is required";
+        hasStopErrors = true;
       }
       
-      if (!formData.stops[i].arrivalDate) {
-        if (!validationErrors.stops[i]) validationErrors.stops[i] = {};
-        validationErrors.stops[i].arrivalDate = "Arrival date is required";
+      if (!formData.stops[i].arrivalDate || formData.stops[i].arrivalDate.trim() === "") {
+        stopErrors.arrivalDate = "Arrival date is required";
+        hasStopErrors = true;
       }
+      
+      stopsErrors[i] = stopErrors;
+    }
+    
+    if (hasStopErrors) {
+      validationErrors.stops = stopsErrors;
     }
 
     // If there are validation errors, set them and show toast

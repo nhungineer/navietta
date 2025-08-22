@@ -97,7 +97,7 @@ export default function FlightDetailsPage() {
         arrivalDate: applyExtractedStringField(extractedData.stops?.[1]?.arrivalDate, '2025-08-23'),
         adults: applyExtractedNumberField(extractedData.adults, 2),
         children: applyExtractedNumberField(extractedData.children, 0),
-        luggageCount: applyExtractedNumberField(extractedData.luggageCount, 2),
+        luggageCount: extractedData.luggageCount ? applyExtractedNumberField(extractedData.luggageCount, 0) : formData.luggageCount,
         stops: [
           {
             location: applyExtractedStringField(extractedData.stops?.[0]?.location, ''),

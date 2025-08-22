@@ -302,7 +302,7 @@ export default function FlightDetailsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-10 h-10 p-0 bg-gray-200 text-gray-600 hover:bg-primary hover:text-white rounded-l-md rounded-r-none"
+                className="w-10 h-10 p-0 bg-gray-200 text-gray-600 hover:bg-primary hover:text-white rounded-r-md rounded-l-none"
                 onClick={() => updateLuggage(true)}
                 data-testid="button-increase-luggage"
               >

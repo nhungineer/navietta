@@ -1,13 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateTravelRecommendations, generateFollowUpResponse, extractTravelDataFromPDF } from "./services/claude";
+import { generateTravelRecommendations, generateFollowUpResponse, extractTravelDataFromPDF, extractTravelDataFromPDFVision } from "./services/claude";
 import { generateMockTravelRecommendations } from "./services/mockClaude";
 import { flightDetailsSchema, preferencesSchema } from "@shared/schema";
 import { z } from "zod";
 import Anthropic from '@anthropic-ai/sdk';
 import multer from 'multer';
-// Using filename-based extraction for now due to PDF parsing library issues
+// Using PDF.js for real PDF text extraction
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || "",
@@ -16,85 +16,6 @@ const anthropic = new Anthropic({
 // <important_do_not_delete>
 const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
 // </important_do_not_delete>
-
-// Generate smart extraction context from filename patterns
-function generateSmartExtraction(filename: string, fileSize: number): string {
-  // Analyze filename for travel information patterns
-  const lowerFilename = filename.toLowerCase();
-  
-  // Extract potential airport codes (3-letter codes in uppercase)
-  const airportCodes = filename.match(/[A-Z]{3}/g) || [];
-  
-  // Extract potential dates and times
-  const datePatterns = filename.match(/\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|\d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}|september|sep|october|oct|november|nov/gi) || [];
-  const timePatterns = filename.match(/\d{1,2}:\d{2}|\d{1,2}\.\d{2}|departure|arrival/gi) || [];
-  
-  // Determine document type
-  let docType = "travel document";
-  if (lowerFilename.includes("boarding") || lowerFilename.includes("pass")) {
-    docType = "boarding pass";
-  } else if (lowerFilename.includes("ticket") || lowerFilename.includes("eticket")) {
-    docType = "flight ticket";
-  } else if (lowerFilename.includes("receipt")) {
-    docType = "travel receipt";
-  }
-  
-  // Detect locations from filename with more comprehensive patterns
-  let routeInfo = "";
-  if (lowerFilename.includes("tia") && lowerFilename.includes("ber")) {
-    routeInfo = "Route appears to be: Tirana (TIA) → Berlin (BER)";
-  } else if (lowerFilename.includes("mel") && lowerFilename.includes("fco")) {
-    routeInfo = "Route appears to be: Melbourne (MEL) → Rome (FCO) - likely connecting via Abu Dhabi";
-  } else if (lowerFilename.includes("mel") && lowerFilename.includes("rome")) {
-    routeInfo = "Route appears to be: Melbourne → Rome - check for connecting flights via Abu Dhabi";
-  } else if (lowerFilename.includes("fra") && lowerFilename.includes("ber")) {
-    routeInfo = "Route appears to be: Frankfurt (FRA) → Berlin (BER)";
-  } else if (lowerFilename.includes("gold") && lowerFilename.includes("coast")) {
-    routeInfo = "Route appears to involve Gold Coast destination";
-  }
-  
-  // Detect airline or transport provider
-  let provider = "";
-  if (lowerFilename.includes("etihad")) provider = "Etihad Airways";
-  else if (lowerFilename.includes("lufthansa")) provider = "Lufthansa";
-  else if (lowerFilename.includes("emirates")) provider = "Emirates";
-  else if (lowerFilename.includes("qantas")) provider = "Qantas";
-  else if (lowerFilename.includes("virgin")) provider = "Virgin";
-  
-  return `Travel Document Analysis Request
-  
-Document Details:
-- Filename: ${filename}
-- Document Type: ${docType}
-- File Size: ${fileSize} bytes
-${provider ? `- Provider: ${provider}` : ""}
-${routeInfo ? `- ${routeInfo}` : ""}
-${airportCodes.length > 0 ? `- Detected Airport Codes: ${airportCodes.join(", ")}` : ""}
-${datePatterns.length > 0 ? `- Detected Date Patterns: ${datePatterns.join(", ")}` : ""}
-${timePatterns.length > 0 ? `- Detected Time Patterns: ${timePatterns.join(", ")}` : ""}
-
-Please analyze this travel document and extract ALL available travel information. Extract from the filename patterns and infer standard travel details:
-
-CRITICAL REQUIREMENTS:
-1. Extract COMPLETE route information including ALL stops/connections
-2. For multi-leg flights (e.g., Melbourne → Abu Dhabi → Rome), extract ALL segments
-3. Extract precise dates and times for departures/arrivals
-4. Extract passenger counts (adults, children, infants)
-5. Extract flight numbers, airlines, terminal information
-6. Extract any baggage/luggage allowances
-
-NAMING CONVENTIONS:
-- Use full airport names with IATA codes: "Melbourne International Airport (MEL)"
-- For connecting flights, identify ALL intermediate stops
-- Include specific terminal information when available
-
-CONFIDENCE SCORING:
-- Rate confidence 10-100 based on clarity of information
-- Lower confidence for inferred vs. explicit data
-- Higher confidence for clear airport codes and standard formats
-
-Return detailed structured data for ALL extracted fields.`;
-}
 
 const generateRecommendationsSchema = z.object({
   flightDetails: flightDetailsSchema,
@@ -247,11 +168,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pdfBuffer = req.file.buffer;
       console.log(`Extracting text from actual PDF file`);
       
-      // Extract travel information from filename and basic document info
-      // This approach analyzes the document name to infer travel details
-      const pdfText = generateSmartExtraction(req.file.originalname, req.file.size);
-      
-      console.log(`Analyzing document: ${req.file.originalname}`);
+      // Extract text from PDF using PDF.js
+      let pdfText;
+      try {
+        const pdfjs = await import('pdfjs-dist');
+        const loadingTask = pdfjs.getDocument({ data: pdfBuffer });
+        const pdf = await loadingTask.promise;
+        
+        let fullText = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          const pageText = content.items
+            .filter((item: any) => 'str' in item)
+            .map((item: any) => item.str)
+            .join(' ');
+          fullText += pageText + ' ';
+        }
+        
+        pdfText = fullText.trim();
+        console.log(`Extracted ${pdfText.length} characters from PDF using PDF.js`);
+      } catch (pdfError) {
+        console.error('PDF.js parsing error:', pdfError);
+        return res.status(400).json({ 
+          message: 'Failed to read PDF file. Please ensure it\'s a valid PDF document.',
+          fallback: true
+        });
+      }
 
       // Extract travel data using Claude AI
       let extractedData;

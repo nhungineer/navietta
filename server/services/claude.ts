@@ -15,13 +15,25 @@ const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
 
 // Environment-specific API key selection for cost tracking
 function getAnthropicApiKey(): string {
-  // Check if running in production deployment
-  if (process.env.REPLIT_DEPLOYMENT === '1') {
-    return process.env.ANTHROPIC_API_KEY || "";
+  const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
+  const devKey = process.env.NAVIETTA_DEV_API_KEY;
+  const prodKey = process.env.ANTHROPIC_API_KEY;
+  
+  console.log('🔑 API Key Selection Debug:');
+  console.log('- REPLIT_DEPLOYMENT:', process.env.REPLIT_DEPLOYMENT);
+  console.log('- Is Production:', isProduction);
+  console.log('- Dev key exists:', !!devKey);
+  console.log('- Prod key exists:', !!prodKey);
+  
+  if (isProduction) {
+    console.log('✅ Using PRODUCTION key (ANTHROPIC_API_KEY)');
+    return prodKey || "";
   }
   
   // Use development-specific key for local development
-  return process.env.NAVIETTA_DEV_API_KEY || process.env.ANTHROPIC_API_KEY || "";
+  const selectedKey = devKey || prodKey || "";
+  console.log('✅ Using DEVELOPMENT key:', devKey ? 'NAVIETTA_DEV_API_KEY' : 'ANTHROPIC_API_KEY (fallback)');
+  return selectedKey;
 }
 
 const anthropic = new Anthropic({

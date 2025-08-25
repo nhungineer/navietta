@@ -13,8 +13,19 @@ When copying code from this code snippet, ensure you also include this informati
 const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
 // </important_do_not_delete>
 
+// Environment-specific API key selection for cost tracking
+function getAnthropicApiKey(): string {
+  // Check if running in production deployment
+  if (process.env.REPLIT_DEPLOYMENT === '1') {
+    return process.env.ANTHROPIC_API_KEY || "";
+  }
+  
+  // Use development-specific key for local development
+  return process.env.NAVIETTA_DEV_API_KEY || process.env.ANTHROPIC_API_KEY || "";
+}
+
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY || "",
+  apiKey: getAnthropicApiKey(),
 });
 
 interface FlightDetails {

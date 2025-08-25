@@ -17,22 +17,24 @@ const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
 function getAnthropicApiKey(): string {
   const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
   const devKey = process.env.NAVIETTA_DEV_API_KEY;
-  const prodKey = process.env.ANTHROPIC_API_KEY;
+  const prodKey = process.env.NAVIETTA_PROD_API_KEY || process.env.ANTHROPIC_API_KEY; // Support both naming conventions
   
   console.log('🔑 API Key Selection Debug:');
   console.log('- REPLIT_DEPLOYMENT:', process.env.REPLIT_DEPLOYMENT);
   console.log('- Is Production:', isProduction);
   console.log('- Dev key exists:', !!devKey);
   console.log('- Prod key exists:', !!prodKey);
+  console.log('- NAVIETTA_PROD_API_KEY exists:', !!process.env.NAVIETTA_PROD_API_KEY);
   
   if (isProduction) {
-    console.log('✅ Using PRODUCTION key (ANTHROPIC_API_KEY)');
+    const keySource = process.env.NAVIETTA_PROD_API_KEY ? 'NAVIETTA_PROD_API_KEY' : 'ANTHROPIC_API_KEY (fallback)';
+    console.log('✅ Using PRODUCTION key:', keySource);
     return prodKey || "";
   }
   
   // Use development-specific key for local development
   const selectedKey = devKey || prodKey || "";
-  console.log('✅ Using DEVELOPMENT key:', devKey ? 'NAVIETTA_DEV_API_KEY' : 'ANTHROPIC_API_KEY (fallback)');
+  console.log('✅ Using DEVELOPMENT key:', devKey ? 'NAVIETTA_DEV_API_KEY' : 'fallback to prod key');
   return selectedKey;
 }
 

@@ -263,8 +263,17 @@ export default function FlightDetailsPage() {
     // Clear any existing errors
     setErrors({});
 
+    // Transform form data to match schema expectations
+    // Map Stop 2 data to final destination fields
+    const transformedFormData = {
+      ...formData,
+      to: formData.stops[1]?.location || '', // Final destination from Stop 2
+      arrivalTime: formData.stops[1]?.arrivalTime || '', // Final arrival time from Stop 2
+      arrivalDate: formData.stops[1]?.arrivalDate || '', // Final arrival date from Stop 2
+    };
+
     try {
-      const validated = flightDetailsSchema.parse(formData);
+      const validated = flightDetailsSchema.parse(transformedFormData);
       setFlightDetails(validated);
       navigateToStep(3);
     } catch (error: any) {

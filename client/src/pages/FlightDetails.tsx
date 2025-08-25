@@ -88,13 +88,38 @@ export default function FlightDetailsPage() {
   // Apply extracted data when available
   useEffect(() => {
     if (extractedData) {
+      // Get Stop 1 date first
+      const stop1Date = applyExtractedStringField(extractedData.stops?.[0]?.arrivalDate, '2025-08-23');
+      
+      // Calculate Stop 2 date with constraint (same day as Stop 1 if no Stop 2 date extracted)
+      let stop2Date = applyExtractedStringField(extractedData.stops?.[1]?.arrivalDate, '');
+      if (!stop2Date && stop1Date) {
+        // If no Stop 2 date extracted, default to same day as Stop 1
+        stop2Date = stop1Date;
+      } else if (stop2Date && stop1Date) {
+        // If Stop 2 date extracted, ensure it's within 1-2 day constraint
+        const stop1DateObj = new Date(stop1Date);
+        const stop2DateObj = new Date(stop2Date);
+        const maxStop2Date = new Date(stop1Date);
+        maxStop2Date.setDate(maxStop2Date.getDate() + 1);
+        
+        // If Stop 2 date is more than 1 day after Stop 1, constrain it
+        if (stop2DateObj > maxStop2Date) {
+          stop2Date = maxStop2Date.toISOString().split('T')[0];
+        }
+        // If Stop 2 date is before Stop 1, set it to same day as Stop 1
+        if (stop2DateObj < stop1DateObj) {
+          stop2Date = stop1Date;
+        }
+      }
+      
       const newFormData: FlightDetails = {
         from: applyExtractedStringField(extractedData.from, ''),
         to: applyExtractedStringField(extractedData.stops?.[1]?.location, ''),
         departureTime: applyExtractedStringField(extractedData.departureTime, '08:00'),
         arrivalTime: applyExtractedStringField(extractedData.stops?.[1]?.arrivalTime, '18:00'),
         departureDate: applyExtractedStringField(extractedData.departureDate, '2025-08-22'),
-        arrivalDate: applyExtractedStringField(extractedData.stops?.[1]?.arrivalDate, '2025-08-23'),
+        arrivalDate: stop2Date || '2025-08-23',
         adults: applyExtractedNumberField(extractedData.adults, 2),
         children: applyExtractedNumberField(extractedData.children, 0),
         luggageCount: extractedData.luggageCount ? applyExtractedNumberField(extractedData.luggageCount, 0) : formData.luggageCount,
@@ -102,12 +127,12 @@ export default function FlightDetailsPage() {
           {
             location: applyExtractedStringField(extractedData.stops?.[0]?.location, ''),
             arrivalTime: applyExtractedStringField(extractedData.stops?.[0]?.arrivalTime, '15:30'),
-            arrivalDate: applyExtractedStringField(extractedData.stops?.[0]?.arrivalDate, '2025-08-23'),
+            arrivalDate: stop1Date,
           },
           {
             location: applyExtractedStringField(extractedData.stops?.[1]?.location, ''),
             arrivalTime: applyExtractedStringField(extractedData.stops?.[1]?.arrivalTime, '18:00'),
-            arrivalDate: applyExtractedStringField(extractedData.stops?.[1]?.arrivalDate, '2025-08-23'),
+            arrivalDate: stop2Date || '2025-08-23',
           },
         ],
       };
@@ -190,7 +215,12 @@ export default function FlightDetailsPage() {
       validationErrors.departureDate = "Departure date is required";
     }
 
-    // Check if all stop locations and dates are filled
+    // Check if departure time is filled
+    if (!formData.departureTime || formData.departureTime.trim() === "") {
+      validationErrors.departureTime = "Departure time is required";
+    }
+
+    // Check if all stop locations, times and dates are filled
     const stopsErrors: { location?: string; arrivalTime?: string; arrivalDate?: string }[] = [];
     let hasStopErrors = false;
     
@@ -199,6 +229,11 @@ export default function FlightDetailsPage() {
       
       if (!formData.stops[i].location || formData.stops[i].location.trim() === "") {
         stopErrors.location = "Location is required";
+        hasStopErrors = true;
+      }
+      
+      if (!formData.stops[i].arrivalTime || formData.stops[i].arrivalTime.trim() === "") {
+        stopErrors.arrivalTime = "Arrival time is required";
         hasStopErrors = true;
       }
       
@@ -391,24 +426,44 @@ export default function FlightDetailsPage() {
           )}
         </div>
 
-        {/* Departure Date */}
-        <div className="mb-6">
-          <div className="relative">
-            <Calendar
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              size={16}
-            />
-            <Input
-              type="date"
-              value={formData.departureDate}
-              onChange={(e) => handleInputChange("departureDate", e.target.value)}
-              className={`pl-10 text-lg h-12 ${errors.departureDate ? 'border-red-500' : ''}`}
-              data-testid="input-departure-date"
-            />
+        {/* Departure Time and Date */}
+        <div className="flex gap-3 items-start mb-6">
+          <div className="flex-1">
+            <div className="relative">
+              <Clock
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10"
+                size={16}
+              />
+              <Input
+                type="time"
+                value={formData.departureTime}
+                onChange={(e) => handleInputChange("departureTime", e.target.value)}
+                className={`pl-10 text-lg h-12 ${errors.departureTime ? 'border-red-500' : ''}`}
+                data-testid="input-departure-time"
+              />
+            </div>
+            {errors.departureTime && (
+              <p className="text-red-500 text-sm mt-1">{errors.departureTime}</p>
+            )}
           </div>
-          {errors.departureDate && (
-            <p className="text-red-500 text-sm mt-1">{errors.departureDate}</p>
-          )}
+          <div className="flex-1">
+            <div className="relative">
+              <Calendar
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={16}
+              />
+              <Input
+                type="date"
+                value={formData.departureDate}
+                onChange={(e) => handleInputChange("departureDate", e.target.value)}
+                className={`pl-10 text-lg h-12 ${errors.departureDate ? 'border-red-500' : ''}`}
+                data-testid="input-departure-date"
+              />
+            </div>
+            {errors.departureDate && (
+              <p className="text-red-500 text-sm mt-1">{errors.departureDate}</p>
+            )}
+          </div>
         </div>
 
         {/* Stops Section */}

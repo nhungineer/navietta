@@ -419,7 +419,7 @@ export default function FlightDetailsPage() {
         </div>
 
         {/* Start Location */}
-        <div className="mb-6">
+        <div className="mb-12">
           <h2 className="text-xl font-semibold text-textPrimary mb-3">Start</h2>
           <ConfidenceField
             label="Departure Location"
@@ -476,7 +476,7 @@ export default function FlightDetailsPage() {
         </div>
 
         {/* Stops Section */}
-        <div className="space-y-16">
+        <div className="space-y-8">
           {formData.stops.map((stop, index) => (
             <div key={index}>
               <h3 className="text-xl font-semibold text-textPrimary mb-3">
@@ -484,7 +484,7 @@ export default function FlightDetailsPage() {
               </h3>
 
               {/* Location */}
-              <div className="mb-6">
+              <div className="mb-12">
                 <ConfidenceField
                   label={`Stop ${index + 1} Location`}
                   value={stop.location}

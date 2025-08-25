@@ -157,10 +157,10 @@ export function PDFUpload({ onSuccess }: PDFUploadProps) {
             />
             <label 
               htmlFor="pdf-upload"
-              className="inline-block w-full bg-primary text-white py-3 px-6 rounded-lg font-medium hover:bg-primary/90 transition-colors cursor-pointer"
-              data-testid="button-select-pdf"
+              className="inline-block w-full bg-white text-primary border-2 border-primary py-3 px-6 rounded-lg font-medium hover:bg-primary/5 transition-colors cursor-pointer"
+              data-testid="button-upload-pdf"
             >
-              SELECT PDF FILE
+              UPLOAD PDF FILE
             </label>
           </>
         )}

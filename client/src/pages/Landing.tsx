@@ -23,17 +23,17 @@ export default function Landing() {
         <p className="text-lg text-textSecondary">Travel transit, stress-free</p>
       </div>
       
-      <PDFUpload onSuccess={handlePDFSuccess} />
-      
-      <div className="my-4 text-gray-500 text-sm font-medium">--- OR -----</div>
-      
       <Button 
         className="w-full bg-primary text-white py-3 px-6 rounded-lg font-medium hover:bg-primary/90 transition-colors"
         onClick={() => navigateToStep(2)}
         data-testid="button-enter-trip-details"
       >
-        ENTER TRIP DETAILS MANUALLY
+        ENTER TRIP DETAILS
       </Button>
+      
+      <div className="my-4 text-gray-500 text-sm font-medium">--- OR -----</div>
+      
+      <PDFUpload onSuccess={handlePDFSuccess} />
     </div>
   );
 }

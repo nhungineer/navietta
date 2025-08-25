@@ -436,35 +436,39 @@ export default function FlightDetailsPage() {
         </div>
 
         {/* Departure Time and Date */}
-        <div className="space-y-4 mb-6">
-          <div className="relative">
-            <Clock
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
-              size={16}
-            />
-            <Input
-              type="time"
-              value={formData.departureTime}
-              onChange={(e) => handleInputChange("departureTime", e.target.value)}
-              className={`pl-10 text-lg h-12 ${errors.departureTime ? 'border-red-500' : ''}`}
-              data-testid="input-departure-time"
-            />
+        <div className="flex gap-4 mb-8">
+          <div className="flex-1">
+            <div className="relative">
+              <Clock
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                size={16}
+              />
+              <Input
+                type="time"
+                value={formData.departureTime}
+                onChange={(e) => handleInputChange("departureTime", e.target.value)}
+                className={`pl-10 text-lg h-12 ${errors.departureTime ? 'border-red-500' : ''}`}
+                data-testid="input-departure-time"
+              />
+            </div>
             {errors.departureTime && (
               <p className="text-red-500 text-sm mt-1">{errors.departureTime}</p>
             )}
           </div>
-          <div className="relative">
-            <Calendar
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
-              size={16}
-            />
-            <Input
-              type="date"
-              value={formData.departureDate}
-              onChange={(e) => handleInputChange("departureDate", e.target.value)}
-              className={`pl-10 text-lg h-12 ${errors.departureDate ? 'border-red-500' : ''}`}
-              data-testid="input-departure-date"
-            />
+          <div className="flex-1">
+            <div className="relative">
+              <Calendar
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                size={16}
+              />
+              <Input
+                type="date"
+                value={formData.departureDate}
+                onChange={(e) => handleInputChange("departureDate", e.target.value)}
+                className={`pl-10 text-lg h-12 ${errors.departureDate ? 'border-red-500' : ''}`}
+                data-testid="input-departure-date"
+              />
+            </div>
             {errors.departureDate && (
               <p className="text-red-500 text-sm mt-1">{errors.departureDate}</p>
             )}
@@ -472,7 +476,7 @@ export default function FlightDetailsPage() {
         </div>
 
         {/* Stops Section */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           {formData.stops.map((stop, index) => (
             <div key={index}>
               <h3 className="text-xl font-semibold text-textPrimary mb-3">
@@ -480,7 +484,7 @@ export default function FlightDetailsPage() {
               </h3>
 
               {/* Location */}
-              <div className="mb-4">
+              <div className="mb-6">
                 <ConfidenceField
                   label={`Stop ${index + 1} Location`}
                   value={stop.location}
@@ -496,48 +500,52 @@ export default function FlightDetailsPage() {
               </div>
 
               {/* Time and Date */}
-              <div className="space-y-4">
-                <div className="relative">
-                  <Clock
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
-                    size={16}
-                  />
-                  <Input
-                    type="time"
-                    value={stop.arrivalTime}
-                    onChange={(e) => handleStopChange(index, "arrivalTime", e.target.value)}
-                    className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.arrivalTime ? 'border-red-500' : ''}`}
-                    data-testid={`input-stop-time-${index}`}
-                  />
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Clock
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                      size={16}
+                    />
+                    <Input
+                      type="time"
+                      value={stop.arrivalTime}
+                      onChange={(e) => handleStopChange(index, "arrivalTime", e.target.value)}
+                      className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.arrivalTime ? 'border-red-500' : ''}`}
+                      data-testid={`input-stop-time-${index}`}
+                    />
+                  </div>
                   {errors.stops?.[index]?.arrivalTime && (
                     <p className="text-red-500 text-sm mt-1">{errors.stops[index].arrivalTime}</p>
                   )}
                 </div>
-                <div className="relative">
-                  <Calendar
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
-                    size={16}
-                  />
-                  <Input
-                    type="date"
-                    value={stop.arrivalDate}
-                    onChange={(e) => {
-                      if (index === 1) {
-                        handleStop2DateChange(e.target.value);
-                      } else {
-                        handleStopChange(index, "arrivalDate", e.target.value);
-                        // Auto-update Stop 2 date when Stop 1 changes
-                        if (index === 0 && formData.stops[1]) {
-                          const newDate = e.target.value;
-                          handleStopChange(1, "arrivalDate", newDate);
+                <div className="flex-1">
+                  <div className="relative">
+                    <Calendar
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                      size={16}
+                    />
+                    <Input
+                      type="date"
+                      value={stop.arrivalDate}
+                      onChange={(e) => {
+                        if (index === 1) {
+                          handleStop2DateChange(e.target.value);
+                        } else {
+                          handleStopChange(index, "arrivalDate", e.target.value);
+                          // Auto-update Stop 2 date when Stop 1 changes
+                          if (index === 0 && formData.stops[1]) {
+                            const newDate = e.target.value;
+                            handleStopChange(1, "arrivalDate", newDate);
+                          }
                         }
-                      }
-                    }}
-                    min={index === 1 ? formData.stops[0]?.arrivalDate : undefined}
-                    max={index === 1 ? getMaxDateForStop2(formData.stops[0]?.arrivalDate || "") : undefined}
-                    className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.arrivalDate ? 'border-red-500' : ''}`}
-                    data-testid={`input-stop-date-${index}`}
-                  />
+                      }}
+                      min={index === 1 ? formData.stops[0]?.arrivalDate : undefined}
+                      max={index === 1 ? getMaxDateForStop2(formData.stops[0]?.arrivalDate || "") : undefined}
+                      className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.arrivalDate ? 'border-red-500' : ''}`}
+                      data-testid={`input-stop-date-${index}`}
+                    />
+                  </div>
                   {errors.stops?.[index]?.arrivalDate && (
                     <p className="text-red-500 text-sm mt-1">{errors.stops[index].arrivalDate}</p>
                   )}

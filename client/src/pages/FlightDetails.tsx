@@ -3,7 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTravelContext } from "@/contexts/TravelContext";
-import { flightDetailsSchema, type FlightDetails, type Stop, type ExtractedField } from "@shared/schema";
+import {
+  flightDetailsSchema,
+  type FlightDetails,
+  type Stop,
+  type ExtractedField,
+} from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { ConfidenceField } from "@/components/ConfidenceField";
 import { VerificationBanner } from "@/components/VerificationBanner";
@@ -32,7 +37,8 @@ type FormErrors = {
 };
 
 export default function FlightDetailsPage() {
-  const { navigateToStep, setFlightDetails, extractedData, hasExtractedData } = useTravelContext();
+  const { navigateToStep, setFlightDetails, extractedData, hasExtractedData } =
+    useTravelContext();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<FlightDetails>({
@@ -62,26 +68,34 @@ export default function FlightDetailsPage() {
   const [errors, setErrors] = useState<FormErrors>({});
 
   // Helper function to apply extracted string field data
-  const applyExtractedStringField = (extractedField: ExtractedField | undefined, fallbackValue: string): string => {
+  const applyExtractedStringField = (
+    extractedField: ExtractedField | undefined,
+    fallbackValue: string,
+  ): string => {
     if (!extractedField) return fallbackValue;
-    
+
     const confidence = extractedField.confidence;
     if (confidence < 50) {
-      return '';
+      return "";
     }
-    
+
     return extractedField.value;
   };
 
   // Helper function to apply extracted number field data
-  const applyExtractedNumberField = (extractedField: { value: number; confidence: number; source: 'manual' | 'extracted' } | undefined, fallbackValue: number): number => {
+  const applyExtractedNumberField = (
+    extractedField:
+      | { value: number; confidence: number; source: "manual" | "extracted" }
+      | undefined,
+    fallbackValue: number,
+  ): number => {
     if (!extractedField) return fallbackValue;
-    
+
     const confidence = extractedField.confidence;
     if (confidence < 50) {
       return fallbackValue;
     }
-    
+
     return extractedField.value;
   };
 
@@ -89,10 +103,16 @@ export default function FlightDetailsPage() {
   useEffect(() => {
     if (extractedData) {
       // Get Stop 1 date first
-      const stop1Date = applyExtractedStringField(extractedData.stops?.[0]?.arrivalDate, '2025-08-23');
-      
+      const stop1Date = applyExtractedStringField(
+        extractedData.stops?.[0]?.arrivalDate,
+        "2025-08-23",
+      );
+
       // Calculate Stop 2 date with constraint (same day as Stop 1 if no Stop 2 date extracted)
-      let stop2Date = applyExtractedStringField(extractedData.stops?.[1]?.arrivalDate, '');
+      let stop2Date = applyExtractedStringField(
+        extractedData.stops?.[1]?.arrivalDate,
+        "",
+      );
       if (!stop2Date && stop1Date) {
         // If no Stop 2 date extracted, default to same day as Stop 1
         stop2Date = stop1Date;
@@ -102,41 +122,64 @@ export default function FlightDetailsPage() {
         const stop2DateObj = new Date(stop2Date);
         const maxStop2Date = new Date(stop1Date);
         maxStop2Date.setDate(maxStop2Date.getDate() + 1);
-        
+
         // If Stop 2 date is more than 1 day after Stop 1, constrain it
         if (stop2DateObj > maxStop2Date) {
-          stop2Date = maxStop2Date.toISOString().split('T')[0];
+          stop2Date = maxStop2Date.toISOString().split("T")[0];
         }
         // If Stop 2 date is before Stop 1, set it to same day as Stop 1
         if (stop2DateObj < stop1DateObj) {
           stop2Date = stop1Date;
         }
       }
-      
+
       const newFormData: FlightDetails = {
-        from: applyExtractedStringField(extractedData.from, ''),
-        to: applyExtractedStringField(extractedData.stops?.[1]?.location, ''),
-        departureTime: applyExtractedStringField(extractedData.departureTime, '08:00'),
-        arrivalTime: applyExtractedStringField(extractedData.stops?.[1]?.arrivalTime, '18:00'),
-        departureDate: applyExtractedStringField(extractedData.departureDate, '2025-08-22'),
-        arrivalDate: stop2Date || '2025-08-23',
+        from: applyExtractedStringField(extractedData.from, ""),
+        to: applyExtractedStringField(extractedData.stops?.[1]?.location, ""),
+        departureTime: applyExtractedStringField(
+          extractedData.departureTime,
+          "08:00",
+        ),
+        arrivalTime: applyExtractedStringField(
+          extractedData.stops?.[1]?.arrivalTime,
+          "18:00",
+        ),
+        departureDate: applyExtractedStringField(
+          extractedData.departureDate,
+          "2025-08-22",
+        ),
+        arrivalDate: stop2Date || "2025-08-23",
         adults: applyExtractedNumberField(extractedData.adults, 2),
         children: applyExtractedNumberField(extractedData.children, 0),
-        luggageCount: extractedData.luggageCount ? applyExtractedNumberField(extractedData.luggageCount, 0) : formData.luggageCount,
+        luggageCount: extractedData.luggageCount
+          ? applyExtractedNumberField(extractedData.luggageCount, 0)
+          : formData.luggageCount,
         stops: [
           {
-            location: applyExtractedStringField(extractedData.stops?.[0]?.location, ''),
-            arrivalTime: applyExtractedStringField(extractedData.stops?.[0]?.arrivalTime, '15:30'),
+            location: applyExtractedStringField(
+              extractedData.stops?.[0]?.location,
+              "",
+            ),
+            arrivalTime: applyExtractedStringField(
+              extractedData.stops?.[0]?.arrivalTime,
+              "15:30",
+            ),
             arrivalDate: stop1Date,
           },
           {
-            location: applyExtractedStringField(extractedData.stops?.[1]?.location, ''),
-            arrivalTime: applyExtractedStringField(extractedData.stops?.[1]?.arrivalTime, '18:00'),
-            arrivalDate: stop2Date || '2025-08-23',
+            location: applyExtractedStringField(
+              extractedData.stops?.[1]?.location,
+              "",
+            ),
+            arrivalTime: applyExtractedStringField(
+              extractedData.stops?.[1]?.arrivalTime,
+              "18:00",
+            ),
+            arrivalDate: stop2Date || "2025-08-23",
           },
         ],
       };
-      
+
       setFormData(newFormData);
     }
   }, [extractedData]);
@@ -162,14 +205,16 @@ export default function FlightDetailsPage() {
     setFormData((prev) => ({
       ...prev,
       stops: prev.stops.map((stop, i) =>
-        i === index ? { ...stop, [field]: value } : stop
+        i === index ? { ...stop, [field]: value } : stop,
       ),
     }));
     // Clear error for the specific stop field on input change
     setErrors((prev) => {
       const newErrors = { ...prev };
       if (newErrors.stops && newErrors.stops[index]) {
-        delete newErrors.stops[index][field as keyof typeof newErrors.stops[0]];
+        delete newErrors.stops[index][
+          field as keyof (typeof newErrors.stops)[0]
+        ];
         if (Object.keys(newErrors.stops[index]).length === 0) {
           delete newErrors.stops[index];
         }
@@ -185,7 +230,7 @@ export default function FlightDetailsPage() {
   const getMaxDateForStop2 = (stop1Date: string): string => {
     const date = new Date(stop1Date);
     date.setDate(date.getDate() + 1); // Allow only same day or next day
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   };
 
   const handleStop2DateChange = (newDate: string) => {
@@ -195,7 +240,7 @@ export default function FlightDetailsPage() {
       const minDate = stop1Date; // Same day as stop 1
 
       if (newDate >= minDate && newDate <= maxDate) {
-        handleStopChange(1, 'arrivalDate', newDate);
+        handleStopChange(1, "arrivalDate", newDate);
       }
     }
   };
@@ -221,30 +266,47 @@ export default function FlightDetailsPage() {
     }
 
     // Check if all stop locations, times and dates are filled
-    const stopsErrors: { location?: string; arrivalTime?: string; arrivalDate?: string }[] = [];
+    const stopsErrors: {
+      location?: string;
+      arrivalTime?: string;
+      arrivalDate?: string;
+    }[] = [];
     let hasStopErrors = false;
-    
+
     for (let i = 0; i < formData.stops.length; i++) {
-      const stopErrors: { location?: string; arrivalTime?: string; arrivalDate?: string } = {};
-      
-      if (!formData.stops[i].location || formData.stops[i].location.trim() === "") {
+      const stopErrors: {
+        location?: string;
+        arrivalTime?: string;
+        arrivalDate?: string;
+      } = {};
+
+      if (
+        !formData.stops[i].location ||
+        formData.stops[i].location.trim() === ""
+      ) {
         stopErrors.location = "Location is required";
         hasStopErrors = true;
       }
-      
-      if (!formData.stops[i].arrivalTime || formData.stops[i].arrivalTime.trim() === "") {
+
+      if (
+        !formData.stops[i].arrivalTime ||
+        formData.stops[i].arrivalTime.trim() === ""
+      ) {
         stopErrors.arrivalTime = "Arrival time is required";
         hasStopErrors = true;
       }
-      
-      if (!formData.stops[i].arrivalDate || formData.stops[i].arrivalDate.trim() === "") {
+
+      if (
+        !formData.stops[i].arrivalDate ||
+        formData.stops[i].arrivalDate.trim() === ""
+      ) {
         stopErrors.arrivalDate = "Arrival date is required";
         hasStopErrors = true;
       }
-      
+
       stopsErrors[i] = stopErrors;
     }
-    
+
     if (hasStopErrors) {
       validationErrors.stops = stopsErrors;
     }
@@ -267,9 +329,9 @@ export default function FlightDetailsPage() {
     // Map Stop 2 data to final destination fields
     const transformedFormData = {
       ...formData,
-      to: formData.stops[1]?.location || '', // Final destination from Stop 2
-      arrivalTime: formData.stops[1]?.arrivalTime || '', // Final arrival time from Stop 2
-      arrivalDate: formData.stops[1]?.arrivalDate || '', // Final arrival date from Stop 2
+      to: formData.stops[1]?.location || "", // Final destination from Stop 2
+      arrivalTime: formData.stops[1]?.arrivalTime || "", // Final arrival time from Stop 2
+      arrivalDate: formData.stops[1]?.arrivalDate || "", // Final arrival date from Stop 2
     };
 
     try {
@@ -280,14 +342,17 @@ export default function FlightDetailsPage() {
       const zodValidationErrors: FormErrors = {};
       if (error.errors) {
         error.errors.forEach((err: any) => {
-          const path = err.path.join('.');
-          if (path.startsWith('stops.')) {
-            const parts = path.split('.');
+          const path = err.path.join(".");
+          if (path.startsWith("stops.")) {
+            const parts = path.split(".");
             const stopIndex = parseInt(parts[1], 10);
             const field = parts[2];
             if (!zodValidationErrors.stops) zodValidationErrors.stops = [];
-            if (!zodValidationErrors.stops[stopIndex]) zodValidationErrors.stops[stopIndex] = {};
-            zodValidationErrors.stops[stopIndex][field as keyof typeof zodValidationErrors.stops[0]] = err.message;
+            if (!zodValidationErrors.stops[stopIndex])
+              zodValidationErrors.stops[stopIndex] = {};
+            zodValidationErrors.stops[stopIndex][
+              field as keyof (typeof zodValidationErrors.stops)[0]
+            ] = err.message;
           } else {
             zodValidationErrors[path as keyof FormErrors] = err.message;
           }
@@ -419,7 +484,7 @@ export default function FlightDetailsPage() {
         </div>
 
         {/* Start Location */}
-        <div className="mb-12">
+        <div className="mb-8">
           <h2 className="text-xl font-semibold text-textPrimary mb-3">Start</h2>
           <ConfidenceField
             label="Departure Location"
@@ -446,13 +511,17 @@ export default function FlightDetailsPage() {
               <Input
                 type="time"
                 value={formData.departureTime}
-                onChange={(e) => handleInputChange("departureTime", e.target.value)}
-                className={`pl-10 text-lg h-12 ${errors.departureTime ? 'border-red-500' : ''}`}
+                onChange={(e) =>
+                  handleInputChange("departureTime", e.target.value)
+                }
+                className={`pl-10 text-lg h-12 ${errors.departureTime ? "border-red-500" : ""}`}
                 data-testid="input-departure-time"
               />
             </div>
             {errors.departureTime && (
-              <p className="text-red-500 text-sm mt-1">{errors.departureTime}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.departureTime}
+              </p>
             )}
           </div>
           <div className="flex-1">
@@ -464,13 +533,17 @@ export default function FlightDetailsPage() {
               <Input
                 type="date"
                 value={formData.departureDate}
-                onChange={(e) => handleInputChange("departureDate", e.target.value)}
-                className={`pl-10 text-lg h-12 ${errors.departureDate ? 'border-red-500' : ''}`}
+                onChange={(e) =>
+                  handleInputChange("departureDate", e.target.value)
+                }
+                className={`pl-10 text-lg h-12 ${errors.departureDate ? "border-red-500" : ""}`}
                 data-testid="input-departure-date"
               />
             </div>
             {errors.departureDate && (
-              <p className="text-red-500 text-sm mt-1">{errors.departureDate}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.departureDate}
+              </p>
             )}
           </div>
         </div>
@@ -484,18 +557,22 @@ export default function FlightDetailsPage() {
               </h3>
 
               {/* Location */}
-              <div className="mb-12">
+              <div className="mb-8">
                 <ConfidenceField
                   label={`Stop ${index + 1} Location`}
                   value={stop.location}
-                  onChange={(value) => handleStopChange(index, "location", value)}
+                  onChange={(value) =>
+                    handleStopChange(index, "location", value)
+                  }
                   extractedField={extractedData?.stops?.[index]?.location}
-                  placeholder={`Enter stop ${index + 1} location (e.g., ${index === 0 ? 'Rome' : 'Amsterdam'})`}
+                  placeholder={`Enter stop ${index + 1} location (e.g., ${index === 0 ? "Rome" : "Amsterdam"})`}
                   data-testid={`input-stop-location-${index}`}
                   className="text-lg h-12"
                 />
                 {errors.stops?.[index]?.location && (
-                  <p className="text-red-500 text-sm mt-1">{errors.stops[index].location}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.stops[index].location}
+                  </p>
                 )}
               </div>
 
@@ -510,13 +587,17 @@ export default function FlightDetailsPage() {
                     <Input
                       type="time"
                       value={stop.arrivalTime}
-                      onChange={(e) => handleStopChange(index, "arrivalTime", e.target.value)}
-                      className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.arrivalTime ? 'border-red-500' : ''}`}
+                      onChange={(e) =>
+                        handleStopChange(index, "arrivalTime", e.target.value)
+                      }
+                      className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.arrivalTime ? "border-red-500" : ""}`}
                       data-testid={`input-stop-time-${index}`}
                     />
                   </div>
                   {errors.stops?.[index]?.arrivalTime && (
-                    <p className="text-red-500 text-sm mt-1">{errors.stops[index].arrivalTime}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.stops[index].arrivalTime}
+                    </p>
                   )}
                 </div>
                 <div className="flex-1">
@@ -532,7 +613,11 @@ export default function FlightDetailsPage() {
                         if (index === 1) {
                           handleStop2DateChange(e.target.value);
                         } else {
-                          handleStopChange(index, "arrivalDate", e.target.value);
+                          handleStopChange(
+                            index,
+                            "arrivalDate",
+                            e.target.value,
+                          );
                           // Auto-update Stop 2 date when Stop 1 changes
                           if (index === 0 && formData.stops[1]) {
                             const newDate = e.target.value;
@@ -540,14 +625,24 @@ export default function FlightDetailsPage() {
                           }
                         }
                       }}
-                      min={index === 1 ? formData.stops[0]?.arrivalDate : undefined}
-                      max={index === 1 ? getMaxDateForStop2(formData.stops[0]?.arrivalDate || "") : undefined}
-                      className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.arrivalDate ? 'border-red-500' : ''}`}
+                      min={
+                        index === 1 ? formData.stops[0]?.arrivalDate : undefined
+                      }
+                      max={
+                        index === 1
+                          ? getMaxDateForStop2(
+                              formData.stops[0]?.arrivalDate || "",
+                            )
+                          : undefined
+                      }
+                      className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.arrivalDate ? "border-red-500" : ""}`}
                       data-testid={`input-stop-date-${index}`}
                     />
                   </div>
                   {errors.stops?.[index]?.arrivalDate && (
-                    <p className="text-red-500 text-sm mt-1">{errors.stops[index].arrivalDate}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.stops[index].arrivalDate}
+                    </p>
                   )}
                 </div>
               </div>
@@ -556,7 +651,12 @@ export default function FlightDetailsPage() {
 
           {/* Transit Planning Note */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
-            <p><strong>Transit Planning:</strong> This tool is designed for short-term transit planning with exactly 2 stops over 1-2 days. For longer multi-city itineraries, please use our extended trip planner.</p>
+            <p>
+              <strong>Transit Planning:</strong> This tool is designed for
+              short-term transit planning with exactly 2 stops over 1-2 days.
+              For longer multi-city itineraries, please use our extended trip
+              planner.
+            </p>
           </div>
         </div>
 

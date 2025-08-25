@@ -436,11 +436,14 @@ export default function FlightDetailsPage() {
         </div>
 
         {/* Departure Time and Date */}
-        <div className="flex gap-3 items-start mb-6">
-          <div className="flex-1">
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <Label className="text-sm font-medium text-gray-700 mb-2 block">
+              Departure Time
+            </Label>
             <div className="relative">
               <Clock
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
                 size={16}
               />
               <Input
@@ -455,10 +458,13 @@ export default function FlightDetailsPage() {
               <p className="text-red-500 text-sm mt-1">{errors.departureTime}</p>
             )}
           </div>
-          <div className="flex-1">
+          <div>
+            <Label className="text-sm font-medium text-gray-700 mb-2 block">
+              Departure Date
+            </Label>
             <div className="relative">
               <Calendar
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
                 size={16}
               />
               <Input
@@ -500,11 +506,14 @@ export default function FlightDetailsPage() {
               </div>
 
               {/* Time and Date */}
-              <div className="flex gap-3 items-start">
-                <div className="flex-1">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Arrival Time
+                  </Label>
                   <div className="relative">
                     <Clock
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10"
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
                       size={16}
                     />
                     <Input
@@ -519,10 +528,13 @@ export default function FlightDetailsPage() {
                     <p className="text-red-500 text-sm mt-1">{errors.stops[index].arrivalTime}</p>
                   )}
                 </div>
-                <div className="flex-1">
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Arrival Date
+                  </Label>
                   <div className="relative">
                     <Calendar
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10"
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
                       size={16}
                     />
                     <Input

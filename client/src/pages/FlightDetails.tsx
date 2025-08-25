@@ -476,7 +476,7 @@ export default function FlightDetailsPage() {
         </div>
 
         {/* Stops Section */}
-        <div className="space-y-8">
+        <div className="space-y-16">
           {formData.stops.map((stop, index) => (
             <div key={index}>
               <h3 className="text-xl font-semibold text-textPrimary mb-3">

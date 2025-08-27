@@ -86,10 +86,8 @@ interface TravelRecommendations {
     }>;
     cost: string;
     duration: string;
-    totalTime: string;
     energyLevel: string;
     comfortLevel: string;
-    confidenceScore: number;
     stressLevel: "Minimal" | "Low" | "Moderate" | "High";
     recommended: boolean;
     confidence: "high" | "medium" | "low";
@@ -293,7 +291,7 @@ USER PREFERENCES:
         : "(prefer simple, straightforward options with minimal complexity)"
   }${locationKnowledge}
 
-Analyze this situation following your structured reasoning approach. Provide exactly 3 distinct options.
+Analyze this situation following your structured reasoning approach. Provide exactly 2 distinct options.
 
 Provide exactly 3 options in this JSON format (times in HH:MM format only):
 {
@@ -314,10 +312,8 @@ Provide exactly 3 options in this JSON format (times in HH:MM format only):
       ],
       "cost": "€75-90 total",
       "duration": "4.5 hours",
-      "totalTime": "Total time: 5 hours",
       "energyLevel": "Moderate activity",
       "comfortLevel": "Comfort", 
-      "confidenceScore": 85,
       "stressLevel": "Minimal",
       "recommended": true,
       "confidence": "high"
@@ -357,7 +353,7 @@ Provide exactly 3 options in this JSON format (times in HH:MM format only):
 
     const response = await anthropic.messages.create({
       model: DEFAULT_MODEL_STR,
-      max_tokens: 4000,
+      max_tokens: 2500,
       system: systemPrompt,
       messages: [
         {

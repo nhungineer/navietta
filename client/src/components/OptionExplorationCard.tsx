@@ -6,10 +6,8 @@ interface OptionExplorationCardProps {
     highlights: Array<string>;
     cost: string;
     duration: string;
-    totalTime: string;
     energyLevel: string;
     comfortLevel: string;
-    confidenceScore: number;
     stressLevel: string;
     recommended: boolean;
     confidence: 'high' | 'medium' | 'low';
@@ -47,7 +45,7 @@ export function OptionExplorationCard({ option, optionLetter, isRecommended = fa
           <circle cx="12" cy="12" r="10"/>
           <polyline points="12,6 12,12 16,14"/>
         </svg>
-        <span className="text-sm text-textPrimary">{option.totalTime}</span>
+        <span className="text-sm text-textPrimary">{option.duration}</span>
       </div>
 
       {/* Cost Row */}
@@ -67,19 +65,6 @@ export function OptionExplorationCard({ option, optionLetter, isRecommended = fa
         </p>
       </div>
 
-      {/* Comfort Progress Bar */}
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs text-textSecondary">Comfort</span>
-          <span className="text-xs text-textSecondary">{option.confidenceScore}%</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className="bg-teal-500 h-2 rounded-full transition-all duration-300" 
-            style={{ width: `${option.confidenceScore}%` }}
-          />
-        </div>
-      </div>
 
       {/* Confidence Level */}
       <div>

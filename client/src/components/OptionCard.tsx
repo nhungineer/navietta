@@ -8,10 +8,8 @@ interface OptionCardProps {
     highlights: Array<string>;
     cost: string;
     duration: string;
-    totalTime: string;
     energyLevel: string;
     comfortLevel: string;
-    confidenceScore: number;
     stressLevel: string;
     recommended: boolean;
   };
@@ -19,17 +17,6 @@ interface OptionCardProps {
 }
 
 export function OptionCard({ option, isRecommended = false }: OptionCardProps) {
-  const getConfidenceColor = (score: number) => {
-    if (score >= 80) return 'text-green-600 bg-green-100';
-    if (score >= 60) return 'text-yellow-600 bg-yellow-100';
-    return 'text-red-600 bg-red-100';
-  };
-
-  const getConfidenceText = (score: number) => {
-    if (score >= 80) return 'High';
-    if (score >= 60) return 'Med';
-    return 'Low';
-  };
 
   return (
     <div 
@@ -81,13 +68,6 @@ export function OptionCard({ option, isRecommended = false }: OptionCardProps) {
             <div className="text-xs text-textSecondary">Stress</div>
             <div className="text-sm font-medium text-textPrimary">{option.stressLevel}</div>
           </div>
-        </div>
-        
-        <div className={`
-          px-2 py-1 rounded-full text-xs font-medium
-          ${getConfidenceColor(option.confidenceScore)}
-        `}>
-          {getConfidenceText(option.confidenceScore)}
         </div>
       </div>
     </div>

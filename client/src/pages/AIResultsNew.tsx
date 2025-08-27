@@ -27,10 +27,8 @@ interface ExtendedAIRecommendations {
     }>;
     cost: string;
     duration: string;
-    totalTime: string;
     energyLevel: string;
     comfortLevel: string;
-    confidenceScore: number;
     stressLevel: 'Minimal' | 'Low' | 'Moderate' | 'High';
     recommended: boolean;
     confidence: 'high' | 'medium' | 'low';

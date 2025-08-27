@@ -121,6 +121,57 @@ export default function AIResultsPage() {
           />
         )}
 
+        {/* User Preferences */}
+        {preferences && (
+          <div className="bg-white rounded-lg p-6 space-y-4">
+            <h3 className="font-medium text-textPrimary mb-4">Your Preferences</h3>
+            
+            {/* Budget vs Convenience Visual */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-textPrimary">Budget vs Convenience</h4>
+              <div className="flex items-center gap-4">
+                <span className="text-xs text-textSecondary">Save money</span>
+                <div className="flex-1 bg-gray-200 rounded-full h-2 relative">
+                  <div 
+                    className="bg-primary h-2 rounded-full" 
+                    style={{ width: `${preferences.budgetComfort}%` }}
+                  />
+                </div>
+                <span className="text-xs text-textSecondary">Max convenience</span>
+              </div>
+            </div>
+
+            {/* Energy Level Visual */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-textPrimary">Energy level</h4>
+              <div className="flex items-center gap-4">
+                <span className="text-xs text-textSecondary">Want to rest</span>
+                <div className="flex-1 bg-gray-200 rounded-full h-2 relative">
+                  <div 
+                    className="bg-blue-500 h-2 rounded-full" 
+                    style={{ width: `${preferences.energyLevel}%` }}
+                  />
+                </div>
+                <span className="text-xs text-textSecondary">Energetic</span>
+              </div>
+            </div>
+
+            {/* Transit Style */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-textPrimary">Transit style</h4>
+              <div className="flex items-center gap-2">
+                <span className={`px-3 py-1 rounded-full text-sm ${
+                  preferences.transitStyle === 'explore' ? 'bg-primary text-white' : 'bg-gray-100 text-textSecondary'
+                }`}>
+                  {preferences.transitStyle === 'quickly' ? 'Get there quickly' :
+                   preferences.transitStyle === 'explore' ? 'Explore along the way' :
+                   'Keep it simple'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Thinking Process Sections */}
         <ExpandableSection 
           title="AI Analysis & Reasoning" 
@@ -140,35 +191,6 @@ export default function AIResultsPage() {
                   isRecommended={option.id === recommendations.finalRecommendation.optionId}
                 />
               ))}
-            </div>
-            {/* Budget vs Convenience Visual */}
-            <div className="bg-white rounded-lg p-4">
-              <h4 className="font-medium text-textPrimary mb-3">Budget vs Convenience</h4>
-              <div className="flex items-center gap-4">
-                <span className="text-xs text-textSecondary">Save money</span>
-                <div className="flex-1 bg-gray-200 rounded-full h-2 relative">
-                  <div 
-                    className="bg-primary h-2 rounded-full" 
-                    style={{ width: `${preferences?.budgetComfort || 50}%` }}
-                  />
-                </div>
-                <span className="text-xs text-textSecondary">Max convenience</span>
-              </div>
-            </div>
-
-            {/* Energy Level Visual */}
-            <div className="bg-white rounded-lg p-4">
-              <h4 className="font-medium text-textPrimary mb-3">Energy level</h4>
-              <div className="flex items-center gap-4">
-                <span className="text-xs text-textSecondary">Want to rest</span>
-                <div className="flex-1 bg-gray-200 rounded-full h-2 relative">
-                  <div 
-                    className="bg-blue-500 h-2 rounded-full" 
-                    style={{ width: `${preferences?.energyLevel || 50}%` }}
-                  />
-                </div>
-                <span className="text-xs text-textSecondary">Energetic</span>
-              </div>
             </div>
           </div>
         </ExpandableSection>

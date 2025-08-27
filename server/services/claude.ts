@@ -278,7 +278,13 @@ Journey breakdown:
 
 IMPORTANT: ${flightDetails.stops[1]?.location} is the FINAL DESTINATION. ${flightDetails.stops[0]?.location} is a transit stop, not the end goal.
 
-FOCUS: Provide transit options for the COMPLETE journey from ${flightDetails.from} through ${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location}.
+FOCUS: Provide transit options for the TRANSIT PORTION from ${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location}.
+
+IMPORTANT TIMING:
+- "duration" field should show TRANSIT TIME ONLY (${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location})
+- Timeline should focus on the TRANSIT PORTION starting from arrival in ${flightDetails.stops[0]?.location}
+- Include 5-7 detailed timeline items with stops for food, rest, and sightseeing during transit
+- Factor in realistic timing for luggage handling, transport connections, breaks
 
 USER PREFERENCES:
 - Budget vs Comfort preference: ${preferences.budgetComfort}/100 (0=budget focused, 100=comfort focused)
@@ -304,14 +310,26 @@ Provide exactly 3 options in this JSON format (times in HH:MM format only):
       "highlights": ["Key benefit 1", "Key benefit 2", "Key benefit 3"],
       "timelineItems": [
         {
-          "time": "19:15",
-          "title": "Activity title", 
-          "description": "What to do",
+          "time": "15:45",
+          "title": "Arrive Vienna Airport", 
+          "description": "Clear customs, collect luggage, head to city transport",
+          "type": "primary"
+        },
+        {
+          "time": "16:30",
+          "title": "Vienna City Center", 
+          "description": "Quick coffee and pastry break at historic café",
+          "type": "secondary"
+        },
+        {
+          "time": "17:00",
+          "title": "Board Transport to Brno", 
+          "description": "Take comfortable train or bus with scenic views",
           "type": "primary"
         }
       ],
       "cost": "€75-90 total",
-      "duration": "4.5 hours",
+      "duration": "4.5 hours transit",
       "energyLevel": "Moderate activity",
       "comfortLevel": "Comfort", 
       "stressLevel": "Minimal",

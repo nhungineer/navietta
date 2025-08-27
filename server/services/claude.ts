@@ -222,7 +222,6 @@ export async function generateTravelRecommendations(
 
 CRITICAL: Respond with ONLY valid JSON. No markdown blocks. Start with { and end with }.`;
 
-
   const stopsText = flightDetails.stops
     .map(
       (stop: any, index: number) =>
@@ -230,20 +229,17 @@ CRITICAL: Respond with ONLY valid JSON. No markdown blocks. Start with { and end
     )
     .join("\n");
 
-  const prompt = `TRAVEL SITUATION:
-- Starting location: ${flightDetails.from}
-- Travelers: ${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ""}
-- Luggage: ${flightDetails.luggageCount} piece(s) of luggage
-
-TRANSIT PLAN - The user needs transit recommendations for their journey:
-${stopsText}
-
-Focus on transit from ${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location}.
+  const prompt = `TRANSIT: ${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location}
+- ${flightDetails.adults} adult(s)${flightDetails.children > 0 ? `, ${flightDetails.children} child(ren)` : ""}
+- ${flightDetails.luggageCount} luggage
+- Arrive ${flightDetails.stops[0]?.location}: ${flightDetails.stops[0]?.arrivalTime}
 
 REQUIREMENTS:
 - Provide EXACTLY 2 options
 - Duration = transit time only (${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location})
-- Timeline starts from ${flightDetails.stops[0]?.location} arrival at ${flightDetails.stops[0]?.arrivalTime}
+- Timeline starts from ${flightDetails.stops[0]?.location} arrival at ${flightDetails.stops[0]?.arrivalTime} 
+- Include exactly 5-7 timeline items covering transit portion only
+- Factor in realistic timing for luggage, transport connections, food/rest breaks
 
 USER PREFERENCES:
 - Budget vs Comfort preference: ${preferences.budgetComfort}/100 (0=budget focused, 100=comfort focused)
@@ -268,20 +264,38 @@ Provide exactly 2 options in this JSON format:
       "timelineItems": [
         {
           "time": "15:45",
-          "title": "Arrive Vienna", 
-          "description": "Clear customs, collect luggage",
+          "title": "Arrive Vienna Airport", 
+          "description": "Clear customs, collect luggage, head to city transport",
           "type": "primary"
         },
         {
-          "time": "16:30",
-          "title": "City highlights", 
-          "description": "Quick Vienna experience",
+          "time": "16:15",
+          "title": "Airport to City Center", 
+          "description": "Take CAT Airport Express or S-Bahn to city center",
+          "type": "primary"
+        },
+        {
+          "time": "16:45",
+          "title": "Quick Vienna Highlights", 
+          "description": "Visit St. Stephen's Cathedral or grab coffee at historic café",
+          "type": "secondary"
+        },
+        {
+          "time": "17:15",
+          "title": "Food & Rest Break", 
+          "description": "Traditional Viennese meal or quick snack before departure",
           "type": "secondary"
         },
         {
           "time": "17:30",
-          "title": "Depart to Brno", 
-          "description": "Board transport to final destination",
+          "title": "Head to Train Station", 
+          "description": "Walk or take U-Bahn to Wien Hauptbahnhof",
+          "type": "primary"
+        },
+        {
+          "time": "17:50",
+          "title": "Board Transport to Brno", 
+          "description": "Take comfortable train or bus with scenic views",
           "type": "primary"
         }
       ],
@@ -298,11 +312,6 @@ Provide exactly 2 options in this JSON format:
     "optionId": "option-1",
     "reasoning": "Why this option is recommended",
     "confidence": 85
-  },
-  "userContext": {
-    "travelingSituation": "Travel situation summary",
-    "preferences": "Stated preferences", 
-    "constraints": "Key constraints"
   },
   "fallbackMode": false
 }`;
@@ -525,153 +534,5 @@ ${pdfText}`,
   } catch (error) {
     console.error("Error extracting travel data from PDF:", error);
     throw new Error("Failed to extract travel data from PDF");
-  }
-}
-
-export async function extractTravelDataFromPDFDirect(
-  pdfBase64: string,
-  filename: string,
-): Promise<PDFExtraction> {
-  const systemPrompt = `You are a travel document analyzer that extracts structured travel information from travel documents. Your task is to extract travel details while strictly protecting privacy.
-
-## CRITICAL PRIVACY REQUIREMENTS:
-- DO NOT extract, store, or return any PII including: names, passport numbers, ID numbers, credit card details, date of birth, phone numbers, email addresses, addresses
-- Only extract travel logistics: locations, dates, times, counts
-- If you encounter PII, redact it completely from your analysis
-
-## EXTRACTION TARGETS:
-Extract these travel logistics with confidence scores (0-100):
-
-1. **Departure Information:**
-   - from: Starting location in format "Full Airport/City Name (CODE)" e.g., "Melbourne International Airport (MEL)"
-   - departureDate: Departure date (YYYY-MM-DD format)
-   - departureTime: Departure time (HH:MM format, 24-hour)
-
-2. **Traveler Counts (CRITICAL - Analyze passenger titles and context):**
-   - adults: Number of adult travelers (look for "MR", "MRS", "MS", adult names without child indicators)
-   - children: Number of child travelers (look for "MSTR", "Master", child age indicators, "CHD", titles indicating minors)
-   - luggageCount: Number of checked bags/luggage pieces mentioned
-
-3. **Journey Stops (maximum 2):**
-   - stops[0].location: First destination in format "Full Airport/City Name (CODE)"
-   - stops[0].arrivalTime: Arrival time (HH:MM, 24-hour)
-   - stops[0].arrivalDate: Arrival date (YYYY-MM-DD)
-   - stops[1].location: Final destination in format "Full Airport/City Name (CODE)"
-   - stops[1].arrivalTime: Final arrival time
-   - stops[1].arrivalDate: Final arrival date
-
-## LOCATION NAME FORMATTING:
-Always provide full location names with airport codes in parentheses:
-- MEL → "Melbourne International Airport (MEL)"
-- AUH → "Abu Dhabi Zayed International Airport (AUH)"
-
-- BER → "Berlin Brandenburg Airport (BER)"
-- FRA → "Frankfurt Airport (FRA)"
-- CDG → "Paris Charles de Gaulle Airport (CDG)"
-- LHR → "London Heathrow Airport (LHR)"
-
-## PASSENGER TYPE DETECTION:
-Pay close attention to passenger classifications:
-- "MSTR" or "Master" = Child passenger
-- "CHD" = Child
-- Age indicators (e.g., "4-12 años", "6-14 Jahre") = Child
-- "MR", "MRS", "MS" without age restrictions = Adult
-- Names with "Mast" prefix typically indicate children
-
-## CONFIDENCE SCORING:
-- 90-100: Explicitly stated information
-- 70-89: Clearly implied or derived information
-- 50-69: Reasonably inferred information
-- 30-49: Uncertain but possible
-- 0-29: Very uncertain or unclear
-
-## RESPONSE FORMAT:
-Return ONLY valid JSON with this exact structure. Omit fields if not found or confidence < 30:
-
-{
-  "from": {"value": "string", "confidence": number},
-  "departureDate": {"value": "YYYY-MM-DD", "confidence": number},
-  "departureTime": {"value": "HH:MM", "confidence": number},
-  "adults": {"value": number, "confidence": number},
-  "children": {"value": number, "confidence": number},
-  "luggageCount": {"value": number, "confidence": number},
-  "stops": [
-    {
-      "location": {"value": "string", "confidence": number},
-      "arrivalTime": {"value": "HH:MM", "confidence": number},
-      "arrivalDate": {"value": "YYYY-MM-DD", "confidence": number}
-    }
-  ]
-}`;
-
-  try {
-    console.log("Extracting travel data from PDF using Claude Vision API...");
-
-    const response = await anthropic.messages.create({
-      model: DEFAULT_MODEL_STR,
-      max_tokens: 2000,
-      system: systemPrompt,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: `Extract travel information from this PDF document: ${filename}. Follow the privacy requirements strictly and return only the JSON structure with travel logistics.`,
-            },
-            {
-              type: "document",
-              source: {
-                type: "base64",
-                media_type: "application/pdf",
-                data: pdfBase64,
-              },
-            },
-          ],
-        },
-      ],
-    });
-
-    console.log("Claude Vision API responded for PDF extraction");
-
-    const content = response.content[0];
-    if (content.type !== "text") {
-      throw new Error("Unexpected response type from Claude Vision API");
-    }
-
-    // Clean the response text to handle markdown code blocks
-    let responseText = content.text.trim();
-    responseText = responseText
-      .replace(/^```json\s*/gi, "")
-      .replace(/^```\s*/gi, "")
-      .replace(/\s*```$/gi, "");
-
-    // Find the actual JSON object
-    const startIndex = responseText.indexOf("{");
-    const lastIndex = responseText.lastIndexOf("}");
-
-    if (startIndex !== -1 && lastIndex !== -1 && lastIndex > startIndex) {
-      responseText = responseText.substring(startIndex, lastIndex + 1);
-    }
-
-    console.log(
-      "Raw PDF extraction response (first 300 chars):",
-      responseText.substring(0, 300),
-    );
-
-    try {
-      const extractedData = JSON.parse(responseText) as PDFExtraction;
-      return extractedData;
-    } catch (parseError) {
-      console.error(
-        "JSON parsing error for PDF extraction. Raw response:",
-        content.text,
-      );
-      console.error("Cleaned response text:", responseText);
-      throw parseError;
-    }
-  } catch (error) {
-    console.error("Error extracting travel data from PDF using vision:", error);
-    throw new Error("Failed to extract travel data from PDF using vision");
   }
 }

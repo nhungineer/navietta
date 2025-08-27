@@ -238,25 +238,12 @@ CRITICAL: Respond with ONLY valid JSON. No markdown blocks. Start with { and end
 TRANSIT PLAN - The user needs transit recommendations for their journey:
 ${stopsText}
 
-This is a MULTI-STOP TRANSIT PLANNING request. The user's complete journey is:
-${flightDetails.from} → ${flightDetails.stops[0]?.location} → ${flightDetails.stops[1]?.location}
+Focus on transit from ${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location}.
 
-Journey breakdown:
-1. First leg: ${flightDetails.from} → ${flightDetails.stops[0]?.location} (arrive by ${flightDetails.stops[0]?.arrivalTime} on ${flightDetails.stops[0]?.arrivalDate})
-2. Second leg: ${flightDetails.stops[0]?.location} → ${flightDetails.stops[1]?.location} (arrive by ${flightDetails.stops[1]?.arrivalTime} on ${flightDetails.stops[1]?.arrivalDate})
-
-IMPORTANT: ${flightDetails.stops[1]?.location} is the FINAL DESTINATION. ${flightDetails.stops[0]?.location} is a transit stop, not the end goal.
-
-FOCUS: Provide transit options for the TRANSIT PORTION from ${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location}.
-
-CRITICAL REQUIREMENTS:
-- Provide EXACTLY 2 options, no more, no less
-- "duration" field shows TRANSIT TIME ONLY (${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location})
-- Timeline starts ONLY from ARRIVAL in ${flightDetails.stops[0]?.location} at ${flightDetails.stops[0]?.arrivalTime}
-- DO NOT include departure from ${flightDetails.from} in timeline
-- Focus EXCLUSIVELY on ${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location} transit
-- Include exactly 5-7 timeline items covering transit portion only
-- Factor in realistic timing for luggage, transport connections, food/rest breaks
+REQUIREMENTS:
+- Provide EXACTLY 2 options
+- Duration = transit time only (${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location})
+- Timeline starts from ${flightDetails.stops[0]?.location} arrival at ${flightDetails.stops[0]?.arrivalTime}
 
 USER PREFERENCES:
 - Budget vs Comfort preference: ${preferences.budgetComfort}/100 (0=budget focused, 100=comfort focused)
@@ -269,9 +256,7 @@ USER PREFERENCES:
         : "(prefer simple, straightforward options with minimal complexity)"
   }
 
-Analyze this situation following your structured reasoning approach. Provide exactly 2 distinct options.
-
-Provide exactly 2 options in this JSON format (times in HH:MM format only):
+Provide exactly 2 options in this JSON format:
 {
   "reasoning": "Brief analysis of situation and how you're balancing their preferences",
   "options": [
@@ -283,38 +268,20 @@ Provide exactly 2 options in this JSON format (times in HH:MM format only):
       "timelineItems": [
         {
           "time": "15:45",
-          "title": "Arrive Vienna Airport", 
-          "description": "Clear customs, collect luggage, head to city transport",
+          "title": "Arrive Vienna", 
+          "description": "Clear customs, collect luggage",
           "type": "primary"
         },
         {
-          "time": "16:15",
-          "title": "Airport to City Center", 
-          "description": "Take CAT Airport Express or S-Bahn to city center",
-          "type": "primary"
-        },
-        {
-          "time": "16:45",
-          "title": "Quick Vienna Highlights", 
-          "description": "Visit St. Stephen's Cathedral or grab coffee at historic café",
+          "time": "16:30",
+          "title": "City highlights", 
+          "description": "Quick Vienna experience",
           "type": "secondary"
         },
         {
-          "time": "17:15",
-          "title": "Head to Train Station", 
-          "description": "Walk or take U-Bahn to Wien Hauptbahnhof",
-          "type": "primary"
-        },
-        {
-          "time": "17:45",
-          "title": "Board Transport to Brno", 
-          "description": "Take comfortable train or bus with scenic views",
-          "type": "primary"
-        },
-        {
-          "time": "18:00",
-          "title": "Arrive Brno", 
-          "description": "Arrive at destination on schedule",
+          "time": "17:30",
+          "title": "Depart to Brno", 
+          "description": "Board transport to final destination",
           "type": "primary"
         }
       ],

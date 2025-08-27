@@ -176,7 +176,7 @@ ${newQuestion}
 - Be helpful and specific to their situation
 - If asked for timeline details, provide specific times and locations
 - If asked about other options, reference the ones you actually recommended
-- Keep responses conversational but informative (2-3 paragraphs max)
+- Keep responses conversational but informative (1 paragraph max)
 - For lists, use proper markdown format with dashes (- item) or numbers (1. item)
 - Use **bold** for emphasis on important details like times, places, or key recommendations
 - Format timelines as proper markdown lists for better readability
@@ -280,11 +280,12 @@ IMPORTANT: ${flightDetails.stops[1]?.location} is the FINAL DESTINATION. ${fligh
 
 FOCUS: Provide transit options for the TRANSIT PORTION from ${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location}.
 
-IMPORTANT TIMING:
-- "duration" field should show TRANSIT TIME ONLY (${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location})
-- Timeline should focus on the TRANSIT PORTION starting from arrival in ${flightDetails.stops[0]?.location}
-- Include 5-7 detailed timeline items with stops for food, rest, and sightseeing during transit
-- Factor in realistic timing for luggage handling, transport connections, breaks
+CRITICAL REQUIREMENTS:
+- Provide EXACTLY 2 options, no more, no less
+- "duration" field shows TRANSIT TIME ONLY (${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location})
+- Timeline starts from ARRIVAL in ${flightDetails.stops[0]?.location} at ${flightDetails.stops[0]?.arrivalTime}, NOT from departure location
+- Include exactly 5-7 timeline items covering transit portion only
+- Factor in realistic timing for luggage, transport connections, food/rest breaks
 
 USER PREFERENCES:
 - Budget vs Comfort preference: ${preferences.budgetComfort}/100 (0=budget focused, 100=comfort focused)
@@ -299,7 +300,7 @@ USER PREFERENCES:
 
 Analyze this situation following your structured reasoning approach. Provide exactly 2 distinct options.
 
-Provide exactly 3 options in this JSON format (times in HH:MM format only):
+Provide exactly 2 options in this JSON format (times in HH:MM format only):
 {
   "reasoning": "Brief analysis of situation and how you're balancing their preferences",
   "options": [
@@ -316,15 +317,33 @@ Provide exactly 3 options in this JSON format (times in HH:MM format only):
           "type": "primary"
         },
         {
-          "time": "16:30",
-          "title": "Vienna City Center", 
-          "description": "Quick coffee and pastry break at historic café",
+          "time": "16:15",
+          "title": "Airport to City Center", 
+          "description": "Take CAT Airport Express or S-Bahn to city center",
+          "type": "primary"
+        },
+        {
+          "time": "16:45",
+          "title": "Quick Vienna Highlights", 
+          "description": "Visit St. Stephen's Cathedral or grab coffee at historic café",
           "type": "secondary"
         },
         {
-          "time": "17:00",
+          "time": "17:15",
+          "title": "Head to Train Station", 
+          "description": "Walk or take U-Bahn to Wien Hauptbahnhof",
+          "type": "primary"
+        },
+        {
+          "time": "17:45",
           "title": "Board Transport to Brno", 
           "description": "Take comfortable train or bus with scenic views",
+          "type": "primary"
+        },
+        {
+          "time": "18:00",
+          "title": "Arrive Brno", 
+          "description": "Arrive at destination on schedule",
           "type": "primary"
         }
       ],

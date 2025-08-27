@@ -66,30 +66,16 @@ export function OptionExplorationCard({ option, optionLetter, isRecommended = fa
       </div>
 
 
-      {/* Confidence Level */}
+      {/* Comfort Level */}
       <div>
         <div className="flex justify-between items-center mb-2">
-          <span className="text-xs text-textSecondary">Confidence</span>
-          <span className={`text-xs px-2 py-1 rounded ${
-            option.confidence === 'high' ? 'bg-green-100 text-green-800' :
-            option.confidence === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
-            'bg-red-100 text-red-800'
-          }`}>
-            {option.confidence === 'high' ? 'High' : option.confidence === 'medium' ? 'Medium' : 'Low'}
+          <span className="text-xs text-textSecondary">Comfort Level</span>
+          <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800">
+            {option.comfortLevel}
           </span>
         </div>
-        <div className="flex gap-1 mb-2">
-          {Array.from({ length: 5 }, (_, i) => (
-            <div 
-              key={i} 
-              className={`flex-1 h-2 rounded ${
-                i < (option.confidence === 'high' ? 5 : option.confidence === 'medium' ? 3 : 2) ? 'bg-teal-500' : 'bg-gray-200'
-              }`} 
-            />
-          ))}
-        </div>
         <p className="text-xs text-textSecondary">
-          High confidence in this recommendation.
+          Comfort rating based on travel style and amenities.
         </p>
       </div>
     </div>

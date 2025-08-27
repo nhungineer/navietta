@@ -182,7 +182,7 @@ export default function AIResultsPage() {
               {recommendations.reasoning}
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {recommendations.options.map((option, index) => (
                 <OptionExplorationCard
                   key={option.id}

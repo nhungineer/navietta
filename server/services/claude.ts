@@ -1,5 +1,5 @@
-import Anthropic from '@anthropic-ai/sdk';
-import { PDFExtraction } from '@shared/schema';
+import Anthropic from "@anthropic-ai/sdk";
+import { PDFExtraction } from "@shared/schema";
 
 /*
 <important_code_snippet_instructions>
@@ -15,26 +15,35 @@ const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
 
 // Environment-specific API key selection for cost tracking
 function getAnthropicApiKey(): string {
-  const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
+  const isProduction = process.env.REPLIT_DEPLOYMENT === "1";
   const devKey = process.env.NAVIETTA_DEV_API_KEY;
-  const prodKey = process.env.NAVIETTA_PROD_API_KEY || process.env.ANTHROPIC_API_KEY; // Support both naming conventions
-  
-  console.log('🔑 API Key Selection Debug:');
-  console.log('- REPLIT_DEPLOYMENT:', process.env.REPLIT_DEPLOYMENT);
-  console.log('- Is Production:', isProduction);
-  console.log('- Dev key exists:', !!devKey);
-  console.log('- Prod key exists:', !!prodKey);
-  console.log('- NAVIETTA_PROD_API_KEY exists:', !!process.env.NAVIETTA_PROD_API_KEY);
-  
+  const prodKey =
+    process.env.NAVIETTA_PROD_API_KEY || process.env.ANTHROPIC_API_KEY; // Support both naming conventions
+
+  console.log("🔑 API Key Selection Debug:");
+  console.log("- REPLIT_DEPLOYMENT:", process.env.REPLIT_DEPLOYMENT);
+  console.log("- Is Production:", isProduction);
+  console.log("- Dev key exists:", !!devKey);
+  console.log("- Prod key exists:", !!prodKey);
+  console.log(
+    "- NAVIETTA_PROD_API_KEY exists:",
+    !!process.env.NAVIETTA_PROD_API_KEY,
+  );
+
   if (isProduction) {
-    const keySource = process.env.NAVIETTA_PROD_API_KEY ? 'NAVIETTA_PROD_API_KEY' : 'ANTHROPIC_API_KEY (fallback)';
-    console.log('✅ Using PRODUCTION key:', keySource);
+    const keySource = process.env.NAVIETTA_PROD_API_KEY
+      ? "NAVIETTA_PROD_API_KEY"
+      : "ANTHROPIC_API_KEY (fallback)";
+    console.log("✅ Using PRODUCTION key:", keySource);
     return prodKey || "";
   }
-  
+
   // Use development-specific key for local development
   const selectedKey = devKey || prodKey || "";
-  console.log('✅ Using DEVELOPMENT key:', devKey ? 'NAVIETTA_DEV_API_KEY' : 'fallback to prod key');
+  console.log(
+    "✅ Using DEVELOPMENT key:",
+    devKey ? "NAVIETTA_DEV_API_KEY" : "fallback to prod key",
+  );
   return selectedKey;
 }
 
@@ -59,7 +68,7 @@ interface FlightDetails {
 interface Preferences {
   budgetComfort: number;
   energyLevel: number;
-  transitStyle: 'quickly' | 'explore' | 'simple';
+  transitStyle: "quickly" | "explore" | "simple";
 }
 
 interface TravelRecommendations {
@@ -73,7 +82,7 @@ interface TravelRecommendations {
       time: string;
       title: string;
       description: string;
-      type: 'primary' | 'accent' | 'secondary';
+      type: "primary" | "accent" | "secondary";
     }>;
     cost: string;
     duration: string;
@@ -81,9 +90,9 @@ interface TravelRecommendations {
     energyLevel: string;
     comfortLevel: string;
     confidenceScore: number;
-    stressLevel: 'Minimal' | 'Low' | 'Moderate' | 'High';
+    stressLevel: "Minimal" | "Low" | "Moderate" | "High";
     recommended: boolean;
-    confidence: 'high' | 'medium' | 'low';
+    confidence: "high" | "medium" | "low";
   }>;
   finalRecommendation: {
     optionId: string;
@@ -102,38 +111,44 @@ export async function generateFollowUpResponse(
   originalRecommendations: TravelRecommendations,
   flightDetails: FlightDetails,
   preferences: Preferences,
-  conversationHistory: Array<{question: string; response: string}>,
-  newQuestion: string
+  conversationHistory: Array<{ question: string; response: string }>,
+  newQuestion: string,
 ): Promise<string> {
   // Create compressed context from original recommendations
   const contextSummary = {
     startLocation: flightDetails.from,
-    firstDestination: flightDetails.stops[0]?.location || 'destination',
+    firstDestination: flightDetails.stops[0]?.location || "destination",
     departureTime: flightDetails.departureTime,
     departureDate: flightDetails.departureDate,
-    firstStopTime: flightDetails.stops[0]?.arrivalTime || 'time not specified',
-    travelers: `${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ''}`,
+    firstStopTime: flightDetails.stops[0]?.arrivalTime || "time not specified",
+    travelers: `${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ""}`,
     luggage: `${flightDetails.luggageCount} piece(s)`,
     preferences: {
       budgetComfort: preferences.budgetComfort,
       energyLevel: preferences.energyLevel,
-      transitStyle: preferences.transitStyle
+      transitStyle: preferences.transitStyle,
     },
     recommendedOption: originalRecommendations.finalRecommendation.optionId,
-    options: originalRecommendations.options.map(opt => ({
+    options: originalRecommendations.options.map((opt) => ({
       id: opt.id,
       title: opt.title,
       description: opt.description,
       cost: opt.cost,
       duration: opt.duration,
-      recommended: opt.recommended
-    }))
+      recommended: opt.recommended,
+    })),
   };
 
   // Create conversation context
-  const conversationContext = conversationHistory.length > 0 
-    ? conversationHistory.map((msg, i) => `Q${i+1}: ${msg.question}\nA${i+1}: ${msg.response}`).join('\n\n')
-    : '';
+  const conversationContext =
+    conversationHistory.length > 0
+      ? conversationHistory
+          .map(
+            (msg, i) =>
+              `Q${i + 1}: ${msg.question}\nA${i + 1}: ${msg.response}`,
+          )
+          .join("\n\n")
+      : "";
 
   const followUpPrompt = `You are Navietta, continuing a conversation about travel recommendations you previously provided.
 
@@ -146,12 +161,12 @@ export async function generateFollowUpResponse(
 
 ## Your Previous Recommendations Summary
 You provided these ${contextSummary.options.length} options:
-${contextSummary.options.map(opt => `- **${opt.title}**: ${opt.description} (${opt.cost}, ${opt.duration})${opt.recommended ? ' [RECOMMENDED]' : ''}`).join('\n')}
+${contextSummary.options.map((opt) => `- **${opt.title}**: ${opt.description} (${opt.cost}, ${opt.duration})${opt.recommended ? " [RECOMMENDED]" : ""}`).join("\n")}
 
 Your recommended option was: ${contextSummary.recommendedOption}
 
 ## Recent Conversation
-${conversationContext || 'This is the first follow-up question.'}
+${conversationContext || "This is the first follow-up question."}
 
 ## Current Question
 ${newQuestion}
@@ -178,26 +193,26 @@ Respond directly as Navietta - no JSON formatting needed, just your natural resp
       messages: [
         {
           role: "user",
-          content: followUpPrompt
-        }
-      ]
+          content: followUpPrompt,
+        },
+      ],
     });
 
     const content = response.content[0];
-    if (content.type !== 'text') {
-      throw new Error('Unexpected response type from Claude API');
+    if (content.type !== "text") {
+      throw new Error("Unexpected response type from Claude API");
     }
 
     return content.text.trim();
   } catch (error) {
-    console.error('Error generating follow-up response:', error);
-    throw new Error('Failed to generate follow-up response');
+    console.error("Error generating follow-up response:", error);
+    throw new Error("Failed to generate follow-up response");
   }
 }
 
 export async function generateTravelRecommendations(
   flightDetails: FlightDetails,
-  preferences: Preferences
+  preferences: Preferences,
 ): Promise<TravelRecommendations> {
   const systemPrompt = `You are Navietta, an AI travel transit assistant. Provide practical travel recommendations with clear reasoning.
 
@@ -211,9 +226,9 @@ CRITICAL: Respond with ONLY valid JSON. No markdown blocks. Start with { and end
 
   // Add location-specific knowledge when relevant
   const getLocationKnowledge = (destination: string): string => {
-    const dest = destination?.toLowerCase() || '';
-    
-    if (dest.includes('rome') || dest.includes('fco')) {
+    const dest = destination?.toLowerCase() || "";
+
+    if (dest.includes("rome") || dest.includes("fco")) {
       return `
 
 ROME-SPECIFIC KNOWLEDGE:
@@ -229,23 +244,28 @@ ROME-SPECIFIC KNOWLEDGE:
 - **Taxi**: €55 fixed rate to central Rome, 45-90 minutes depending on traffic, available 24/7
 - **Private transfer**: €25-60 depending on service, advance booking recommended`;
     }
-    
+
     // Future: Add other destination knowledge here as needed
     // if (dest.includes('paris') || dest.includes('cdg')) { return parisKnowledge; }
     // if (dest.includes('london') || dest.includes('lhr')) { return londonKnowledge; }
-    
-    return '';
+
+    return "";
   };
 
-  const locationKnowledge = getLocationKnowledge(flightDetails.stops[0]?.location || '');
+  const locationKnowledge = getLocationKnowledge(
+    flightDetails.stops[0]?.location || "",
+  );
 
-  const stopsText = flightDetails.stops.map((stop: any, index: number) => 
-    `- Stop ${index + 1}: ${stop.location} at ${stop.arrivalTime} on ${stop.arrivalDate}`
-  ).join('\n');
+  const stopsText = flightDetails.stops
+    .map(
+      (stop: any, index: number) =>
+        `- Stop ${index + 1}: ${stop.location} at ${stop.arrivalTime} on ${stop.arrivalDate}`,
+    )
+    .join("\n");
 
   const prompt = `TRAVEL SITUATION:
 - Starting location: ${flightDetails.from}
-- Travelers: ${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ''}
+- Travelers: ${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ""}
 - Luggage: ${flightDetails.luggageCount} piece(s) of luggage
 
 TRANSIT PLAN - The user needs transit recommendations for their journey:
@@ -266,10 +286,12 @@ USER PREFERENCES:
 - Budget vs Comfort preference: ${preferences.budgetComfort}/100 (0=budget focused, 100=comfort focused)
 - Energy level: ${preferences.energyLevel}/100 (0=tired/need rest, 100=energetic/ready to explore)
 - Transit style: ${preferences.transitStyle} ${
-  preferences.transitStyle === 'quickly' ? '(prioritize speed and efficiency, direct routes)' :
-  preferences.transitStyle === 'explore' ? '(want to see sights along the way, open to detours and experiences)' :
-  '(prefer simple, straightforward options with minimal complexity)'
-}${locationKnowledge}
+    preferences.transitStyle === "quickly"
+      ? "(prioritize speed and efficiency, direct routes)"
+      : preferences.transitStyle === "explore"
+        ? "(want to see sights along the way, open to detours and experiences)"
+        : "(prefer simple, straightforward options with minimal complexity)"
+  }${locationKnowledge}
 
 Analyze this situation following your structured reasoning approach. Provide exactly 3 distinct options.
 
@@ -315,15 +337,24 @@ Provide exactly 3 options in this JSON format (times in HH:MM format only):
 }`;
 
   try {
-    console.log('Making request to Claude API...');
-    console.log('📊 TOKEN ANALYSIS:');
-    console.log('  System prompt length:', systemPrompt.length, 'characters');
-    console.log('  User prompt length:', prompt.length, 'characters');
-    console.log('  Total prompt length:', (systemPrompt.length + prompt.length), 'characters');
-    console.log('DEBUGGING - Transit details sent to AI:');
-    console.log('From:', flightDetails.from);
-    console.log('Stops:', flightDetails.stops.map(s => `${s.location} at ${s.arrivalTime} on ${s.arrivalDate}`).join(', '));
-    
+    console.log("Making request to Claude API...");
+    console.log("📊 TOKEN ANALYSIS:");
+    console.log("  System prompt length:", systemPrompt.length, "characters");
+    console.log("  User prompt length:", prompt.length, "characters");
+    console.log(
+      "  Total prompt length:",
+      systemPrompt.length + prompt.length,
+      "characters",
+    );
+    console.log("DEBUGGING - Transit details sent to AI:");
+    console.log("From:", flightDetails.from);
+    console.log(
+      "Stops:",
+      flightDetails.stops
+        .map((s) => `${s.location} at ${s.arrivalTime} on ${s.arrivalDate}`)
+        .join(", "),
+    );
+
     const response = await anthropic.messages.create({
       model: DEFAULT_MODEL_STR,
       max_tokens: 4000,
@@ -331,35 +362,46 @@ Provide exactly 3 options in this JSON format (times in HH:MM format only):
       messages: [
         {
           role: "user",
-          content: prompt
-        }
-      ]
+          content: prompt,
+        },
+      ],
     });
-    
-    console.log('Claude API responded successfully');
-    console.log('📊 RESPONSE ANALYSIS:');
-    console.log('  Input tokens:', response.usage?.input_tokens || 'unknown');
-    console.log('  Output tokens:', response.usage?.output_tokens || 'unknown');
-    console.log('  Total tokens:', response.usage ? (response.usage.input_tokens + response.usage.output_tokens) : 'unknown');
-    
+
+    console.log("Claude API responded successfully");
+    console.log("📊 RESPONSE ANALYSIS:");
+    console.log("  Input tokens:", response.usage?.input_tokens || "unknown");
+    console.log("  Output tokens:", response.usage?.output_tokens || "unknown");
+    console.log(
+      "  Total tokens:",
+      response.usage
+        ? response.usage.input_tokens + response.usage.output_tokens
+        : "unknown",
+    );
+
     const content = response.content[0];
-    if (content.type !== 'text') {
-      throw new Error('Unexpected response type from Claude API');
+    if (content.type !== "text") {
+      throw new Error("Unexpected response type from Claude API");
     }
-    
+
     // Log a snippet of the raw AI response to debug
-    console.log('RAW AI RESPONSE (first 500 chars):', content.text.substring(0, 500));
+    console.log(
+      "RAW AI RESPONSE (first 500 chars):",
+      content.text.substring(0, 500),
+    );
 
     // Clean the response text to handle markdown code blocks
     let responseText = content.text.trim();
-    
+
     // Remove markdown code blocks if present - more aggressive approach
-    responseText = responseText.replace(/^```json\s*/gi, '').replace(/^```\s*/gi, '').replace(/\s*```$/gi, '');
-    
+    responseText = responseText
+      .replace(/^```json\s*/gi, "")
+      .replace(/^```\s*/gi, "")
+      .replace(/\s*```$/gi, "");
+
     // Find the actual JSON object by looking for the first { and last }
-    const startIndex = responseText.indexOf('{');
-    const lastIndex = responseText.lastIndexOf('}');
-    
+    const startIndex = responseText.indexOf("{");
+    const lastIndex = responseText.lastIndexOf("}");
+
     if (startIndex !== -1 && lastIndex !== -1 && lastIndex > startIndex) {
       responseText = responseText.substring(startIndex, lastIndex + 1);
     }
@@ -368,17 +410,19 @@ Provide exactly 3 options in this JSON format (times in HH:MM format only):
       const recommendations = JSON.parse(responseText) as TravelRecommendations;
       return recommendations;
     } catch (parseError) {
-      console.error('JSON parsing error. Raw Claude response:', content.text);
-      console.error('Cleaned response text:', responseText);
+      console.error("JSON parsing error. Raw Claude response:", content.text);
+      console.error("Cleaned response text:", responseText);
       throw parseError;
     }
   } catch (error) {
-    console.error('Error generating travel recommendations:', error);
-    throw new Error('Failed to generate travel recommendations');
+    console.error("Error generating travel recommendations:", error);
+    throw new Error("Failed to generate travel recommendations");
   }
 }
 
-export async function extractTravelDataFromPDF(pdfText: string): Promise<PDFExtraction> {
+export async function extractTravelDataFromPDF(
+  pdfText: string,
+): Promise<PDFExtraction> {
   const systemPrompt = `You are a travel document analyzer that extracts structured travel information from travel documents. Your task is to extract travel details while strictly protecting privacy.
 
 ## CRITICAL PRIVACY REQUIREMENTS:
@@ -452,8 +496,8 @@ Return ONLY valid JSON with this exact structure. Omit fields if not found or co
 }`;
 
   try {
-    console.log('Extracting travel data from PDF text using Claude API...');
-    
+    console.log("Extracting travel data from PDF text using Claude API...");
+
     const response = await anthropic.messages.create({
       model: DEFAULT_MODEL_STR,
       max_tokens: 2000,
@@ -464,47 +508,59 @@ Return ONLY valid JSON with this exact structure. Omit fields if not found or co
           content: `Extract travel information from this travel document text. Follow the privacy requirements strictly and return only the JSON structure with travel logistics.
 
 Travel Document Text:
-${pdfText}`
-        }
-      ]
+${pdfText}`,
+        },
+      ],
     });
 
-    console.log('Claude API responded for PDF extraction');
-    
+    console.log("Claude API responded for PDF extraction");
+
     const content = response.content[0];
-    if (content.type !== 'text') {
-      throw new Error('Unexpected response type from Claude API');
+    if (content.type !== "text") {
+      throw new Error("Unexpected response type from Claude API");
     }
 
     // Clean the response text to handle markdown code blocks
     let responseText = content.text.trim();
-    responseText = responseText.replace(/^```json\s*/gi, '').replace(/^```\s*/gi, '').replace(/\s*```$/gi, '');
-    
+    responseText = responseText
+      .replace(/^```json\s*/gi, "")
+      .replace(/^```\s*/gi, "")
+      .replace(/\s*```$/gi, "");
+
     // Find the actual JSON object
-    const startIndex = responseText.indexOf('{');
-    const lastIndex = responseText.lastIndexOf('}');
-    
+    const startIndex = responseText.indexOf("{");
+    const lastIndex = responseText.lastIndexOf("}");
+
     if (startIndex !== -1 && lastIndex !== -1 && lastIndex > startIndex) {
       responseText = responseText.substring(startIndex, lastIndex + 1);
     }
 
-    console.log('Raw PDF extraction response (first 300 chars):', responseText.substring(0, 300));
+    console.log(
+      "Raw PDF extraction response (first 300 chars):",
+      responseText.substring(0, 300),
+    );
 
     try {
       const extractedData = JSON.parse(responseText) as PDFExtraction;
       return extractedData;
     } catch (parseError) {
-      console.error('JSON parsing error for PDF extraction. Raw response:', content.text);
-      console.error('Cleaned response text:', responseText);
+      console.error(
+        "JSON parsing error for PDF extraction. Raw response:",
+        content.text,
+      );
+      console.error("Cleaned response text:", responseText);
       throw parseError;
     }
   } catch (error) {
-    console.error('Error extracting travel data from PDF:', error);
-    throw new Error('Failed to extract travel data from PDF');
+    console.error("Error extracting travel data from PDF:", error);
+    throw new Error("Failed to extract travel data from PDF");
   }
 }
 
-export async function extractTravelDataFromPDFDirect(pdfBase64: string, filename: string): Promise<PDFExtraction> {
+export async function extractTravelDataFromPDFDirect(
+  pdfBase64: string,
+  filename: string,
+): Promise<PDFExtraction> {
   const systemPrompt = `You are a travel document analyzer that extracts structured travel information from travel documents. Your task is to extract travel details while strictly protecting privacy.
 
 ## CRITICAL PRIVACY REQUIREMENTS:
@@ -578,8 +634,8 @@ Return ONLY valid JSON with this exact structure. Omit fields if not found or co
 }`;
 
   try {
-    console.log('Extracting travel data from PDF using Claude Vision API...');
-    
+    console.log("Extracting travel data from PDF using Claude Vision API...");
+
     const response = await anthropic.messages.create({
       model: DEFAULT_MODEL_STR,
       max_tokens: 2000,
@@ -590,52 +646,61 @@ Return ONLY valid JSON with this exact structure. Omit fields if not found or co
           content: [
             {
               type: "text",
-              text: `Extract travel information from this PDF document: ${filename}. Follow the privacy requirements strictly and return only the JSON structure with travel logistics.`
+              text: `Extract travel information from this PDF document: ${filename}. Follow the privacy requirements strictly and return only the JSON structure with travel logistics.`,
             },
             {
               type: "document",
               source: {
                 type: "base64",
                 media_type: "application/pdf",
-                data: pdfBase64
-              }
-            }
-          ]
-        }
-      ]
+                data: pdfBase64,
+              },
+            },
+          ],
+        },
+      ],
     });
 
-    console.log('Claude Vision API responded for PDF extraction');
-    
+    console.log("Claude Vision API responded for PDF extraction");
+
     const content = response.content[0];
-    if (content.type !== 'text') {
-      throw new Error('Unexpected response type from Claude Vision API');
+    if (content.type !== "text") {
+      throw new Error("Unexpected response type from Claude Vision API");
     }
 
     // Clean the response text to handle markdown code blocks
     let responseText = content.text.trim();
-    responseText = responseText.replace(/^```json\s*/gi, '').replace(/^```\s*/gi, '').replace(/\s*```$/gi, '');
-    
+    responseText = responseText
+      .replace(/^```json\s*/gi, "")
+      .replace(/^```\s*/gi, "")
+      .replace(/\s*```$/gi, "");
+
     // Find the actual JSON object
-    const startIndex = responseText.indexOf('{');
-    const lastIndex = responseText.lastIndexOf('}');
-    
+    const startIndex = responseText.indexOf("{");
+    const lastIndex = responseText.lastIndexOf("}");
+
     if (startIndex !== -1 && lastIndex !== -1 && lastIndex > startIndex) {
       responseText = responseText.substring(startIndex, lastIndex + 1);
     }
 
-    console.log('Raw PDF extraction response (first 300 chars):', responseText.substring(0, 300));
+    console.log(
+      "Raw PDF extraction response (first 300 chars):",
+      responseText.substring(0, 300),
+    );
 
     try {
       const extractedData = JSON.parse(responseText) as PDFExtraction;
       return extractedData;
     } catch (parseError) {
-      console.error('JSON parsing error for PDF extraction. Raw response:', content.text);
-      console.error('Cleaned response text:', responseText);
+      console.error(
+        "JSON parsing error for PDF extraction. Raw response:",
+        content.text,
+      );
+      console.error("Cleaned response text:", responseText);
       throw parseError;
     }
   } catch (error) {
-    console.error('Error extracting travel data from PDF using vision:', error);
-    throw new Error('Failed to extract travel data from PDF using vision');
+    console.error("Error extracting travel data from PDF using vision:", error);
+    throw new Error("Failed to extract travel data from PDF using vision");
   }
 }

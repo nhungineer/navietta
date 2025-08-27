@@ -74,6 +74,18 @@ export function OptionExplorationCard({ option, optionLetter, isRecommended = fa
             {option.comfortLevel}
           </span>
         </div>
+        <div className="flex gap-1 mb-2">
+          {Array.from({ length: 5 }, (_, i) => (
+            <div 
+              key={i} 
+              className={`flex-1 h-2 rounded ${
+                i < (option.comfortLevel === 'High comfort' ? 5 : 
+                     option.comfortLevel === 'Standard comfort' ? 3 : 
+                     option.comfortLevel === 'Basic comfort' ? 2 : 3) ? 'bg-blue-500' : 'bg-gray-200'
+              }`} 
+            />
+          ))}
+        </div>
         <p className="text-xs text-textSecondary">
           Comfort rating based on travel style and amenities.
         </p>

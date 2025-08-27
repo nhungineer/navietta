@@ -222,37 +222,6 @@ export async function generateTravelRecommendations(
 
 CRITICAL: Respond with ONLY valid JSON. No markdown blocks. Start with { and end with }.`;
 
-  // Add location-specific knowledge when relevant
-  const getLocationKnowledge = (destination: string): string => {
-    const dest = destination?.toLowerCase() || "";
-
-    if (dest.includes("rome") || dest.includes("fco")) {
-      return `
-
-ROME-SPECIFIC KNOWLEDGE:
-### Fiumicino Airport (FCO) Processing Times
-- **Total airport processing**: Allow 1.5-2 hours from landing to exit (international arrivals)
-- **Customs & Immigration**: Can be unpredictable; lines vary significantly
-- **Luggage collection**: 30-45 minutes post-landing typically
-- **Airport navigation**: 10-15 minutes walking to transport/rental cars
-
-### Transport Options from FCO
-- **Leonardo Express**: €14, 32 minutes to Termini, every 15 minutes, operates 06:08-23:23
-- **Airport shuttle buses**: €7, 55 minutes to city center, frequent departures
-- **Taxi**: €55 fixed rate to central Rome, 45-90 minutes depending on traffic, available 24/7
-- **Private transfer**: €25-60 depending on service, advance booking recommended`;
-    }
-
-    // Future: Add other destination knowledge here as needed
-    // if (dest.includes('paris') || dest.includes('cdg')) { return parisKnowledge; }
-    // if (dest.includes('london') || dest.includes('lhr')) { return londonKnowledge; }
-
-    return "";
-  };
-
-  const locationKnowledge = getLocationKnowledge(
-    flightDetails.stops[0]?.location || "",
-  );
 
   const stopsText = flightDetails.stops
     .map(
@@ -283,7 +252,9 @@ FOCUS: Provide transit options for the TRANSIT PORTION from ${flightDetails.stop
 CRITICAL REQUIREMENTS:
 - Provide EXACTLY 2 options, no more, no less
 - "duration" field shows TRANSIT TIME ONLY (${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location})
-- Timeline starts from ARRIVAL in ${flightDetails.stops[0]?.location} at ${flightDetails.stops[0]?.arrivalTime}, NOT from departure location
+- Timeline starts ONLY from ARRIVAL in ${flightDetails.stops[0]?.location} at ${flightDetails.stops[0]?.arrivalTime}
+- DO NOT include departure from ${flightDetails.from} in timeline
+- Focus EXCLUSIVELY on ${flightDetails.stops[0]?.location} to ${flightDetails.stops[1]?.location} transit
 - Include exactly 5-7 timeline items covering transit portion only
 - Factor in realistic timing for luggage, transport connections, food/rest breaks
 
@@ -296,7 +267,7 @@ USER PREFERENCES:
       : preferences.transitStyle === "explore"
         ? "(want to see sights along the way, open to detours and experiences)"
         : "(prefer simple, straightforward options with minimal complexity)"
-  }${locationKnowledge}
+  }
 
 Analyze this situation following your structured reasoning approach. Provide exactly 2 distinct options.
 
@@ -488,7 +459,7 @@ Extract these travel logistics with confidence scores (0-100):
 Always provide full location names with airport codes in parentheses:
 - MEL → "Melbourne International Airport (MEL)"
 - AUH → "Abu Dhabi Zayed International Airport (AUH)"
-- FCO → "Rome Fiumicino International Airport (FCO)"
+
 - BER → "Berlin Brandenburg Airport (BER)"
 - FRA → "Frankfurt Airport (FRA)"
 - CDG → "Paris Charles de Gaulle Airport (CDG)"
@@ -626,7 +597,7 @@ Extract these travel logistics with confidence scores (0-100):
 Always provide full location names with airport codes in parentheses:
 - MEL → "Melbourne International Airport (MEL)"
 - AUH → "Abu Dhabi Zayed International Airport (AUH)"
-- FCO → "Rome Fiumicino International Airport (FCO)"
+
 - BER → "Berlin Brandenburg Airport (BER)"
 - FRA → "Frankfurt Airport (FRA)"
 - CDG → "Paris Charles de Gaulle Airport (CDG)"

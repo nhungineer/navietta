@@ -13,11 +13,7 @@ import { FeedbackSection } from '@/components/FeedbackSection';
 import { useToast } from '@/hooks/use-toast';
 
 interface ExtendedAIRecommendations {
-  reasoning: {
-    situationAssessment: string;
-    generatingOptions: string;
-    tradeOffAnalysis: string;
-  };
+  reasoning: string;
   options: Array<{
     id: string;
     title: string;
@@ -37,10 +33,7 @@ interface ExtendedAIRecommendations {
     confidenceScore: number;
     stressLevel: 'Minimal' | 'Low' | 'Moderate' | 'High';
     recommended: boolean;
-    summary: string;
     confidence: 'high' | 'medium' | 'low';
-    uncertainties: Array<string>;
-    fallbackSuggestion?: string;
   }>;
   finalRecommendation: {
     optionId: string;
@@ -132,21 +125,12 @@ export default function AIResultsPage() {
 
         {/* Thinking Process Sections */}
         <ExpandableSection 
-          title="Situation assessment" 
-          icon={<span className="text-xs font-bold">1</span>}
-        >
-          <p className="text-sm text-textPrimary leading-relaxed">
-            {recommendations.reasoning.situationAssessment}
-          </p>
-        </ExpandableSection>
-
-        <ExpandableSection 
-          title="Option exploration" 
-          icon={<span className="text-xs font-bold">2</span>}
+          title="AI Analysis & Reasoning" 
+          icon={<Brain size={16} />}
         >
           <div className="space-y-4">
-            <p className="text-sm text-textPrimary leading-relaxed mb-4">
-              {recommendations.reasoning.generatingOptions}
+            <p className="text-sm text-textPrimary leading-relaxed">
+              {recommendations.reasoning}
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -159,18 +143,6 @@ export default function AIResultsPage() {
                 />
               ))}
             </div>
-          </div>
-        </ExpandableSection>
-
-        <ExpandableSection 
-          title="Trade-off analysis" 
-          icon={<span className="text-xs font-bold">3</span>}
-        >
-          <div className="space-y-4">
-            <p className="text-sm text-textPrimary leading-relaxed">
-              {recommendations.reasoning.tradeOffAnalysis}
-            </p>
-            
             {/* Budget vs Convenience Visual */}
             <div className="bg-white rounded-lg p-4">
               <h4 className="font-medium text-textPrimary mb-3">Budget vs Convenience</h4>

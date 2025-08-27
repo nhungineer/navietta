@@ -12,10 +12,7 @@ interface OptionExplorationCardProps {
     confidenceScore: number;
     stressLevel: string;
     recommended: boolean;
-    summary: string;
     confidence: 'high' | 'medium' | 'low';
-    uncertainties: Array<string>;
-    fallbackSuggestion?: string;
   };
   optionLetter: string;
   isRecommended?: boolean;
@@ -62,11 +59,11 @@ export function OptionExplorationCard({ option, optionLetter, isRecommended = fa
         <span className="text-sm text-textSecondary">{option.cost}</span>
       </div>
 
-      {/* Summary */}
+      {/* Description */}
       <div className="mb-4">
-        <h4 className="text-sm font-medium text-textPrimary mb-2">Summary</h4>
+        <h4 className="text-sm font-medium text-textPrimary mb-2">Description</h4>
         <p className="text-xs text-textSecondary leading-relaxed">
-          {option.summary || option.description}
+          {option.description}
         </p>
       </div>
 
@@ -107,9 +104,7 @@ export function OptionExplorationCard({ option, optionLetter, isRecommended = fa
           ))}
         </div>
         <p className="text-xs text-textSecondary">
-          {option.uncertainties && option.uncertainties.length > 0 
-            ? `Uncertainties: ${option.uncertainties.join(', ')}. ${option.fallbackSuggestion || ''}` 
-            : "High confidence in this recommendation with minimal uncertainties."}
+          High confidence in this recommendation.
         </p>
       </div>
     </div>

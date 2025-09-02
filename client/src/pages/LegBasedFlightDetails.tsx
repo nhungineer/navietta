@@ -366,8 +366,12 @@ export default function LegBasedFlightDetailsPage() {
         variant: "default",
       });
 
-      // Validate with Zod schema
-      const validatedData = flightDetailsSchema.parse(formData);
+      // Validate with Zod schema (only include the first stop for leg-based structure)
+      const dataToValidate = {
+        ...formData,
+        stops: [formData.stops[0]] // Only include the transit stop we're using
+      };
+      const validatedData = flightDetailsSchema.parse(dataToValidate);
       
       // Save and proceed
       setFlightDetails(validatedData);

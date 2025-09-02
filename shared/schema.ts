@@ -79,11 +79,11 @@ export const insertTravelSessionSchema = createInsertSchema(travelSessions).omit
 });
 
 export const stopSchema = z.object({
-  location: z.string().min(1, "Stop location is required"),
-  arrivalTime: z.string().min(1, "Arrival time is required"),
-  arrivalDate: z.string().min(1, "Arrival date is required"),
-  departureTime: z.string().optional(), // Optional: When departing FROM this stop
-  departureDate: z.string().optional(), // Optional: Date when departing FROM this stop
+  location: z.string().min(1, "Transit location is required"),
+  arrivalTime: z.string().min(1, "1st leg arrival time is required"),
+  arrivalDate: z.string().min(1, "1st leg arrival date is required"),
+  departureTime: z.string().min(1, "2nd leg departure time is required"), // Required for leg-based structure
+  departureDate: z.string().min(1, "2nd leg departure date is required"), // Required for leg-based structure
 });
 
 export const flightDetailsSchema = z.object({
@@ -96,7 +96,7 @@ export const flightDetailsSchema = z.object({
   adults: z.number().min(1, "At least 1 adult required").max(10),
   children: z.number().min(0).max(10),
   luggageCount: z.number().min(0).max(20),
-  stops: z.array(stopSchema).length(2, "Exactly 2 stops are required for this transit planner"),
+  stops: z.array(stopSchema).length(1, "Exactly 1 transit stop is required for this leg-based planner"),
 });
 
 export const preferencesSchema = z.object({

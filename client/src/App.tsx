@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { TravelProvider } from "@/contexts/TravelContext";
 import { ProgressBar } from "@/components/ProgressBar";
 import Landing from "@/pages/Landing";
-import FlightDetails from "@/pages/FlightDetails";
+import LegBasedFlightDetails from "@/pages/LegBasedFlightDetails";
 import Preferences from "@/pages/Preferences";
 import AIResults from "@/pages/AIResultsNew";
 import NotFound from "@/pages/not-found";
@@ -15,7 +15,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
-      <Route path="/flight-details" component={FlightDetails} />
+      <Route path="/flight-details" component={LegBasedFlightDetails} />
       <Route path="/preferences" component={Preferences} />
       <Route path="/results" component={AIResults} />
       <Route component={NotFound} />

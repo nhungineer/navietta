@@ -404,15 +404,16 @@ export default function LegBasedFlightDetailsPage() {
             </p>
           </div>
 
-          {/* Departure Section */}
+
+          {/* 1st Leg */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
-              <PlaneTakeoff className="text-primary" size={24} />
-              <h2 className="text-xl font-semibold text-textPrimary">Departure</h2>
+              <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</div>
+              <h2 className="text-xl font-semibold text-textPrimary">1st Leg</h2>
             </div>
 
-            <div className="space-y-6">
-              {/* From Location */}
+            <div className="space-y-4">
+              {/* From Location A */}
               <ConfidenceField
                 label="From"
                 value={formData.from}
@@ -467,62 +468,6 @@ export default function LegBasedFlightDetailsPage() {
                   )}
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* 1st Leg */}
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</div>
-              <h2 className="text-xl font-semibold text-textPrimary">1st Leg</h2>
-            </div>
-
-            <div className="space-y-6">
-              {/* From Location A (uses existing From field) */}
-              <div>
-                <Label className="text-sm font-medium text-gray-700">From</Label>
-                <div className="relative mt-2">
-                  <MapPin
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={16}
-                  />
-                  <Input
-                    value={formData.from}
-                    readOnly
-                    className="pl-10 text-lg h-12 bg-gray-50 text-gray-600"
-                    placeholder="From departure location (auto-filled)"
-                    data-testid="input-first-leg-from"
-                  />
-                </div>
-              </div>
-
-              {/* Departure Time & Date */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="relative">
-                  <Clock
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={16}
-                  />
-                  <Input
-                    value={formData.departureTime}
-                    readOnly
-                    className="pl-10 text-lg h-12 bg-gray-50 text-gray-600"
-                    data-testid="input-first-leg-departure-time"
-                  />
-                </div>
-                <div className="relative">
-                  <Calendar
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={16}
-                  />
-                  <Input
-                    value={formData.departureDate}
-                    readOnly
-                    className="pl-10 text-lg h-12 bg-gray-50 text-gray-600"
-                    data-testid="input-first-leg-departure-date"
-                  />
-                </div>
-              </div>
 
               {/* To Location B */}
               <ConfidenceField
@@ -540,49 +485,56 @@ export default function LegBasedFlightDetailsPage() {
 
               {/* Arrival Time & Date */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="relative">
-                  <Clock
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={16}
-                  />
-                  <Input
-                    type="time"
-                    value={formData.stops[0].arrivalTime}
-                    onChange={(e) => handleStopChange(0, "arrivalTime", e.target.value)}
-                    className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.arrivalTime ? "border-red-500" : ""}`}
-                    data-testid="input-transit-arrival-time"
-                  />
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Time</Label>
+                  <div className="relative mt-2">
+                    <Clock
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <Input
+                      type="time"
+                      value={formData.stops[0].arrivalTime}
+                      onChange={(e) => handleStopChange(0, "arrivalTime", e.target.value)}
+                      className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.arrivalTime ? "border-red-500" : ""}`}
+                      data-testid="input-transit-arrival-time"
+                    />
+                  </div>
+                  {errors.stops?.[0]?.arrivalTime && (
+                    <p className="text-red-500 text-sm mt-1">{errors.stops[0].arrivalTime}</p>
+                  )}
                 </div>
-                <div className="relative">
-                  <Calendar
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={16}
-                  />
-                  <Input
-                    type="date"
-                    value={formData.stops[0].arrivalDate}
-                    onChange={(e) => handleStopChange(0, "arrivalDate", e.target.value)}
-                    className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.arrivalDate ? "border-red-500" : ""}`}
-                    data-testid="input-transit-arrival-date"
-                  />
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Date</Label>
+                  <div className="relative mt-2">
+                    <Calendar
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <Input
+                      type="date"
+                      value={formData.stops[0].arrivalDate}
+                      onChange={(e) => handleStopChange(0, "arrivalDate", e.target.value)}
+                      className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.arrivalDate ? "border-red-500" : ""}`}
+                      data-testid="input-transit-arrival-date"
+                    />
+                  </div>
+                  {errors.stops?.[0]?.arrivalDate && (
+                    <p className="text-red-500 text-sm mt-1">{errors.stops[0].arrivalDate}</p>
+                  )}
                 </div>
               </div>
-              {(errors.stops?.[0]?.arrivalTime || errors.stops?.[0]?.arrivalDate) && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.stops[0].arrivalTime || errors.stops[0].arrivalDate}
-                </p>
-              )}
             </div>
           </div>
 
           {/* 2nd Leg */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
-              <div className="bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</div>
+              <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</div>
               <h2 className="text-xl font-semibold text-textPrimary">2nd Leg</h2>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* From Location B (same as transit location) */}
               <div>
                 <Label className="text-sm font-medium text-gray-700">From</Label>
@@ -603,38 +555,45 @@ export default function LegBasedFlightDetailsPage() {
 
               {/* Departure Time & Date */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="relative">
-                  <Clock
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={16}
-                  />
-                  <Input
-                    type="time"
-                    value={formData.stops[0].departureTime}
-                    onChange={(e) => handleStopChange(0, "departureTime", e.target.value)}
-                    className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.departureTime ? "border-red-500" : ""}`}
-                    data-testid="input-transit-departure-time"
-                  />
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Time</Label>
+                  <div className="relative mt-2">
+                    <Clock
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <Input
+                      type="time"
+                      value={formData.stops[0].departureTime}
+                      onChange={(e) => handleStopChange(0, "departureTime", e.target.value)}
+                      className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.departureTime ? "border-red-500" : ""}`}
+                      data-testid="input-transit-departure-time"
+                    />
+                  </div>
+                  {errors.stops?.[0]?.departureTime && (
+                    <p className="text-red-500 text-sm mt-1">{errors.stops[0].departureTime}</p>
+                  )}
                 </div>
-                <div className="relative">
-                  <Calendar
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={16}
-                  />
-                  <Input
-                    type="date"
-                    value={formData.stops[0].departureDate}
-                    onChange={(e) => handleStopChange(0, "departureDate", e.target.value)}
-                    className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.departureDate ? "border-red-500" : ""}`}
-                    data-testid="input-transit-departure-date"
-                  />
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Date</Label>
+                  <div className="relative mt-2">
+                    <Calendar
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <Input
+                      type="date"
+                      value={formData.stops[0].departureDate}
+                      onChange={(e) => handleStopChange(0, "departureDate", e.target.value)}
+                      className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.departureDate ? "border-red-500" : ""}`}
+                      data-testid="input-transit-departure-date"
+                    />
+                  </div>
+                  {errors.stops?.[0]?.departureDate && (
+                    <p className="text-red-500 text-sm mt-1">{errors.stops[0].departureDate}</p>
+                  )}
                 </div>
               </div>
-              {(errors.stops?.[0]?.departureTime || errors.stops?.[0]?.departureDate) && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.stops[0].departureTime || errors.stops[0].departureDate}
-                </p>
-              )}
 
               {/* To Location C */}
               <ConfidenceField
@@ -652,38 +611,45 @@ export default function LegBasedFlightDetailsPage() {
 
               {/* Arrival Time & Date */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="relative">
-                  <Clock
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={16}
-                  />
-                  <Input
-                    type="time"
-                    value={formData.arrivalTime}
-                    onChange={(e) => handleInputChange("arrivalTime", e.target.value)}
-                    className={`pl-10 text-lg h-12 ${errors.arrivalTime ? "border-red-500" : ""}`}
-                    data-testid="input-final-arrival-time"
-                  />
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Time</Label>
+                  <div className="relative mt-2">
+                    <Clock
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <Input
+                      type="time"
+                      value={formData.arrivalTime}
+                      onChange={(e) => handleInputChange("arrivalTime", e.target.value)}
+                      className={`pl-10 text-lg h-12 ${errors.arrivalTime ? "border-red-500" : ""}`}
+                      data-testid="input-final-arrival-time"
+                    />
+                  </div>
+                  {errors.arrivalTime && (
+                    <p className="text-red-500 text-sm mt-1">{errors.arrivalTime}</p>
+                  )}
                 </div>
-                <div className="relative">
-                  <Calendar
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={16}
-                  />
-                  <Input
-                    type="date"
-                    value={formData.arrivalDate}
-                    onChange={(e) => handleInputChange("arrivalDate", e.target.value)}
-                    className={`pl-10 text-lg h-12 ${errors.arrivalDate ? "border-red-500" : ""}`}
-                    data-testid="input-final-arrival-date"
-                  />
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Date</Label>
+                  <div className="relative mt-2">
+                    <Calendar
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <Input
+                      type="date"
+                      value={formData.arrivalDate}
+                      onChange={(e) => handleInputChange("arrivalDate", e.target.value)}
+                      className={`pl-10 text-lg h-12 ${errors.arrivalDate ? "border-red-500" : ""}`}
+                      data-testid="input-final-arrival-date"
+                    />
+                  </div>
+                  {errors.arrivalDate && (
+                    <p className="text-red-500 text-sm mt-1">{errors.arrivalDate}</p>
+                  )}
                 </div>
               </div>
-              {(errors.arrivalTime || errors.arrivalDate) && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.arrivalTime || errors.arrivalDate}
-                </p>
-              )}
             </div>
           </div>
 

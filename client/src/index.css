@@ -88,16 +88,16 @@
   
   .slider::-webkit-slider-thumb {
     @apply appearance-none w-5 h-5 rounded-full cursor-pointer;
-    background: hsl(var(--primary));
+    background: hsl(174, 100%, 20%); /* Darker shade of teal */
     border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.15);
   }
   
   .slider::-moz-range-thumb {
     @apply w-5 h-5 rounded-full cursor-pointer border-0;
-    background: hsl(var(--primary));
+    background: hsl(174, 100%, 20%); /* Darker shade of teal */
     border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.15);
   }
 
   .text-primary {

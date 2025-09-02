@@ -142,7 +142,7 @@ export default function PreferencesPage() {
 
         <div className="space-y-8">
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-2">
                 <DollarSign className="text-textPrimary" size={20} />
                 <Label className="text-lg font-medium text-textPrimary">
@@ -168,7 +168,12 @@ export default function PreferencesPage() {
                   </DialogContent>
                 </Dialog>
               </div>
-              <span className="text-lg font-semibold text-textPrimary">{getBudgetLabel(formData.budget)}</span>
+              <div className="text-right">
+                <div className="text-lg font-semibold text-textPrimary">{getBudgetLabel(formData.budget)}</div>
+                <div className="text-sm text-textSecondary mt-1">
+                  {getBudgetDescription(formData.budget)}
+                </div>
+              </div>
             </div>
             <div className="relative">
               <input
@@ -185,14 +190,11 @@ export default function PreferencesPage() {
                   background: `linear-gradient(to right, #00897B 0%, #00897B ${((formData.budget - 1) / 4) * 100}%, #e5e7eb ${((formData.budget - 1) / 4) * 100}%, #e5e7eb 100%)`,
                 }}
               />
-              <div className="text-sm text-textSecondary mt-3">
-                {getBudgetDescription(formData.budget)}
-              </div>
             </div>
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Zap className="text-textPrimary" size={20} />
                 <Label className="text-lg font-medium text-textPrimary">
@@ -219,7 +221,12 @@ export default function PreferencesPage() {
                   </DialogContent>
                 </Dialog>
               </div>
-              <span className="text-lg font-semibold text-textPrimary">{getActivitiesLabel(formData.activities)}</span>
+              <div className="text-right">
+                <div className="text-lg font-semibold text-textPrimary">{getActivitiesLabel(formData.activities)}</div>
+                <div className="text-sm text-textSecondary mt-1">
+                  {getActivitiesDescription(formData.activities)}
+                </div>
+              </div>
             </div>
             <div className="relative">
               <input
@@ -236,9 +243,6 @@ export default function PreferencesPage() {
                   background: `linear-gradient(to right, #00897B 0%, #00897B ${(formData.activities / 5) * 100}%, #e5e7eb ${(formData.activities / 5) * 100}%, #e5e7eb 100%)`,
                 }}
               />
-              <div className="text-sm text-textSecondary mt-3">
-                {getActivitiesDescription(formData.activities)}
-              </div>
             </div>
           </div>
 

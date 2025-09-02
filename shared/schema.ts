@@ -19,6 +19,8 @@ export const travelSessions = pgTable("travel_sessions", {
       location: string;
       arrivalTime: string;
       arrivalDate: string;
+      departureTime?: string;  // When departing FROM this stop location
+      departureDate?: string;  // Date when departing FROM this stop location
     }>;
   }>(),
   preferences: jsonb("preferences").$type<{
@@ -80,6 +82,8 @@ export const stopSchema = z.object({
   location: z.string().min(1, "Stop location is required"),
   arrivalTime: z.string().min(1, "Arrival time is required"),
   arrivalDate: z.string().min(1, "Arrival date is required"),
+  departureTime: z.string().optional(), // Optional: When departing FROM this stop
+  departureDate: z.string().optional(), // Optional: Date when departing FROM this stop
 });
 
 export const flightDetailsSchema = z.object({
@@ -131,6 +135,8 @@ export const pdfExtractionSchema = z.object({
     location: extractedFieldSchema.optional(),
     arrivalTime: extractedFieldSchema.optional(),
     arrivalDate: extractedFieldSchema.optional(),
+    departureTime: extractedFieldSchema.optional(), // Optional departure fields for PDF extraction
+    departureDate: extractedFieldSchema.optional(),
   })).length(2).optional(),
 });
 

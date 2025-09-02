@@ -20,6 +20,18 @@ Navietta is a travel transit application that helps users find optimal layover r
 - ✅ Added location disambiguation rules for multiple matching cities
 - ✅ Enhanced system prompts with clear reasoning requirements for preference conflicts
 
+### Schema Evolution Completed (September 2, 2025)
+
+#### Phase 2B: Schema Evolution (Additive) - ✅ COMPLETED
+- ✅ Enhanced stop schema with optional departure fields (departureTime, departureDate)  
+- ✅ Maintained full backward compatibility - existing data structures still work  
+- ✅ Added leg-based structure support: each stop can track both arrival AND departure times  
+- ✅ Updated TypeScript types and Zod validation schemas  
+- ✅ Tested validation functions work with both original and enhanced schema structures  
+- ✅ Server successfully restarted and API endpoints responding correctly  
+
+**Ready for Phase 3**: New UI implementation with leg-based FlightDetails component and real-time validation integration.
+
 ### Previous Changes (August 22, 2025)
 
 ### PDF Document Extraction System

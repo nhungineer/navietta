@@ -14,6 +14,7 @@ import { ConfidenceField } from "@/components/ConfidenceField";
 import { VerificationBanner } from "@/components/VerificationBanner";
 import {
   validateLocation,
+  validateJourney,
   type LocationValidationResponse
 } from "@/lib/validation";
 import {
@@ -219,6 +220,58 @@ export default function LegBasedFlightDetailsPage() {
     }
   };
 
+  // Timing validation function
+  const validateTiming = (data: any): LegFormErrors => {
+    const errors: LegFormErrors = {};
+    
+    try {
+      // Parse dates and times for validation
+      const parseDateTime = (dateStr: string, timeStr: string) => {
+        if (!dateStr || !timeStr) return null;
+        return new Date(`${dateStr}T${timeStr}:00`);
+      };
+
+      // 1st Leg: departure to transit arrival
+      const departureDateTime = parseDateTime(data.departureDate, data.departureTime);
+      const transitArrivalDateTime = parseDateTime(data.stops[0].arrivalDate, data.stops[0].arrivalTime);
+      
+      // 2nd Leg: transit departure to final arrival
+      const transitDepartureDateTime = parseDateTime(data.stops[0].departureDate, data.stops[0].departureTime);
+      const finalArrivalDateTime = parseDateTime(data.arrivalDate, data.arrivalTime);
+
+      // Validate 1st leg: departure < transit arrival
+      if (departureDateTime && transitArrivalDateTime) {
+        if (departureDateTime >= transitArrivalDateTime) {
+          if (!errors.stops) errors.stops = [{}];
+          errors.stops[0].arrivalTime = "1st leg arrival must be after departure time";
+          errors.stops[0].arrivalDate = "1st leg arrival must be after departure date";
+        }
+      }
+
+      // Validate 2nd leg: transit departure < final arrival  
+      if (transitDepartureDateTime && finalArrivalDateTime) {
+        if (transitDepartureDateTime >= finalArrivalDateTime) {
+          errors.arrivalTime = "Final arrival must be after 2nd leg departure time";
+          errors.arrivalDate = "Final arrival must be after 2nd leg departure date";
+        }
+      }
+
+      // Validate transit timing: arrival < departure from same location
+      if (transitArrivalDateTime && transitDepartureDateTime) {
+        if (transitArrivalDateTime >= transitDepartureDateTime) {
+          if (!errors.stops) errors.stops = [{}];
+          errors.stops[0].departureTime = "2nd leg departure must be after 1st leg arrival";
+          errors.stops[0].departureDate = "2nd leg departure must be after 1st leg arrival";
+        }
+      }
+
+    } catch (error) {
+      console.error('Timing validation error:', error);
+    }
+
+    return errors;
+  };
+
   // Batch validation on Next button click
   const handleSubmit = async () => {
     const validationErrors: LegFormErrors = {};
@@ -290,10 +343,22 @@ export default function LegBasedFlightDetailsPage() {
       return;
     }
 
+    // Add timing validation logic
+    const timingErrors = validateTiming(formData);
+    if (Object.keys(timingErrors).length > 0) {
+      setErrors(timingErrors);
+      toast({
+        title: "Invalid Timing",
+        description: "Please check your arrival and departure times.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Clear basic errors
     setErrors({});
 
-    // Now validate locations (expensive API calls)
+    // Now validate locations and journey distances (expensive API calls)
     setValidationState({
       isValidating: true,
       locations: locationsToValidate.map(l => l.value),
@@ -301,6 +366,7 @@ export default function LegBasedFlightDetailsPage() {
     });
 
     try {
+      // First validate all locations
       const locationValidationPromises = locationsToValidate
         .filter(loc => loc.value.trim()) // Only validate non-empty locations
         .map(async (loc) => {
@@ -319,6 +385,42 @@ export default function LegBasedFlightDetailsPage() {
         });
 
       const validationResults = await Promise.all(locationValidationPromises);
+
+      // If locations are valid, validate journey distances with haversine formula
+      const locationSuccess = validationResults.every(result => result.result.success);
+      if (locationSuccess) {
+        const journeyValidations = await Promise.all([
+          // Validate 1st leg: departure → transit
+          validateJourney(
+            formData.from,
+            formData.stops[0].location,
+            `${formData.departureDate}T${formData.departureTime}:00`,
+            `${formData.stops[0].arrivalDate}T${formData.stops[0].arrivalTime}:00`
+          ),
+          // Validate 2nd leg: transit → final destination
+          validateJourney(
+            formData.stops[0].location,
+            formData.to,
+            `${formData.stops[0].departureDate}T${formData.stops[0].departureTime}:00`,
+            `${formData.arrivalDate}T${formData.arrivalTime}:00`
+          )
+        ]);
+
+        // Check for journey validation errors
+        const [leg1Journey, leg2Journey] = journeyValidations;
+        if (!leg1Journey.success) {
+          validationResults.push({
+            type: 'from',
+            result: { success: false, error: `1st leg: ${leg1Journey.error}` }
+          });
+        }
+        if (!leg2Journey.success) {
+          validationResults.push({
+            type: 'transit',
+            result: { success: false, error: `2nd leg: ${leg2Journey.error}` }
+          });
+        }
+      }
       
       // Process validation results
       const finalValidationErrors: LegFormErrors = {};

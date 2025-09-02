@@ -220,6 +220,21 @@ export async function generateTravelRecommendations(
 - Consider luggage count and group needs
 - Explain reasoning in everyday language
 
+## Handling Conflicting Preferences
+When preferences conflict, use these priority rules:
+- **Tight timeframes are CRITICAL OVERRIDE** - Always take precedence over budget, comfort, or exploration when timing is genuinely constrained. EXPLICITLY flag time-related risks and recommend only options guaranteeing timely arrival.
+- **Energy Level and Transit Style** priority over Budget when conflicts impact user well-being or feasibility (e.g., exhausted needing rest over saving money)
+- **Budget vs. Comfort** often result in mid-tier compromises, unless one explicitly dominates (very high budget or zero budget)
+- **Situational factors** (tight time, large groups, kids, luggage) override standard preferences and push toward practicality, favoring ease and comfort over pure budget or exploration desire
+
+State clear reasoning for recommendations showing you've explicitly considered the conflicting input.
+
+## Location Disambiguation Rules
+When multiple locations match (e.g., Paris, France vs Paris, Texas vs Paris, Ontario):
+- Prioritize by population (Paris, FR wins over smaller cities)
+- Consider route context (international flights suggest major cities)
+- Always use full city/airport names with airport codes when available
+
 CRITICAL: Respond with ONLY valid JSON. No markdown blocks. Start with { and end with }.`;
 
   const stopsText = flightDetails.stops

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,11 @@ import { useToast } from "@/hooks/use-toast";
 import { ConfidenceField } from "@/components/ConfidenceField";
 import { VerificationBanner } from "@/components/VerificationBanner";
 import {
+  validateLocation,
+  debounce,
+  type LocationValidationResponse
+} from "@/lib/validation";
+import {
   Plane,
   PlaneTakeoff,
   Minus,
@@ -23,6 +28,9 @@ import {
   Users,
   Luggage,
   X,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 
 // Define a type for errors
@@ -34,6 +42,19 @@ type FormErrors = {
   adults?: string;
   children?: string;
   luggageCount?: string;
+};
+
+// Define validation states
+type ValidationState = {
+  isValidating: boolean;
+  isValid?: boolean;
+  error?: string;
+  suggestions?: string[];
+};
+
+type LocationValidationStates = {
+  from: ValidationState;
+  stops: ValidationState[];
 };
 
 export default function FlightDetailsPage() {
@@ -66,6 +87,13 @@ export default function FlightDetailsPage() {
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
+  const [validationStates, setValidationStates] = useState<LocationValidationStates>({
+    from: { isValidating: false },
+    stops: [
+      { isValidating: false },
+      { isValidating: false }
+    ]
+  });
 
   // Helper function to apply extracted string field data
   const applyExtractedStringField = (

@@ -7,6 +7,12 @@ import {
   extractTravelDataFromPDF,
 } from "./services/claude";
 import { generateMockTravelRecommendations } from "./services/mockClaude";
+import {
+  validateLocation,
+  validateJourney,
+  type ValidationResult,
+  type LocationInfo
+} from "./services/locationValidation";
 import { flightDetailsSchema, preferencesSchema } from "@shared/schema";
 import { z } from "zod";
 import Anthropic from "@anthropic-ai/sdk";
@@ -38,6 +44,17 @@ const chatSchema = z.object({
     )
     .optional()
     .default([]),
+});
+
+const locationValidationSchema = z.object({
+  location: z.string().min(1, "Location name is required"),
+});
+
+const journeyValidationSchema = z.object({
+  fromLocation: z.string().min(1, "Departure location is required"),
+  toLocation: z.string().min(1, "Arrival location is required"),
+  departureTime: z.string(),
+  arrivalTime: z.string(),
 });
 
 // Configure multer for PDF uploads
@@ -263,6 +280,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     },
   );
+
+  // Location validation endpoint
+  app.post("/api/validation/location", async (req, res) => {
+    try {
+      const { location } = locationValidationSchema.parse(req.body);
+      
+      const result = await validateLocation(location);
+      
+      res.json({
+        success: result.isValid,
+        location: result.location,
+        error: result.error,
+        suggestions: result.suggestions || []
+      });
+    } catch (error) {
+      console.error("Location validation error:", error);
+      
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid request format",
+          details: error.errors
+        });
+      }
+      
+      res.status(500).json({
+        success: false,
+        error: "Location validation service unavailable"
+      });
+    }
+  });
+
+  // Journey validation endpoint
+  app.post("/api/validation/journey", async (req, res) => {
+    try {
+      const { fromLocation, toLocation, departureTime, arrivalTime } = 
+        journeyValidationSchema.parse(req.body);
+      
+      // Parse the time strings to Date objects
+      const departure = new Date(departureTime);
+      const arrival = new Date(arrivalTime);
+      
+      if (isNaN(departure.getTime()) || isNaN(arrival.getTime())) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid date/time format"
+        });
+      }
+      
+      const result = await validateJourney(
+        fromLocation,
+        toLocation,
+        departure,
+        arrival
+      );
+      
+      res.json({
+        success: result.isValid,
+        fromLocation: result.fromLocationInfo,
+        toLocation: result.toLocationInfo,
+        distance: result.distance,
+        error: result.error
+      });
+    } catch (error) {
+      console.error("Journey validation error:", error);
+      
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid request format",
+          details: error.errors
+        });
+      }
+      
+      res.status(500).json({
+        success: false,
+        error: "Journey validation service unavailable"
+      });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

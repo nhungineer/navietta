@@ -72,6 +72,8 @@ export async function generateMockTravelRecommendations(
   const isComfortFocused = preferences.budget >= 4;
   const departureHour = parseInt(flightDetails.departureTime.split(':')[0]);
   const isEveningDeparture = departureHour >= 18;
+  const arrivalHour = parseInt((flightDetails.arrivalTime || '18:00').split(':')[0]);
+  const isEveningArrival = arrivalHour >= 18;
 
   return {
     reasoning: {
@@ -85,7 +87,7 @@ export async function generateMockTravelRecommendations(
       {
         id: "direct-transfer",
         title: isComfortFocused ? "Premium Direct Transfer" : "Budget-Friendly Direct Route",
-        description: `This ${isComfortFocused ? 'comfortable and efficient' : 'cost-effective'} option gets you to ${flightDetails.stops[0]?.location || 'your destination'} without any detours. ${isEveningDeparture ? "Perfect since you're departing in the evening and probably want to get to your destination without delays." : "A straightforward daytime transfer that'll get you there feeling refreshed."}`,
+        description: `This ${isComfortFocused ? 'comfortable and efficient' : 'cost-effective'} option gets you through ${flightDetails.stops[0]?.location || 'your transit location'} to your final destination without any detours. ${isEveningDeparture ? "Perfect since you're departing in the evening and probably want to get to your destination without delays." : "A straightforward transit that'll get you there feeling refreshed."}`,
         timelineItems: [
           {
             time: flightDetails.departureTime,
@@ -95,7 +97,7 @@ export async function generateMockTravelRecommendations(
           },
           {
             time: addMinutes(flightDetails.departureTime, 45),
-            title: `Board your transport to ${flightDetails.stops[0]?.location || 'your destination'}`,
+            title: `Board your transport to ${flightDetails.stops[0]?.location || 'your transit location'}`,
             description: isComfortFocused 
               ? "Premium service with reserved seating - relax and enjoy the ride" 
               : "Scheduled service - I would suggest arriving a few minutes early for the best seats",
@@ -103,8 +105,8 @@ export async function generateMockTravelRecommendations(
           },
           {
             time: addMinutes(flightDetails.departureTime, isComfortFocused ? 90 : 75),
-            title: `You've made it to ${flightDetails.stops[0]?.location || 'your destination'}!`,
-            description: isComfortFocused ? "Arrive feeling refreshed and ready for what's next" : "Mission accomplished - you've saved both time and money",
+            title: `You've made it to ${flightDetails.stops[0]?.location || 'your transit location'}!`,
+            description: isComfortFocused ? "Arrive at your transit location feeling refreshed and ready for the next leg" : "Mission accomplished - you've reached your transit point efficiently",
             type: "secondary"
           }
         ],
@@ -120,7 +122,7 @@ export async function generateMockTravelRecommendations(
         comfortLevel: isComfortFocused ? "High comfort" : "Comfort",
         confidenceScore: isComfortFocused ? 90 : 75,
         stressLevel: "Minimal" as const,
-        recommended: !isHighEnergy || preferences.transitStyle === 'quickly' || preferences.transitStyle === 'simple',
+        recommended: !isHighEnergy || preferences.transitStyle === 'fast-track' || preferences.transitStyle === 'fewer-transfers',
         summary: isComfortFocused ? 
           "Premium direct route with reserved seating and maximum comfort for efficient travel." :
           "Budget-conscious option focusing on direct transit while maintaining reasonable comfort levels.",
@@ -135,16 +137,16 @@ export async function generateMockTravelRecommendations(
       {
         id: "strategic-stopover",
         title: isEveningArrival ? "Evening Exploration" : "Strategic City Tour",
-        description: `Since you wanted to ${preferences.transitStyle === 'explore' ? 'explore along the way' : 'make the most of your time'}, this gives you ${isEveningArrival ? 'a lovely evening walk through the historic center before you settle in for the night' : 'a perfectly timed tour of the key landmarks without rushing - you will still get to your destination comfortably'}.`,
+        description: `Since you wanted to ${preferences.transitStyle === 'scenic-route' ? 'explore along the way' : 'make the most of your time'}, this gives you ${isEveningArrival ? 'a lovely evening walk through the historic center before you settle in for the night' : 'a perfectly timed tour of the key landmarks without rushing - you will still get to your destination comfortably'}.`,
         timelineItems: [
           {
-            time: flightDetails.arrivalTime,
+            time: flightDetails.stops[0]?.arrivalTime || "15:30",
             title: "Drop off your luggage",
             description: `I would recommend storing your ${flightDetails.luggageCount} piece${flightDetails.luggageCount > 1 ? 's' : ''} at ${flightDetails.to} airport or a central location so you can explore hands-free`,
             type: "primary"
           },
           {
-            time: addMinutes(flightDetails.arrivalTime, 60),
+            time: addMinutes(flightDetails.stops[0]?.arrivalTime || "15:30", 60),
             title: isEveningArrival ? "Evening stroll through the city" : "Hit the main highlights",
             description: isEveningArrival 
               ? "A peaceful evening walk through the historic center - the lighting is beautiful at this time" 
@@ -160,9 +162,9 @@ export async function generateMockTravelRecommendations(
             type: "secondary"
           },
           {
-            time: subtractMinutes(flightDetails.stops[0]?.arrivalTime || "15:30", 30),
-            title: `Time to head to ${flightDetails.stops[0]?.location || 'your destination'}`,
-            description: "Grab your luggage and make your way to your final destination - you'll arrive with some great stories!",
+            time: addMinutes(flightDetails.stops[0]?.departureTime || "13:00", 120),
+            title: `Continue to final destination`,
+            description: "Board your next transport and head to your final destination - you'll arrive with some great stories!",
             type: "primary"
           }
         ],
@@ -178,7 +180,7 @@ export async function generateMockTravelRecommendations(
         comfortLevel: "Comfort",
         confidenceScore: 70,
         stressLevel: isHighEnergy ? "Low" as const : "Moderate" as const,
-        recommended: isHighEnergy && preferences.transitStyle === 'explore',
+        recommended: isHighEnergy && preferences.transitStyle === 'scenic-route',
         summary: isEveningArrival ? 
           "Memorable evening exploration, focusing on the illuminated historic centers and authentic local dining." :
           "Strategic daytime sightseeing, focusing on the main landmarks and authentic local experiences.",
@@ -196,13 +198,13 @@ export async function generateMockTravelRecommendations(
         description: "Overnight stay at airport hotel for maximum recovery before city exploration",
         timelineItems: [
           {
-            time: flightDetails.arrivalTime,
+            time: flightDetails.stops[0]?.arrivalTime || "15:30",
             title: "Airport Hotel Check-in",
             description: "Quick transfer to nearby airport hotel for rest and recovery",
             type: "primary"
           },
           {
-            time: addMinutes(flightDetails.arrivalTime, 30),
+            time: addMinutes(flightDetails.stops[0]?.arrivalTime || "15:30", 30),
             title: "Rest & Refresh",
             description: "Shower, rest, and prepare for next day's activities",
             type: "secondary"
@@ -215,7 +217,7 @@ export async function generateMockTravelRecommendations(
           },
           {
             time: "10:00",
-            title: `Transfer to ${flightDetails.stops[0]?.location || 'your destination'}`,
+            title: `Continue to final destination`,
             description: "Well-rested transfer to city accommodation",
             type: "primary"
           }

@@ -72,18 +72,18 @@ export default function LegBasedFlightDetailsPage() {
     luggageCount: 2,
     stops: [
       {
-        location: "",
-        arrivalTime: "12:00",
-        arrivalDate: "2025-09-02",
-        departureTime: "13:00", // Enhanced field
-        departureDate: "2025-09-02", // Enhanced field
+        location: "", // Transit location (connects 1st and 2nd leg)
+        arrivalTime: "12:00", // 1st leg arrival time
+        arrivalDate: "2025-09-02", // 1st leg arrival date
+        departureTime: "13:00", // 2nd leg departure time
+        departureDate: "2025-09-02", // 2nd leg departure date
       },
       {
-        location: "",
+        location: "", // Unused in leg-based structure
         arrivalTime: "16:00",
         arrivalDate: "2025-09-02",
-        departureTime: "17:00", // Enhanced field  
-        departureDate: "2025-09-02", // Enhanced field
+        departureTime: "17:00",
+        departureDate: "2025-09-02",
       },
     ],
   });
@@ -223,14 +223,11 @@ export default function LegBasedFlightDetailsPage() {
   const handleSubmit = async () => {
     const validationErrors: LegFormErrors = {};
     
-    // Collect all locations for validation
+    // Collect all locations for validation (only 3 locations in leg-based structure)
     const locationsToValidate = [
       { type: 'from', value: formData.from },
+      { type: 'transit', value: formData.stops[0].location }, // Only use stops[0] for transit
       { type: 'to', value: formData.to },
-      ...formData.stops.map((stop, index) => ({ 
-        type: `stop-${index}` as const, 
-        value: stop.location 
-      }))
     ];
 
     // Check required fields first (before expensive API calls)
@@ -253,44 +250,33 @@ export default function LegBasedFlightDetailsPage() {
       validationErrors.arrivalDate = "Final arrival date is required";
     }
 
-    const stopsErrors: Array<{
-      location?: string;
-      arrivalTime?: string;
-      arrivalDate?: string;
-      departureTime?: string;
-      departureDate?: string;
-    }> = [];
-    let hasStopErrors = false;
+    // Validate transit stop (only stops[0] in leg-based structure)
+    const transitErrors: any = {};
+    let hasTransitErrors = false;
 
-    for (let i = 0; i < formData.stops.length; i++) {
-      const stopErrors: any = {};
-      
-      if (!formData.stops[i].location?.trim()) {
-        stopErrors.location = "Location is required";
-        hasStopErrors = true;
-      }
-      if (!formData.stops[i].arrivalTime?.trim()) {
-        stopErrors.arrivalTime = "Arrival time is required";
-        hasStopErrors = true;
-      }
-      if (!formData.stops[i].arrivalDate?.trim()) {
-        stopErrors.arrivalDate = "Arrival date is required";
-        hasStopErrors = true;
-      }
-      if (!formData.stops[i].departureTime?.trim()) {
-        stopErrors.departureTime = "Departure time is required";
-        hasStopErrors = true;
-      }
-      if (!formData.stops[i].departureDate?.trim()) {
-        stopErrors.departureDate = "Departure date is required";
-        hasStopErrors = true;
-      }
-      
-      stopsErrors[i] = stopErrors;
+    if (!formData.stops[0].location?.trim()) {
+      transitErrors.location = "Transit location is required";
+      hasTransitErrors = true;
+    }
+    if (!formData.stops[0].arrivalTime?.trim()) {
+      transitErrors.arrivalTime = "1st leg arrival time is required";
+      hasTransitErrors = true;
+    }
+    if (!formData.stops[0].arrivalDate?.trim()) {
+      transitErrors.arrivalDate = "1st leg arrival date is required";
+      hasTransitErrors = true;
+    }
+    if (!formData.stops[0].departureTime?.trim()) {
+      transitErrors.departureTime = "2nd leg departure time is required";
+      hasTransitErrors = true;
+    }
+    if (!formData.stops[0].departureDate?.trim()) {
+      transitErrors.departureDate = "2nd leg departure date is required";
+      hasTransitErrors = true;
     }
 
-    if (hasStopErrors) {
-      validationErrors.stops = stopsErrors;
+    if (hasTransitErrors) {
+      validationErrors.stops = [transitErrors];
     }
 
     // If basic validation fails, show errors immediately
@@ -346,15 +332,11 @@ export default function LegBasedFlightDetailsPage() {
             finalValidationErrors.from = errorMessage;
           } else if (type === 'to') {
             finalValidationErrors.to = errorMessage;
-          } else if (type.startsWith('stop-')) {
-            const stopIndex = parseInt(type.split('-')[1]);
+          } else if (type === 'transit') {
             if (!finalValidationErrors.stops) {
-              finalValidationErrors.stops = [];
+              finalValidationErrors.stops = [{}];
             }
-            if (!finalValidationErrors.stops[stopIndex]) {
-              finalValidationErrors.stops[stopIndex] = {};
-            }
-            finalValidationErrors.stops[stopIndex].location = errorMessage;
+            finalValidationErrors.stops[0].location = errorMessage;
           }
           
           validationErrorsList.push(errorMessage);
@@ -488,112 +470,124 @@ export default function LegBasedFlightDetailsPage() {
             </div>
           </div>
 
-          {/* Transit Stops */}
-          <div className="space-y-6">
-            {formData.stops.map((stop, index) => (
-              <div key={index} className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                  <MapPin className="text-accent" size={24} />
-                  <h2 className="text-xl font-semibold text-textPrimary">
-                    Transit Stop {index + 1}
-                  </h2>
-                </div>
-
-                <div className="space-y-6">
-                  {/* Location */}
-                  <ConfidenceField
-                    label="Location"
-                    value={stop.location}
-                    onChange={(value) => handleStopChange(index, "location", value)}
-                    extractedField={extractedData?.stops?.[index]?.location}
-                    placeholder={`Enter stop ${index + 1} location (e.g., ${index === 0 ? "Rome" : "Amsterdam"})`}
-                    data-testid={`input-stop-location-${index}`}
-                    className="text-lg h-12"
-                  />
-                  {errors.stops?.[index]?.location && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.stops[index].location}
-                    </p>
-                  )}
-
-                  {/* Arrival Time & Date */}
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-3">Arrival</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="relative">
-                        <Clock
-                          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                          size={16}
-                        />
-                        <Input
-                          type="time"
-                          value={stop.arrivalTime}
-                          onChange={(e) => handleStopChange(index, "arrivalTime", e.target.value)}
-                          className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.arrivalTime ? "border-red-500" : ""}`}
-                          data-testid={`input-stop-arrival-time-${index}`}
-                        />
-                      </div>
-                      <div className="relative">
-                        <Calendar
-                          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                          size={16}
-                        />
-                        <Input
-                          type="date"
-                          value={stop.arrivalDate}
-                          onChange={(e) => handleStopChange(index, "arrivalDate", e.target.value)}
-                          className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.arrivalDate ? "border-red-500" : ""}`}
-                          data-testid={`input-stop-arrival-date-${index}`}
-                        />
-                      </div>
-                    </div>
-                    {(errors.stops?.[index]?.arrivalTime || errors.stops?.[index]?.arrivalDate) && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.stops[index].arrivalTime || errors.stops[index].arrivalDate}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Departure Time & Date */}
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-3">Departure</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="relative">
-                        <Clock
-                          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                          size={16}
-                        />
-                        <Input
-                          type="time"
-                          value={stop.departureTime}
-                          onChange={(e) => handleStopChange(index, "departureTime", e.target.value)}
-                          className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.departureTime ? "border-red-500" : ""}`}
-                          data-testid={`input-stop-departure-time-${index}`}
-                        />
-                      </div>
-                      <div className="relative">
-                        <Calendar
-                          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                          size={16}
-                        />
-                        <Input
-                          type="date"
-                          value={stop.departureDate}
-                          onChange={(e) => handleStopChange(index, "departureDate", e.target.value)}
-                          className={`pl-10 text-lg h-12 ${errors.stops?.[index]?.departureDate ? "border-red-500" : ""}`}
-                          data-testid={`input-stop-departure-date-${index}`}
-                        />
-                      </div>
-                    </div>
-                    {(errors.stops?.[index]?.departureTime || errors.stops?.[index]?.departureDate) && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.stops[index].departureTime || errors.stops[index].departureDate}
-                      </p>
-                    )}
-                  </div>
-                </div>
+          {/* 1st Leg */}
+          <div className="bg-white rounded-xl p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</div>
+              <h2 className="text-xl font-semibold text-textPrimary">1st Leg</h2>
+              <div className="flex items-center gap-2 text-textSecondary">
+                <span className="text-sm">{formData.from || "From"}</span>
+                <ArrowRight size={16} />
+                <span className="text-sm">{formData.stops[0].location || "Transit"}</span>
               </div>
-            ))}
+            </div>
+
+            <div className="space-y-6">
+              {/* Transit Location */}
+              <ConfidenceField
+                label="Transit Location"
+                value={formData.stops[0].location}
+                onChange={(value) => handleStopChange(0, "location", value)}
+                extractedField={extractedData?.stops?.[0]?.location}
+                placeholder="Enter transit location (e.g., Hong Kong)"
+                data-testid="input-transit-location"
+                className="text-lg h-12"
+              />
+              {errors.stops?.[0]?.location && (
+                <p className="text-red-500 text-sm mt-1">{errors.stops[0].location}</p>
+              )}
+
+              {/* 1st Leg Arrival (at transit location) */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Arrives at Transit Location</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="relative">
+                    <Clock
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <Input
+                      type="time"
+                      value={formData.stops[0].arrivalTime}
+                      onChange={(e) => handleStopChange(0, "arrivalTime", e.target.value)}
+                      className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.arrivalTime ? "border-red-500" : ""}`}
+                      data-testid="input-transit-arrival-time"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Calendar
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <Input
+                      type="date"
+                      value={formData.stops[0].arrivalDate}
+                      onChange={(e) => handleStopChange(0, "arrivalDate", e.target.value)}
+                      className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.arrivalDate ? "border-red-500" : ""}`}
+                      data-testid="input-transit-arrival-date"
+                    />
+                  </div>
+                </div>
+                {(errors.stops?.[0]?.arrivalTime || errors.stops?.[0]?.arrivalDate) && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.stops[0].arrivalTime || errors.stops[0].arrivalDate}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* 2nd Leg */}
+          <div className="bg-white rounded-xl p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</div>
+              <h2 className="text-xl font-semibold text-textPrimary">2nd Leg</h2>
+              <div className="flex items-center gap-2 text-textSecondary">
+                <span className="text-sm">{formData.stops[0].location || "Transit"}</span>
+                <ArrowRight size={16} />
+                <span className="text-sm">{formData.to || "Destination"}</span>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {/* 2nd Leg Departure (from transit location) */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Departs from Transit Location</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="relative">
+                    <Clock
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <Input
+                      type="time"
+                      value={formData.stops[0].departureTime}
+                      onChange={(e) => handleStopChange(0, "departureTime", e.target.value)}
+                      className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.departureTime ? "border-red-500" : ""}`}
+                      data-testid="input-transit-departure-time"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Calendar
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <Input
+                      type="date"
+                      value={formData.stops[0].departureDate}
+                      onChange={(e) => handleStopChange(0, "departureDate", e.target.value)}
+                      className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.departureDate ? "border-red-500" : ""}`}
+                      data-testid="input-transit-departure-date"
+                    />
+                  </div>
+                </div>
+                {(errors.stops?.[0]?.departureTime || errors.stops?.[0]?.departureDate) && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.stops[0].departureTime || errors.stops[0].departureDate}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Final Destination */}
@@ -606,11 +600,11 @@ export default function LegBasedFlightDetailsPage() {
             <div className="space-y-6">
               {/* To Location */}
               <ConfidenceField
-                label="To"
+                label="Final Destination"
                 value={formData.to}
                 onChange={(value) => handleInputChange("to", value)}
                 extractedField={extractedData?.stops?.[1]?.location}
-                placeholder="Enter final destination (e.g., Barcelona)"
+                placeholder="Enter final destination (e.g., London)"
                 data-testid="input-final-destination"
                 className="text-lg h-12"
               />
@@ -619,10 +613,10 @@ export default function LegBasedFlightDetailsPage() {
               )}
 
               {/* Final Arrival Time & Date */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Arrival Time</Label>
-                  <div className="relative mt-2">
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Arrives at Final Destination</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="relative">
                     <Clock
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                       size={16}
@@ -632,16 +626,10 @@ export default function LegBasedFlightDetailsPage() {
                       value={formData.arrivalTime}
                       onChange={(e) => handleInputChange("arrivalTime", e.target.value)}
                       className={`pl-10 text-lg h-12 ${errors.arrivalTime ? "border-red-500" : ""}`}
-                      data-testid="input-arrival-time"
+                      data-testid="input-final-arrival-time"
                     />
                   </div>
-                  {errors.arrivalTime && (
-                    <p className="text-red-500 text-sm mt-1">{errors.arrivalTime}</p>
-                  )}
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Arrival Date</Label>
-                  <div className="relative mt-2">
+                  <div className="relative">
                     <Calendar
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                       size={16}
@@ -651,13 +639,15 @@ export default function LegBasedFlightDetailsPage() {
                       value={formData.arrivalDate}
                       onChange={(e) => handleInputChange("arrivalDate", e.target.value)}
                       className={`pl-10 text-lg h-12 ${errors.arrivalDate ? "border-red-500" : ""}`}
-                      data-testid="input-arrival-date"
+                      data-testid="input-final-arrival-date"
                     />
                   </div>
-                  {errors.arrivalDate && (
-                    <p className="text-red-500 text-sm mt-1">{errors.arrivalDate}</p>
-                  )}
                 </div>
+                {(errors.arrivalTime || errors.arrivalDate) && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.arrivalTime || errors.arrivalDate}
+                  </p>
+                )}
               </div>
             </div>
           </div>

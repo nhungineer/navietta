@@ -126,12 +126,12 @@ export default function PreferencesPage() {
                 ` and ${flightDetails.children} child${flightDetails.children > 1 ? "ren" : ""}`}{" "}
               travelling from{" "}
               <strong>
-                {flightDetails.from} to {flightDetails.stops[1]?.location}
+                {flightDetails.from} to {flightDetails.to}
               </strong>
               , arriving at{" "}
               <strong>
-                {formatTime(flightDetails.stops[1]?.arrivalTime)} on{" "}
-                {formatDate(flightDetails.stops[1]?.arrivalDate)}
+                {formatTime(flightDetails.arrivalTime)} on{" "}
+                {formatDate(flightDetails.arrivalDate)}
               </strong>
               . Your next stop is <strong>{flightDetails.stops[0]?.location}</strong> at{" "}
               <strong>{formatTime(flightDetails.stops[0]?.arrivalTime)}</strong>. What

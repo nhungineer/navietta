@@ -66,9 +66,9 @@ interface FlightDetails {
 }
 
 interface Preferences {
-  budgetComfort: number;
-  energyLevel: number;
-  transitStyle: "quickly" | "explore" | "simple";
+  budget: number;
+  activities: number;
+  transitStyle: "fast-track" | "scenic-route" | "fewer-transfers";
 }
 
 interface TravelRecommendations {
@@ -122,8 +122,8 @@ export async function generateFollowUpResponse(
     travelers: `${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ""}`,
     luggage: `${flightDetails.luggageCount} piece(s)`,
     preferences: {
-      budgetComfort: preferences.budgetComfort,
-      energyLevel: preferences.energyLevel,
+      budget: preferences.budget,
+      activities: preferences.activities,
       transitStyle: preferences.transitStyle,
     },
     recommendedOption: originalRecommendations.finalRecommendation.optionId,
@@ -155,7 +155,7 @@ export async function generateFollowUpResponse(
 - First destination: ${contextSummary.firstDestination} at ${contextSummary.firstStopTime}
 - Travelers: ${contextSummary.travelers} with ${contextSummary.luggage} of luggage
 - AI will recommend optimal transport based on preferences
-- User preferences: ${contextSummary.preferences.budgetComfort}/100 budget-comfort, ${contextSummary.preferences.energyLevel}/100 energy, ${contextSummary.preferences.transitStyle} style
+- User preferences: ${contextSummary.preferences.budget}/5 budget, ${contextSummary.preferences.activities}/5 activities, ${contextSummary.preferences.transitStyle} style
 
 ## Your Previous Recommendations Summary
 You provided these ${contextSummary.options.length} options:
@@ -257,14 +257,14 @@ REQUIREMENTS:
 - Factor in realistic timing for luggage, transport connections, food/rest breaks
 
 USER PREFERENCES:
-- Budget vs Comfort preference: ${preferences.budgetComfort}/100 (0=budget focused, 100=comfort focused)
-- Energy level: ${preferences.energyLevel}/100 (0=tired/need rest, 100=energetic/ready to explore)
+- Budget: ${preferences.budget}/5 (1=Frugal/cheapest possible, 2=Economy/low-cost, 3=Balanced/cost and comfort equal, 4=Comfort/more spend for ease, 5=Luxury/max comfort)
+- Activities: ${preferences.activities}/5 (0=Resting/downtime, 1=Easy/light movement, 2=Gentle/mild activities, 3=Balanced/moderate plans, 4=Lively/active exploration, 5=Energised/high stamina)
 - Transit style: ${preferences.transitStyle} ${
-    preferences.transitStyle === "quickly"
-      ? "(prioritize speed and efficiency, direct routes)"
-      : preferences.transitStyle === "explore"
-        ? "(want to see sights along the way, open to detours and experiences)"
-        : "(prefer simple, straightforward options with minimal complexity)"
+    preferences.transitStyle === "fast-track"
+      ? "(prioritise quickest route, minimise travel time)"
+      : preferences.transitStyle === "scenic-route"
+        ? "(take time, see sights, explore along the way)"
+        : "(most straightforward routes, minimal transfers)"
   }
 
 Provide exactly 2 options in this JSON format:

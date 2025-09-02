@@ -13,9 +13,9 @@ interface FlightDetails {
 }
 
 interface Preferences {
-  budgetComfort: number;
-  energyLevel: number;
-  transitStyle: 'quickly' | 'explore' | 'simple';
+  budget: number;
+  activities: number;
+  transitStyle: 'fast-track' | 'scenic-route' | 'fewer-transfers';
 }
 
 interface TravelRecommendations {
@@ -68,8 +68,8 @@ export async function generateMockTravelRecommendations(
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 2000));
 
-  const isHighEnergy = preferences.energyLevel > 60;
-  const isComfortFocused = preferences.budgetComfort > 60;
+  const isHighEnergy = preferences.activities >= 3;
+  const isComfortFocused = preferences.budget >= 4;
   const departureHour = parseInt(flightDetails.departureTime.split(':')[0]);
   const isEveningDeparture = departureHour >= 18;
 
@@ -77,9 +77,9 @@ export async function generateMockTravelRecommendations(
     reasoning: {
       situationAssessment: `I can see you're starting from ${flightDetails.from} at ${flightDetails.departureTime} - that's ${isEveningDeparture ? 'an evening departure' : 'a daytime departure which gives us good flexibility'}. With ${flightDetails.luggageCount} piece${flightDetails.luggageCount > 1 ? 's' : ''} of luggage and needing to reach ${flightDetails.stops[0]?.location || 'your destination'} by ${flightDetails.stops[0]?.arrivalTime || 'your scheduled time'}, ${isHighEnergy ? "I can tell you're feeling energetic, so I'm comfortable suggesting options that involve a bit more activity." : "since you mentioned feeling less energetic, I'm focusing on straightforward options that won't wear you out further."}`,
       
-      generatingOptions: `Given that you prefer ${preferences.transitStyle === 'quickly' ? 'getting there quickly' : preferences.transitStyle === 'explore' ? 'exploring along the way' : 'keeping things simple'} and you're ${isComfortFocused ? 'willing to spend a bit more for comfort' : 'looking to save money where possible'}, I'm weighing up direct transfers, potential overnight stays, and ${preferences.transitStyle === 'explore' ? 'some interesting exploration opportunities' : 'the most efficient routes'} that work with your ${flightDetails.departureTime} departure.`,
+      generatingOptions: `Given that you prefer ${preferences.transitStyle === 'fast-track' ? 'getting there quickly' : preferences.transitStyle === 'scenic-route' ? 'exploring along the way' : 'keeping things simple'} and you're ${isComfortFocused ? 'willing to spend a bit more for comfort' : 'looking to save money where possible'}, I'm weighing up direct transfers, potential overnight stays, and ${preferences.transitStyle === 'scenic-route' ? 'some interesting exploration opportunities' : 'the most efficient routes'} that work with your ${flightDetails.departureTime} departure.`,
       
-      tradeOffAnalysis: `Since you're ${preferences.budgetComfort < 30 ? 'really focused on keeping costs down' : preferences.budgetComfort > 70 ? 'prioritizing comfort and convenience' : 'looking for a good balance between cost and comfort'} and mentioned feeling ${preferences.energyLevel < 30 ? 'quite tired' : preferences.energyLevel > 70 ? 'energetic and ready to explore' : 'moderately energetic'}, I'm ${isEveningDeparture ? 'keeping in mind that evening departures can limit what you can realistically do, but they do offer good opportunities to rest' : 'taking advantage of your daytime departure to give you more options'}. The time window to ${flightDetails.stops[0]?.location || 'your destination'} ${preferences.transitStyle === 'explore' ? 'actually works well for some strategic sightseeing' : preferences.transitStyle === 'quickly' ? 'means we can focus on the most direct routes' : 'gives us room for simple, stress-free transit'}.`
+      tradeOffAnalysis: `Since you're ${preferences.budget <= 2 ? 'really focused on keeping costs down' : preferences.budget >= 4 ? 'prioritizing comfort and convenience' : 'looking for a good balance between cost and comfort'} and mentioned feeling ${preferences.activities <= 1 ? 'quite tired' : preferences.activities >= 4 ? 'energetic and ready to explore' : 'moderately energetic'}, I'm ${isEveningDeparture ? 'keeping in mind that evening departures can limit what you can realistically do, but they do offer good opportunities to rest' : 'taking advantage of your daytime departure to give you more options'}. The time window to ${flightDetails.stops[0]?.location || 'your destination'} ${preferences.transitStyle === 'scenic-route' ? 'actually works well for some strategic sightseeing' : preferences.transitStyle === 'fast-track' ? 'means we can focus on the most direct routes' : 'gives us room for simple, stress-free transit'}.`
     },
     options: [
       {
@@ -240,22 +240,22 @@ export async function generateMockTravelRecommendations(
       }
     ],
     finalRecommendation: {
-      optionId: preferences.transitStyle === 'explore' && isHighEnergy 
+      optionId: preferences.transitStyle === 'scenic-route' && isHighEnergy 
         ? "strategic-stopover" 
         : !isHighEnergy && isComfortFocused && isEveningArrival 
         ? "overnight-recovery" 
         : "direct-transfer",
-      reasoning: `Based on your ${preferences.energyLevel < 50 ? 'lower energy level' : 'high energy level'} and ${preferences.budgetComfort > 70 ? 'comfort-focused' : 'budget-conscious'} preferences, ${
-        preferences.transitStyle === 'explore' && isHighEnergy ? 'the strategic exploration option gives you the perfect balance of sightseeing and efficiency' :
+      reasoning: `Based on your ${preferences.activities < 3 ? 'lower energy level' : 'high energy level'} and ${preferences.budget >= 4 ? 'comfort-focused' : 'budget-conscious'} preferences, ${
+        preferences.transitStyle === 'scenic-route' && isHighEnergy ? 'the strategic exploration option gives you the perfect balance of sightseeing and efficiency' :
         !isHighEnergy && isComfortFocused && isEveningArrival ? 'an overnight stay will leave you completely refreshed for your next day' :
         'the direct transfer option provides the best balance of cost, comfort, and simplicity for your situation'
       }.`,
-      confidence: preferences.transitStyle === 'explore' && isHighEnergy ? 85 : 
+      confidence: preferences.transitStyle === 'scenic-route' && isHighEnergy ? 85 : 
                   !isHighEnergy && isComfortFocused && isEveningArrival ? 90 : 80
     },
     userContext: {
       travelingSituation: `Travelling from ${flightDetails.from} with ${flightDetails.adults + flightDetails.children} traveler(s) and ${flightDetails.luggageCount} piece(s) of luggage, departing at ${flightDetails.departureTime} and needing to reach ${flightDetails.stops[0]?.location || 'destination'} by ${flightDetails.stops[0]?.arrivalTime || 'scheduled time'}.`,
-      preferences: `You prefer ${preferences.transitStyle === 'quickly' ? 'quick and efficient travel' : preferences.transitStyle === 'explore' ? 'exploring and experiencing local culture' : 'simple, straightforward options'} with a ${preferences.budgetComfort > 70 ? 'comfort-focused' : preferences.budgetComfort > 30 ? 'balanced' : 'budget-conscious'} approach and ${preferences.energyLevel > 70 ? 'high' : preferences.energyLevel > 30 ? 'moderate' : 'low'} energy levels.`,
+      preferences: `You prefer ${preferences.transitStyle === 'fast-track' ? 'quick and efficient travel' : preferences.transitStyle === 'scenic-route' ? 'exploring and experiencing local culture' : 'simple, straightforward options'} with a ${preferences.budget >= 4 ? 'comfort-focused' : preferences.budget >= 3 ? 'balanced' : 'budget-conscious'} approach and ${preferences.activities >= 4 ? 'high' : preferences.activities >= 2 ? 'moderate' : 'low'} energy levels.`,
       constraints: `Time window of ${calculateTimeDifference(flightDetails.departureTime, flightDetails.stops[0]?.arrivalTime || '15:30')} between departure and first destination, ${isEveningDeparture ? 'evening departure time' : 'daytime departure providing good flexibility'}, and managing ${flightDetails.luggageCount} piece(s) of luggage during transit.`
     }
   };

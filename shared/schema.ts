@@ -22,9 +22,9 @@ export const travelSessions = pgTable("travel_sessions", {
     }>;
   }>(),
   preferences: jsonb("preferences").$type<{
-    budgetComfort: number; // 0-100 scale
-    energyLevel: number; // 0-100 scale
-    transitStyle: 'quickly' | 'explore' | 'simple';
+    budget: number; // 1-5 scale (1=Frugal, 2=Economy, 3=Balanced, 4=Comfort, 5=Luxury)
+    activities: number; // 0-5 scale (0=Resting, 1=Easy, 2=Gentle, 3=Balanced, 4=Lively, 5=Energised)
+    transitStyle: 'fast-track' | 'scenic-route' | 'fewer-transfers';
   }>(),
   aiRecommendations: jsonb("ai_recommendations").$type<{
     reasoning: {
@@ -96,9 +96,9 @@ export const flightDetailsSchema = z.object({
 });
 
 export const preferencesSchema = z.object({
-  budgetComfort: z.number().min(0).max(100),
-  energyLevel: z.number().min(0).max(100),
-  transitStyle: z.enum(['quickly', 'explore', 'simple']),
+  budget: z.number().min(1).max(5),
+  activities: z.number().min(0).max(5),
+  transitStyle: z.enum(['fast-track', 'scenic-route', 'fewer-transfers']),
 });
 
 // PDF Extraction schemas

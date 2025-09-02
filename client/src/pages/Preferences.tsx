@@ -11,13 +11,13 @@ export default function PreferencesPage() {
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<Preferences>({
-    budgetComfort: 62,
-    energyLevel: 62,
-    transitStyle: "explore",
+    budget: 3,
+    activities: 3,
+    transitStyle: "scenic-route",
   });
 
   const handleSliderChange = (
-    field: "budgetComfort" | "energyLevel",
+    field: "budget" | "activities",
     value: number,
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -98,31 +98,40 @@ export default function PreferencesPage() {
             <div className="flex items-center gap-2 mb-4">
               <DollarSign className="text-textPrimary" size={20} />
               <Label className="text-lg font-medium text-textPrimary">
-                Budget vs Convenience
+                Budget
               </Label>
             </div>
             <div className="relative">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-textSecondary">0</span>
-                <span className="text-lg font-semibold text-primary">{formData.budgetComfort}</span>
-                <span className="text-sm text-textSecondary">100</span>
+                <span className="text-sm text-textSecondary">1</span>
+                <span className="text-lg font-semibold text-primary">{formData.budget}</span>
+                <span className="text-sm text-textSecondary">5</span>
               </div>
               <input
                 type="range"
-                min="0"
-                max="100"
-                value={formData.budgetComfort}
+                min="1"
+                max="5"
+                step="1"
+                value={formData.budget}
                 onChange={(e) =>
-                  handleSliderChange("budgetComfort", parseInt(e.target.value))
+                  handleSliderChange("budget", parseInt(e.target.value))
                 }
                 className="slider w-full"
                 style={{
-                  background: `linear-gradient(to right, #00897B 0%, #00897B ${formData.budgetComfort}%, #e5e7eb ${formData.budgetComfort}%, #e5e7eb 100%)`,
+                  background: `linear-gradient(to right, #00897B 0%, #00897B ${((formData.budget - 1) / 4) * 100}%, #e5e7eb ${((formData.budget - 1) / 4) * 100}%, #e5e7eb 100%)`,
                 }}
               />
               <div className="flex justify-between text-xs text-textSecondary px-1 mt-2">
-                <span>Save money</span>
-                <span>Max convenience</span>
+                <span>1 - Frugal</span>
+                <span>3 - Balanced</span>
+                <span>5 - Luxury</span>
+              </div>
+              <div className="text-center text-sm text-textSecondary mt-2">
+                {formData.budget === 1 && "Cheapest possible, no frills"}
+                {formData.budget === 2 && "Low-cost choices, slight comfort"}
+                {formData.budget === 3 && "Cost and comfort equally matter"}
+                {formData.budget === 4 && "More spend for ease"}
+                {formData.budget === 5 && "Max comfort, price no object"}
               </div>
             </div>
           </div>
@@ -131,31 +140,41 @@ export default function PreferencesPage() {
             <div className="flex items-center gap-2 mb-4">
               <Zap className="text-textPrimary" size={20} />
               <Label className="text-lg font-medium text-textPrimary">
-                Energy level
+                Activities
               </Label>
             </div>
             <div className="relative">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm text-textSecondary">0</span>
-                <span className="text-lg font-semibold text-primary">{formData.energyLevel}</span>
-                <span className="text-sm text-textSecondary">100</span>
+                <span className="text-lg font-semibold text-primary">{formData.activities}</span>
+                <span className="text-sm text-textSecondary">5</span>
               </div>
               <input
                 type="range"
                 min="0"
-                max="100"
-                value={formData.energyLevel}
+                max="5"
+                step="1"
+                value={formData.activities}
                 onChange={(e) =>
-                  handleSliderChange("energyLevel", parseInt(e.target.value))
+                  handleSliderChange("activities", parseInt(e.target.value))
                 }
                 className="slider w-full"
                 style={{
-                  background: `linear-gradient(to right, #00897B 0%, #00897B ${formData.energyLevel}%, #e5e7eb ${formData.energyLevel}%, #e5e7eb 100%)`,
+                  background: `linear-gradient(to right, #00897B 0%, #00897B ${(formData.activities / 5) * 100}%, #e5e7eb ${(formData.activities / 5) * 100}%, #e5e7eb 100%)`,
                 }}
               />
               <div className="flex justify-between text-xs text-textSecondary px-1 mt-2">
-                <span>Exhausted</span>
-                <span>Energetic</span>
+                <span>0 - Resting</span>
+                <span>3 - Balanced</span>
+                <span>5 - Energised</span>
+              </div>
+              <div className="text-center text-sm text-textSecondary mt-2">
+                {formData.activities === 0 && "Best for downtime, relaxation"}
+                {formData.activities === 1 && "Only light movement or short outings"}
+                {formData.activities === 2 && "Okay with mild activities"}
+                {formData.activities === 3 && "Comfortable with moderate plans"}
+                {formData.activities === 4 && "Keen for active exploration"}
+                {formData.activities === 5 && "High stamina, ready for all"}
               </div>
             </div>
           </div>
@@ -170,49 +189,49 @@ export default function PreferencesPage() {
             <div className="grid grid-cols-3 gap-4">
               <button
                 type="button"
-                onClick={() => setFormData((prev) => ({ ...prev, transitStyle: "quickly" }))}
+                onClick={() => setFormData((prev) => ({ ...prev, transitStyle: "fast-track" }))}
                 className={`p-4 rounded-lg border-2 text-center transition-all ${
-                  formData.transitStyle === "quickly"
+                  formData.transitStyle === "fast-track"
                     ? "border-primary bg-primary/5"
                     : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <div className="flex flex-col items-center gap-2">
                   <Rabbit className="text-amber-600" size={32} />
-                  <span className="font-medium text-textPrimary">Get there</span>
-                  <span className="font-medium text-textPrimary">quickly</span>
+                  <span className="font-medium text-textPrimary">Fast track</span>
+                  <span className="text-sm text-textSecondary">Prioritise quickest route</span>
                 </div>
               </button>
 
               <button
                 type="button"
-                onClick={() => setFormData((prev) => ({ ...prev, transitStyle: "explore" }))}
+                onClick={() => setFormData((prev) => ({ ...prev, transitStyle: "scenic-route" }))}
                 className={`p-4 rounded-lg border-2 text-center transition-all ${
-                  formData.transitStyle === "explore"
+                  formData.transitStyle === "scenic-route"
                     ? "border-primary bg-primary/5"
                     : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <div className="flex flex-col items-center gap-2">
                   <MapPin className="text-blue-500" size={32} />
-                  <span className="font-medium text-textPrimary">Explore along</span>
-                  <span className="font-medium text-textPrimary">the way</span>
+                  <span className="font-medium text-textPrimary">Scenic route</span>
+                  <span className="text-sm text-textSecondary">Take time, see sights</span>
                 </div>
               </button>
 
               <button
                 type="button"
-                onClick={() => setFormData((prev) => ({ ...prev, transitStyle: "simple" }))}
+                onClick={() => setFormData((prev) => ({ ...prev, transitStyle: "fewer-transfers" }))}
                 className={`p-4 rounded-lg border-2 text-center transition-all ${
-                  formData.transitStyle === "simple"
+                  formData.transitStyle === "fewer-transfers"
                     ? "border-primary bg-primary/5"
                     : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <div className="flex flex-col items-center gap-2">
                   <TreePine className="text-gray-500" size={32} />
-                  <span className="font-medium text-textPrimary">Keep</span>
-                  <span className="font-medium text-textPrimary">it simple</span>
+                  <span className="font-medium text-textPrimary">Fewer transfers</span>
+                  <span className="text-sm text-textSecondary">Straightforward routes</span>
                 </div>
               </button>
             </div>

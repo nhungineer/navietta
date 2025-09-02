@@ -275,7 +275,7 @@ export default function FlightDetailsPage() {
 
   // No remove stop function needed - exactly 2 stops required
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const validationErrors: FormErrors = {};
 
     // Check if start location is filled and not just whitespace

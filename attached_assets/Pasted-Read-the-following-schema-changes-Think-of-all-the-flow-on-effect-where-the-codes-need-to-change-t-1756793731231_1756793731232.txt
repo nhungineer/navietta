@@ -1,0 +1,60 @@
+Read the following schema changes 
+
+Think of all the flow-on effect where the codes need to change to reflect these changes: find all files where you need to make the changes, including where the data is being used down the chain (system prompts, next screens) 
+
+Check with me first about your plan before implementing anything. 
+
+### Trip details
+
+- Each location/ stop should have
+    - location name
+    - departure time, date
+    - arrival time, date
+
+For the trip itinerary, split into different ‘legs’ of the trips
+
+- First leg
+    - From {Location A }, departure time, date
+    - To {Location B} arrival time, date
+    - Preferred mode of transport: plane, bus, train, ferry, car (optional)
+- 2nd leg
+    - From {Location B }, departure time, date
+    - To {Location C} arrival time, date
+    - Preferred mode of transport: plane, bus, train, ferry, car (optional)
+- Validation rules in the FE:
+    - Location A (origin)’s departure time and date are optional
+    - Preferred mode of transport are optional
+    - Arrival time, date must be after departure time and date for each leg
+    - Departure time and date of the 2nd leg must be after arrival time and date of the 1st leg
+    - Highlight any elements that violates the validation rules. The error text should be under the field where the validation didn’t pass and users cannot go to the next page till the error is corrected.
+
+### Preferences
+
+I want to update the preferences schema as followed:
+
+**Current: Budget to Comfort (0-100 scale)**
+
+New:  Budget  (1-5 scale) 
+Five point scale 1 - 5 with clear label and explanation:
+1 **– Frugal**: Cheapest possible, no frills.
+2 **– Economy**: Low‑cost choices, slight comfort.
+**3 – Balanced**: Cost and comfort equally matter.
+**4 – Comfort**: More spend for ease.
+**5 – Luxury**: Max comfort, price no object.
+
+**Current: Energy level (0-100 scale)**
+
+New: **Activities** (1-5 scale)
+
+- **0 – Resting**: Best for downtime, relaxation.
+- **1 – Easy**: Only light movement or short outings.
+- **2 – Gentle**: Okay with mild activities.
+- **3 – Balanced**: Comfortable with moderate plans.
+- **4 – Lively**: Keen for active exploration.
+- **5 – Energised**: High stamina, ready for all.
+
+Updates to 3 categories of transit styles: 
+
+- **Get there quickly → Fast track:** Prioritise quickest route, minimise travel time
+- **Explore along the way → Scenic route:** take time, see sights, explore along the way
+- Keep it simple →  **Fewer transfers:** most straightforward routes, minimal transfers

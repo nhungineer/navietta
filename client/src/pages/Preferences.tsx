@@ -41,11 +41,10 @@ export default function PreferencesPage() {
 
   const getActivitiesLabel = (value: number) => {
     const labels = {
-      0: "Resting",
-      1: "Easy",
-      2: "Gentle",
+      1: "Resting",
+      2: "Easy",
       3: "Balanced",
-      4: "Moderate",
+      4: "Lively",
       5: "Energised"
     };
     return labels[value as keyof typeof labels] || "";
@@ -53,11 +52,10 @@ export default function PreferencesPage() {
 
   const getActivitiesDescription = (value: number) => {
     const descriptions = {
-      0: "Best for downtime, relaxation",
-      1: "Only light movement or short outings",
+      1: "Best for downtime, relaxation",
       2: "Okay with mild activities",
       3: "Comfortable with moderate plans",
-      4: "Comfortable with moderate exploration",
+      4: "Keen for active exploration",
       5: "High stamina, ready for all"
     };
     return descriptions[value as keyof typeof descriptions] || "";
@@ -211,11 +209,10 @@ export default function PreferencesPage() {
                       <DialogTitle>Activity Level Options</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-3">
-                      <div><strong>0 - Resting:</strong> Best for downtime, relaxation</div>
-                      <div><strong>1 - Easy:</strong> Only light movement or short outings</div>
-                      <div><strong>2 - Gentle:</strong> Okay with mild activities</div>
+                      <div><strong>1 - Resting:</strong> Best for downtime, relaxation</div>
+                      <div><strong>2 - Easy:</strong> Okay with mild activities</div>
                       <div><strong>3 - Balanced:</strong> Comfortable with moderate plans</div>
-                      <div><strong>4 - Moderate:</strong> Comfortable with moderate exploration</div>
+                      <div><strong>4 - Lively:</strong> Keen for active exploration</div>
                       <div><strong>5 - Energised:</strong> High stamina, ready for all</div>
                     </div>
                   </DialogContent>
@@ -231,7 +228,7 @@ export default function PreferencesPage() {
             <div className="relative">
               <input
                 type="range"
-                min="0"
+                min="1"
                 max="5"
                 step="1"
                 value={formData.activities}
@@ -240,7 +237,7 @@ export default function PreferencesPage() {
                 }
                 className="slider w-full"
                 style={{
-                  background: `linear-gradient(to right, #00897B 0%, #00897B ${(formData.activities / 5) * 100}%, #e5e7eb ${(formData.activities / 5) * 100}%, #e5e7eb 100%)`,
+                  background: `linear-gradient(to right, #00897B 0%, #00897B ${((formData.activities - 1) / 4) * 100}%, #e5e7eb ${((formData.activities - 1) / 4) * 100}%, #e5e7eb 100%)`,
                 }}
               />
             </div>

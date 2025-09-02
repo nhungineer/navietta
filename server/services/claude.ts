@@ -258,7 +258,7 @@ REQUIREMENTS:
 
 USER PREFERENCES:
 - Budget: ${preferences.budget}/5 (1=Frugal/cheapest possible, 2=Economy/low-cost, 3=Balanced/cost and comfort equal, 4=Comfort/more spend for ease, 5=Luxury/max comfort)
-- Activities: ${preferences.activities}/5 (0=Resting/downtime, 1=Easy/light movement, 2=Gentle/mild activities, 3=Balanced/moderate plans, 4=Moderate/moderate exploration, 5=Energised/high stamina)
+- Activities: ${preferences.activities}/5 (1=Resting/downtime, 2=Easy/mild activities, 3=Balanced/moderate plans, 4=Lively/active exploration, 5=Energised/high stamina)
 - Transit style: ${preferences.transitStyle} ${
     preferences.transitStyle === "fast-track"
       ? "(prioritise quickest route, minimise travel time)"

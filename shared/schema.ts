@@ -101,7 +101,7 @@ export const flightDetailsSchema = z.object({
 
 export const preferencesSchema = z.object({
   budget: z.number().min(1).max(5),
-  activities: z.number().min(0).max(5),
+  activities: z.number().min(1).max(5),
   transitStyle: z.enum(['fast-track', 'scenic-route', 'fewer-transfers']),
 });
 

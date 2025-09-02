@@ -2,7 +2,25 @@
 
 Navietta is a travel transit application that helps users find optimal layover recommendations between flights. The application uses AI (Anthropic Claude 4.0 Sonnet) to analyze flight details and user preferences to generate personalized transit options with transparent, step-by-step reasoning. It follows a 4-screen wizard flow where users input flight information, set preferences, and receive AI-generated recommendations with detailed timelines and trade-off analysis.
 
-## Recent Changes (August 22, 2025)
+## Recent Changes (September 2, 2025)
+
+### Preferences System Redesign
+- ✅ Updated preferences schema from 0-100 scales to more intuitive 1-5 and 0-5 scales
+- ✅ Budget: Changed from budgetComfort (0-100) to budget (1-5) with clear labels (Frugal, Economy, Balanced, Comfort, Luxury)
+- ✅ Activities: Changed from energyLevel (0-100) to activities (0-5) with descriptive levels (Resting, Easy, Gentle, Balanced, Lively, Energised)
+- ✅ Transit Style: Updated labels (fast-track, scenic-route, fewer-transfers) with clearer descriptions
+- ✅ Redesigned preferences UI to match modern mockup design with clean sliders
+- ✅ Added info tooltips with modals explaining all preference options
+- ✅ Updated all Claude API prompts and mock logic to use new preference scales
+- ✅ Enhanced AI recommendation system with explicit conflict resolution rules for tight timeframes
+
+### AI System Enhancements
+- ✅ Added explicit rules for handling conflicting preferences in recommendations
+- ✅ Implemented priority hierarchy: tight timeframes override all other preferences
+- ✅ Added location disambiguation rules for multiple matching cities
+- ✅ Enhanced system prompts with clear reasoning requirements for preference conflicts
+
+### Previous Changes (August 22, 2025)
 
 ### PDF Document Extraction System
 - ✅ Implemented real PDF text extraction using pdf-parse library

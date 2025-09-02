@@ -4,7 +4,8 @@ import { Label } from "@/components/ui/label";
 import { useTravelContext } from "@/contexts/TravelContext";
 import { preferencesSchema, type Preferences } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { DollarSign, Zap, Rabbit, MapPin, TreePine } from "lucide-react";
+import { DollarSign, Zap, Rabbit, MapPin, TreePine, Info } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function PreferencesPage() {
   const { navigateToStep, setPreferences, flightDetails } = useTravelContext();
@@ -15,6 +16,52 @@ export default function PreferencesPage() {
     activities: 3,
     transitStyle: "scenic-route",
   });
+
+  const getBudgetLabel = (value: number) => {
+    const labels = {
+      1: "Frugal",
+      2: "Economy", 
+      3: "Balanced",
+      4: "Comfort",
+      5: "Luxury"
+    };
+    return labels[value as keyof typeof labels] || "";
+  };
+
+  const getBudgetDescription = (value: number) => {
+    const descriptions = {
+      1: "Cheapest possible, no frills",
+      2: "Low-cost choices, slight comfort",
+      3: "Cost and comfort equally matter",
+      4: "More spend for ease",
+      5: "Max comfort, price no object"
+    };
+    return descriptions[value as keyof typeof descriptions] || "";
+  };
+
+  const getActivitiesLabel = (value: number) => {
+    const labels = {
+      0: "Resting",
+      1: "Easy",
+      2: "Gentle",
+      3: "Balanced",
+      4: "Lively",
+      5: "Energised"
+    };
+    return labels[value as keyof typeof labels] || "";
+  };
+
+  const getActivitiesDescription = (value: number) => {
+    const descriptions = {
+      0: "Best for downtime, relaxation",
+      1: "Only light movement or short outings",
+      2: "Okay with mild activities",
+      3: "Comfortable with moderate plans",
+      4: "Keen for active exploration",
+      5: "High stamina, ready for all"
+    };
+    return descriptions[value as keyof typeof descriptions] || "";
+  };
 
   const handleSliderChange = (
     field: "budget" | "activities",
@@ -95,18 +142,35 @@ export default function PreferencesPage() {
 
         <div className="space-y-8">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <DollarSign className="text-textPrimary" size={20} />
-              <Label className="text-lg font-medium text-textPrimary">
-                Budget
-              </Label>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <DollarSign className="text-textPrimary" size={20} />
+                <Label className="text-lg font-medium text-textPrimary">
+                  Budget
+                </Label>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+                      <Info className="text-gray-500" size={16} />
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Budget Options</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                      <div><strong>1 - Frugal:</strong> Cheapest possible, no frills</div>
+                      <div><strong>2 - Economy:</strong> Low-cost choices, slight comfort</div>
+                      <div><strong>3 - Balanced:</strong> Cost and comfort equally matter</div>
+                      <div><strong>4 - Comfort:</strong> More spend for ease</div>
+                      <div><strong>5 - Luxury:</strong> Max comfort, price no object</div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              <span className="text-lg font-semibold text-textPrimary">{getBudgetLabel(formData.budget)}</span>
             </div>
             <div className="relative">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-textSecondary">1</span>
-                <span className="text-lg font-semibold text-primary">{formData.budget}</span>
-                <span className="text-sm text-textSecondary">5</span>
-              </div>
               <input
                 type="range"
                 min="1"
@@ -121,34 +185,43 @@ export default function PreferencesPage() {
                   background: `linear-gradient(to right, #00897B 0%, #00897B ${((formData.budget - 1) / 4) * 100}%, #e5e7eb ${((formData.budget - 1) / 4) * 100}%, #e5e7eb 100%)`,
                 }}
               />
-              <div className="flex justify-between text-xs text-textSecondary px-1 mt-2">
-                <span>1 - Frugal</span>
-                <span>3 - Balanced</span>
-                <span>5 - Luxury</span>
-              </div>
-              <div className="text-center text-sm text-textSecondary mt-2">
-                {formData.budget === 1 && "Cheapest possible, no frills"}
-                {formData.budget === 2 && "Low-cost choices, slight comfort"}
-                {formData.budget === 3 && "Cost and comfort equally matter"}
-                {formData.budget === 4 && "More spend for ease"}
-                {formData.budget === 5 && "Max comfort, price no object"}
+              <div className="text-sm text-textSecondary mt-3">
+                {getBudgetDescription(formData.budget)}
               </div>
             </div>
           </div>
 
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Zap className="text-textPrimary" size={20} />
-              <Label className="text-lg font-medium text-textPrimary">
-                Activities
-              </Label>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Zap className="text-textPrimary" size={20} />
+                <Label className="text-lg font-medium text-textPrimary">
+                  Activities
+                </Label>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+                      <Info className="text-gray-500" size={16} />
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Activity Level Options</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                      <div><strong>0 - Resting:</strong> Best for downtime, relaxation</div>
+                      <div><strong>1 - Easy:</strong> Only light movement or short outings</div>
+                      <div><strong>2 - Gentle:</strong> Okay with mild activities</div>
+                      <div><strong>3 - Balanced:</strong> Comfortable with moderate plans</div>
+                      <div><strong>4 - Lively:</strong> Keen for active exploration</div>
+                      <div><strong>5 - Energised:</strong> High stamina, ready for all</div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              <span className="text-lg font-semibold text-textPrimary">{getActivitiesLabel(formData.activities)}</span>
             </div>
             <div className="relative">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-textSecondary">0</span>
-                <span className="text-lg font-semibold text-primary">{formData.activities}</span>
-                <span className="text-sm text-textSecondary">5</span>
-              </div>
               <input
                 type="range"
                 min="0"
@@ -163,18 +236,8 @@ export default function PreferencesPage() {
                   background: `linear-gradient(to right, #00897B 0%, #00897B ${(formData.activities / 5) * 100}%, #e5e7eb ${(formData.activities / 5) * 100}%, #e5e7eb 100%)`,
                 }}
               />
-              <div className="flex justify-between text-xs text-textSecondary px-1 mt-2">
-                <span>0 - Resting</span>
-                <span>3 - Balanced</span>
-                <span>5 - Energised</span>
-              </div>
-              <div className="text-center text-sm text-textSecondary mt-2">
-                {formData.activities === 0 && "Best for downtime, relaxation"}
-                {formData.activities === 1 && "Only light movement or short outings"}
-                {formData.activities === 2 && "Okay with mild activities"}
-                {formData.activities === 3 && "Comfortable with moderate plans"}
-                {formData.activities === 4 && "Keen for active exploration"}
-                {formData.activities === 5 && "High stamina, ready for all"}
+              <div className="text-sm text-textSecondary mt-3">
+                {getActivitiesDescription(formData.activities)}
               </div>
             </div>
           </div>

@@ -45,7 +45,7 @@ export default function PreferencesPage() {
       1: "Easy",
       2: "Gentle",
       3: "Balanced",
-      4: "Lively",
+      4: "Moderate",
       5: "Energised"
     };
     return labels[value as keyof typeof labels] || "";
@@ -57,7 +57,7 @@ export default function PreferencesPage() {
       1: "Only light movement or short outings",
       2: "Okay with mild activities",
       3: "Comfortable with moderate plans",
-      4: "Keen for active exploration",
+      4: "Comfortable with moderate exploration",
       5: "High stamina, ready for all"
     };
     return descriptions[value as keyof typeof descriptions] || "";
@@ -215,7 +215,7 @@ export default function PreferencesPage() {
                       <div><strong>1 - Easy:</strong> Only light movement or short outings</div>
                       <div><strong>2 - Gentle:</strong> Okay with mild activities</div>
                       <div><strong>3 - Balanced:</strong> Comfortable with moderate plans</div>
-                      <div><strong>4 - Lively:</strong> Keen for active exploration</div>
+                      <div><strong>4 - Moderate:</strong> Comfortable with moderate exploration</div>
                       <div><strong>5 - Energised:</strong> High stamina, ready for all</div>
                     </div>
                   </DialogContent>

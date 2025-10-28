@@ -15,7 +15,7 @@ import { VerificationBanner } from "@/components/VerificationBanner";
 import {
   validateLocation,
   validateJourney,
-  type LocationValidationResponse
+  type LocationValidationResponse,
 } from "@/lib/validation";
 import {
   Plane,
@@ -99,7 +99,7 @@ export default function LegBasedFlightDetailsPage() {
   // Helper function to apply extracted string field data
   const applyExtractedStringField = (
     extractedField: ExtractedField | undefined,
-    fallbackValue: string,
+    fallbackValue: string
   ): string => {
     if (!extractedField) return fallbackValue;
     const confidence = extractedField.confidence;
@@ -112,7 +112,7 @@ export default function LegBasedFlightDetailsPage() {
     extractedField:
       | { value: number; confidence: number; source: "manual" | "extracted" }
       | undefined,
-    fallbackValue: number,
+    fallbackValue: number
   ): number => {
     if (!extractedField) return fallbackValue;
     const confidence = extractedField.confidence;
@@ -126,13 +126,13 @@ export default function LegBasedFlightDetailsPage() {
       // Get Stop 1 date first
       const stop1Date = applyExtractedStringField(
         extractedData.stops?.[0]?.arrivalDate,
-        "2025-09-02",
+        "2025-09-02"
       );
 
       // Calculate Stop 2 date with constraint
       let stop2Date = applyExtractedStringField(
         extractedData.stops?.[1]?.arrivalDate,
-        "",
+        ""
       );
       if (!stop2Date && stop1Date) {
         stop2Date = stop1Date; // Same day as Stop 1 if no Stop 2 date extracted
@@ -143,12 +143,12 @@ export default function LegBasedFlightDetailsPage() {
         to: formData.to,
         departureTime: applyExtractedStringField(
           extractedData.departureTime,
-          "08:00",
+          "08:00"
         ),
         arrivalTime: formData.arrivalTime,
         departureDate: applyExtractedStringField(
           extractedData.departureDate,
-          "2025-09-02",
+          "2025-09-02"
         ),
         arrivalDate: formData.arrivalDate,
         adults: applyExtractedNumberField(extractedData.adults, 2),
@@ -158,32 +158,32 @@ export default function LegBasedFlightDetailsPage() {
           {
             location: applyExtractedStringField(
               extractedData.stops?.[0]?.location,
-              "",
+              ""
             ),
             arrivalTime: applyExtractedStringField(
               extractedData.stops?.[0]?.arrivalTime,
-              "12:00",
+              "12:00"
             ),
             arrivalDate: stop1Date,
             departureTime: applyExtractedStringField(
               extractedData.stops?.[0]?.departureTime,
-              "13:00",
+              "13:00"
             ),
             departureDate: stop1Date,
           },
           {
             location: applyExtractedStringField(
               extractedData.stops?.[1]?.location,
-              "",
+              ""
             ),
             arrivalTime: applyExtractedStringField(
               extractedData.stops?.[1]?.arrivalTime,
-              "16:00",
+              "16:00"
             ),
             arrivalDate: stop2Date || stop1Date,
             departureTime: applyExtractedStringField(
               extractedData.stops?.[1]?.departureTime,
-              "17:00",
+              "17:00"
             ),
             departureDate: stop2Date || stop1Date,
           },
@@ -194,7 +194,7 @@ export default function LegBasedFlightDetailsPage() {
 
   const handleInputChange = (field: keyof FlightDetails, value: any) => {
     setFormData({ ...formData, [field]: value });
-    
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors({ ...errors, [field]: undefined });
@@ -204,12 +204,12 @@ export default function LegBasedFlightDetailsPage() {
   const handleStopChange = (
     index: number,
     field: keyof Stop,
-    value: string,
+    value: string
   ) => {
     const newStops = [...formData.stops];
     newStops[index] = { ...newStops[index], [field]: value };
     setFormData({ ...formData, stops: newStops });
-    
+
     // Clear stop error when user starts typing
     if (errors.stops?.[index]?.[field]) {
       const newStopErrors = [...(errors.stops || [])];
@@ -223,7 +223,7 @@ export default function LegBasedFlightDetailsPage() {
   // Timing validation function
   const validateTiming = (data: any): LegFormErrors => {
     const errors: LegFormErrors = {};
-    
+
     try {
       // Parse dates and times for validation
       const parseDateTime = (dateStr: string, timeStr: string) => {
@@ -232,27 +232,43 @@ export default function LegBasedFlightDetailsPage() {
       };
 
       // 1st Leg: departure to transit arrival
-      const departureDateTime = parseDateTime(data.departureDate, data.departureTime);
-      const transitArrivalDateTime = parseDateTime(data.stops[0].arrivalDate, data.stops[0].arrivalTime);
-      
+      const departureDateTime = parseDateTime(
+        data.departureDate,
+        data.departureTime
+      );
+      const transitArrivalDateTime = parseDateTime(
+        data.stops[0].arrivalDate,
+        data.stops[0].arrivalTime
+      );
+
       // 2nd Leg: transit departure to final arrival
-      const transitDepartureDateTime = parseDateTime(data.stops[0].departureDate, data.stops[0].departureTime);
-      const finalArrivalDateTime = parseDateTime(data.arrivalDate, data.arrivalTime);
+      const transitDepartureDateTime = parseDateTime(
+        data.stops[0].departureDate,
+        data.stops[0].departureTime
+      );
+      const finalArrivalDateTime = parseDateTime(
+        data.arrivalDate,
+        data.arrivalTime
+      );
 
       // Validate 1st leg: departure < transit arrival
       if (departureDateTime && transitArrivalDateTime) {
         if (departureDateTime >= transitArrivalDateTime) {
           if (!errors.stops) errors.stops = [{}];
-          errors.stops[0].arrivalTime = "1st leg arrival must be after departure time";
-          errors.stops[0].arrivalDate = "1st leg arrival must be after departure date";
+          errors.stops[0].arrivalTime =
+            "1st leg arrival must be after departure time";
+          errors.stops[0].arrivalDate =
+            "1st leg arrival must be after departure date";
         }
       }
 
-      // Validate 2nd leg: transit departure < final arrival  
+      // Validate 2nd leg: transit departure < final arrival
       if (transitDepartureDateTime && finalArrivalDateTime) {
         if (transitDepartureDateTime >= finalArrivalDateTime) {
-          errors.arrivalTime = "Final arrival must be after 2nd leg departure time";
-          errors.arrivalDate = "Final arrival must be after 2nd leg departure date";
+          errors.arrivalTime =
+            "Final arrival must be after 2nd leg departure time";
+          errors.arrivalDate =
+            "Final arrival must be after 2nd leg departure date";
         }
       }
 
@@ -260,13 +276,14 @@ export default function LegBasedFlightDetailsPage() {
       if (transitArrivalDateTime && transitDepartureDateTime) {
         if (transitArrivalDateTime >= transitDepartureDateTime) {
           if (!errors.stops) errors.stops = [{}];
-          errors.stops[0].departureTime = "2nd leg departure must be after 1st leg arrival";
-          errors.stops[0].departureDate = "2nd leg departure must be after 1st leg arrival";
+          errors.stops[0].departureTime =
+            "2nd leg departure must be after 1st leg arrival";
+          errors.stops[0].departureDate =
+            "2nd leg departure must be after 1st leg arrival";
         }
       }
-
     } catch (error) {
-      console.error('Timing validation error:', error);
+      console.error("Timing validation error:", error);
     }
 
     return errors;
@@ -275,12 +292,12 @@ export default function LegBasedFlightDetailsPage() {
   // Batch validation on Next button click
   const handleSubmit = async () => {
     const validationErrors: LegFormErrors = {};
-    
+
     // Collect all locations for validation (only 3 locations in leg-based structure)
     const locationsToValidate = [
-      { type: 'from', value: formData.from },
-      { type: 'transit', value: formData.stops[0].location }, // Only use stops[0] for transit
-      { type: 'to', value: formData.to },
+      { type: "from", value: formData.from },
+      { type: "transit", value: formData.stops[0].location }, // Only use stops[0] for transit
+      { type: "to", value: formData.to },
     ];
 
     // Check required fields first (before expensive API calls)
@@ -361,25 +378,25 @@ export default function LegBasedFlightDetailsPage() {
     // Now validate locations and journey distances (expensive API calls)
     setValidationState({
       isValidating: true,
-      locations: locationsToValidate.map(l => l.value),
+      locations: locationsToValidate.map((l) => l.value),
       errors: [],
     });
 
     try {
       // First validate all locations
       const locationValidationPromises = locationsToValidate
-        .filter(loc => loc.value.trim()) // Only validate non-empty locations
+        .filter((loc) => loc.value.trim()) // Only validate non-empty locations
         .map(async (loc) => {
           try {
             const result = await validateLocation(loc.value);
             return { type: loc.type, result };
           } catch (error) {
-            return { 
-              type: loc.type, 
-              result: { 
-                success: false, 
-                error: "Could not validate location" 
-              } as LocationValidationResponse 
+            return {
+              type: loc.type,
+              result: {
+                success: false,
+                error: "Could not validate location",
+              } as LocationValidationResponse,
             };
           }
         });
@@ -387,7 +404,9 @@ export default function LegBasedFlightDetailsPage() {
       const validationResults = await Promise.all(locationValidationPromises);
 
       // If locations are valid, validate journey distances with haversine formula
-      const locationSuccess = validationResults.every(result => result.result.success);
+      const locationSuccess = validationResults.every(
+        (result) => result.result.success
+      );
       if (locationSuccess) {
         const journeyValidations = await Promise.all([
           // Validate 1st leg: departure → transit
@@ -403,25 +422,25 @@ export default function LegBasedFlightDetailsPage() {
             formData.to,
             `${formData.stops[0].departureDate}T${formData.stops[0].departureTime}:00`,
             `${formData.arrivalDate}T${formData.arrivalTime}:00`
-          )
+          ),
         ]);
 
         // Check for journey validation errors
         const [leg1Journey, leg2Journey] = journeyValidations;
         if (!leg1Journey.success) {
           validationResults.push({
-            type: 'from',
-            result: { success: false, error: `1st leg: ${leg1Journey.error}` }
+            type: "from",
+            result: { success: false, error: `1st leg: ${leg1Journey.error}` },
           });
         }
         if (!leg2Journey.success) {
           validationResults.push({
-            type: 'transit',
-            result: { success: false, error: `2nd leg: ${leg2Journey.error}` }
+            type: "transit",
+            result: { success: false, error: `2nd leg: ${leg2Journey.error}` },
           });
         }
       }
-      
+
       // Process validation results
       const finalValidationErrors: LegFormErrors = {};
       const validationErrorsList: string[] = [];
@@ -429,18 +448,18 @@ export default function LegBasedFlightDetailsPage() {
       for (const { type, result } of validationResults) {
         if (!result.success) {
           const errorMessage = result.error || "Invalid location";
-          
-          if (type === 'from') {
+
+          if (type === "from") {
             finalValidationErrors.from = errorMessage;
-          } else if (type === 'to') {
+          } else if (type === "to") {
             finalValidationErrors.to = errorMessage;
-          } else if (type === 'transit') {
+          } else if (type === "transit") {
             if (!finalValidationErrors.stops) {
               finalValidationErrors.stops = [{}];
             }
             finalValidationErrors.stops[0].location = errorMessage;
           }
-          
+
           validationErrorsList.push(errorMessage);
         }
       }
@@ -471,24 +490,32 @@ export default function LegBasedFlightDetailsPage() {
       // Validate with Zod schema (only include the first stop for leg-based structure)
       const dataToValidate = {
         ...formData,
-        stops: [formData.stops[0]] // Only include the transit stop we're using
+        stops: [
+          formData.stops[0], // Transit stop (Hong Kong) with arrival + departure times
+          {
+            location: formData.to, // Final destination (London)
+            arrivalTime: formData.arrivalTime,
+            arrivalDate: formData.arrivalDate,
+            // No departure times needed for final destination
+          },
+        ],
       };
       const validatedData = flightDetailsSchema.parse(dataToValidate);
-      
+
       // Save and proceed
       setFlightDetails(validatedData);
       navigateToStep(3);
-
     } catch (error) {
       setValidationState({
         isValidating: false,
         locations: [],
         errors: ["Validation failed"],
       });
-      
+
       toast({
         title: "Validation Error",
-        description: "Something went wrong during validation. Please try again.",
+        description:
+          "Something went wrong during validation. Please try again.",
         variant: "destructive",
       });
     }
@@ -497,8 +524,10 @@ export default function LegBasedFlightDetailsPage() {
   return (
     <div className="min-h-screen bg-bgPrimary">
       <div className="max-w-2xl mx-auto px-6 py-8">
-        {hasExtractedData && <VerificationBanner hasExtractedData={hasExtractedData} />}
-        
+        {hasExtractedData && (
+          <VerificationBanner hasExtractedData={hasExtractedData} />
+        )}
+
         <div className="space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
@@ -510,12 +539,15 @@ export default function LegBasedFlightDetailsPage() {
             </p>
           </div>
 
-
           {/* 1st Leg */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
-              <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</div>
-              <h2 className="text-xl font-semibold text-textPrimary">1st Leg</h2>
+              <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+                1
+              </div>
+              <h2 className="text-xl font-semibold text-textPrimary">
+                1st Leg
+              </h2>
             </div>
 
             <div className="space-y-4">
@@ -536,7 +568,9 @@ export default function LegBasedFlightDetailsPage() {
               {/* Departure Time & Date */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Time</Label>
+                  <Label className="text-sm font-medium text-gray-700">
+                    Time
+                  </Label>
                   <div className="relative mt-2">
                     <Clock
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -545,17 +579,25 @@ export default function LegBasedFlightDetailsPage() {
                     <Input
                       type="time"
                       value={formData.departureTime}
-                      onChange={(e) => handleInputChange("departureTime", e.target.value)}
-                      className={`pl-10 text-lg h-12 ${errors.departureTime ? "border-red-500" : ""}`}
+                      onChange={(e) =>
+                        handleInputChange("departureTime", e.target.value)
+                      }
+                      className={`pl-10 text-lg h-12 ${
+                        errors.departureTime ? "border-red-500" : ""
+                      }`}
                       data-testid="input-departure-time"
                     />
                   </div>
                   {errors.departureTime && (
-                    <p className="text-red-500 text-sm mt-1">{errors.departureTime}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.departureTime}
+                    </p>
                   )}
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Date</Label>
+                  <Label className="text-sm font-medium text-gray-700">
+                    Date
+                  </Label>
                   <div className="relative mt-2">
                     <Calendar
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -564,13 +606,19 @@ export default function LegBasedFlightDetailsPage() {
                     <Input
                       type="date"
                       value={formData.departureDate}
-                      onChange={(e) => handleInputChange("departureDate", e.target.value)}
-                      className={`pl-10 text-lg h-12 ${errors.departureDate ? "border-red-500" : ""}`}
+                      onChange={(e) =>
+                        handleInputChange("departureDate", e.target.value)
+                      }
+                      className={`pl-10 text-lg h-12 ${
+                        errors.departureDate ? "border-red-500" : ""
+                      }`}
                       data-testid="input-departure-date"
                     />
                   </div>
                   {errors.departureDate && (
-                    <p className="text-red-500 text-sm mt-1">{errors.departureDate}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.departureDate}
+                    </p>
                   )}
                 </div>
               </div>
@@ -586,13 +634,17 @@ export default function LegBasedFlightDetailsPage() {
                 className="text-lg h-12"
               />
               {errors.stops?.[0]?.location && (
-                <p className="text-red-500 text-sm mt-1">{errors.stops[0].location}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.stops[0].location}
+                </p>
               )}
 
               {/* Arrival Time & Date */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Time</Label>
+                  <Label className="text-sm font-medium text-gray-700">
+                    Time
+                  </Label>
                   <div className="relative mt-2">
                     <Clock
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -601,17 +653,25 @@ export default function LegBasedFlightDetailsPage() {
                     <Input
                       type="time"
                       value={formData.stops[0].arrivalTime}
-                      onChange={(e) => handleStopChange(0, "arrivalTime", e.target.value)}
-                      className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.arrivalTime ? "border-red-500" : ""}`}
+                      onChange={(e) =>
+                        handleStopChange(0, "arrivalTime", e.target.value)
+                      }
+                      className={`pl-10 text-lg h-12 ${
+                        errors.stops?.[0]?.arrivalTime ? "border-red-500" : ""
+                      }`}
                       data-testid="input-transit-arrival-time"
                     />
                   </div>
                   {errors.stops?.[0]?.arrivalTime && (
-                    <p className="text-red-500 text-sm mt-1">{errors.stops[0].arrivalTime}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.stops[0].arrivalTime}
+                    </p>
                   )}
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Date</Label>
+                  <Label className="text-sm font-medium text-gray-700">
+                    Date
+                  </Label>
                   <div className="relative mt-2">
                     <Calendar
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -620,13 +680,19 @@ export default function LegBasedFlightDetailsPage() {
                     <Input
                       type="date"
                       value={formData.stops[0].arrivalDate}
-                      onChange={(e) => handleStopChange(0, "arrivalDate", e.target.value)}
-                      className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.arrivalDate ? "border-red-500" : ""}`}
+                      onChange={(e) =>
+                        handleStopChange(0, "arrivalDate", e.target.value)
+                      }
+                      className={`pl-10 text-lg h-12 ${
+                        errors.stops?.[0]?.arrivalDate ? "border-red-500" : ""
+                      }`}
                       data-testid="input-transit-arrival-date"
                     />
                   </div>
                   {errors.stops?.[0]?.arrivalDate && (
-                    <p className="text-red-500 text-sm mt-1">{errors.stops[0].arrivalDate}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.stops[0].arrivalDate}
+                    </p>
                   )}
                 </div>
               </div>
@@ -636,14 +702,20 @@ export default function LegBasedFlightDetailsPage() {
           {/* 2nd Leg */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
-              <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</div>
-              <h2 className="text-xl font-semibold text-textPrimary">2nd Leg</h2>
+              <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+                2
+              </div>
+              <h2 className="text-xl font-semibold text-textPrimary">
+                2nd Leg
+              </h2>
             </div>
 
             <div className="space-y-4">
               {/* From Location B (same as transit location) */}
               <div>
-                <Label className="text-sm font-medium text-gray-700">From</Label>
+                <Label className="text-sm font-medium text-gray-700">
+                  From
+                </Label>
                 <div className="relative mt-2">
                   <MapPin
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -662,7 +734,9 @@ export default function LegBasedFlightDetailsPage() {
               {/* Departure Time & Date */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Time</Label>
+                  <Label className="text-sm font-medium text-gray-700">
+                    Time
+                  </Label>
                   <div className="relative mt-2">
                     <Clock
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -671,17 +745,25 @@ export default function LegBasedFlightDetailsPage() {
                     <Input
                       type="time"
                       value={formData.stops[0].departureTime}
-                      onChange={(e) => handleStopChange(0, "departureTime", e.target.value)}
-                      className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.departureTime ? "border-red-500" : ""}`}
+                      onChange={(e) =>
+                        handleStopChange(0, "departureTime", e.target.value)
+                      }
+                      className={`pl-10 text-lg h-12 ${
+                        errors.stops?.[0]?.departureTime ? "border-red-500" : ""
+                      }`}
                       data-testid="input-transit-departure-time"
                     />
                   </div>
                   {errors.stops?.[0]?.departureTime && (
-                    <p className="text-red-500 text-sm mt-1">{errors.stops[0].departureTime}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.stops[0].departureTime}
+                    </p>
                   )}
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Date</Label>
+                  <Label className="text-sm font-medium text-gray-700">
+                    Date
+                  </Label>
                   <div className="relative mt-2">
                     <Calendar
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -690,13 +772,19 @@ export default function LegBasedFlightDetailsPage() {
                     <Input
                       type="date"
                       value={formData.stops[0].departureDate}
-                      onChange={(e) => handleStopChange(0, "departureDate", e.target.value)}
-                      className={`pl-10 text-lg h-12 ${errors.stops?.[0]?.departureDate ? "border-red-500" : ""}`}
+                      onChange={(e) =>
+                        handleStopChange(0, "departureDate", e.target.value)
+                      }
+                      className={`pl-10 text-lg h-12 ${
+                        errors.stops?.[0]?.departureDate ? "border-red-500" : ""
+                      }`}
                       data-testid="input-transit-departure-date"
                     />
                   </div>
                   {errors.stops?.[0]?.departureDate && (
-                    <p className="text-red-500 text-sm mt-1">{errors.stops[0].departureDate}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.stops[0].departureDate}
+                    </p>
                   )}
                 </div>
               </div>
@@ -718,7 +806,9 @@ export default function LegBasedFlightDetailsPage() {
               {/* Arrival Time & Date */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Time</Label>
+                  <Label className="text-sm font-medium text-gray-700">
+                    Time
+                  </Label>
                   <div className="relative mt-2">
                     <Clock
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -727,17 +817,25 @@ export default function LegBasedFlightDetailsPage() {
                     <Input
                       type="time"
                       value={formData.arrivalTime}
-                      onChange={(e) => handleInputChange("arrivalTime", e.target.value)}
-                      className={`pl-10 text-lg h-12 ${errors.arrivalTime ? "border-red-500" : ""}`}
+                      onChange={(e) =>
+                        handleInputChange("arrivalTime", e.target.value)
+                      }
+                      className={`pl-10 text-lg h-12 ${
+                        errors.arrivalTime ? "border-red-500" : ""
+                      }`}
                       data-testid="input-final-arrival-time"
                     />
                   </div>
                   {errors.arrivalTime && (
-                    <p className="text-red-500 text-sm mt-1">{errors.arrivalTime}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.arrivalTime}
+                    </p>
                   )}
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Date</Label>
+                  <Label className="text-sm font-medium text-gray-700">
+                    Date
+                  </Label>
                   <div className="relative mt-2">
                     <Calendar
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -746,30 +844,39 @@ export default function LegBasedFlightDetailsPage() {
                     <Input
                       type="date"
                       value={formData.arrivalDate}
-                      onChange={(e) => handleInputChange("arrivalDate", e.target.value)}
-                      className={`pl-10 text-lg h-12 ${errors.arrivalDate ? "border-red-500" : ""}`}
+                      onChange={(e) =>
+                        handleInputChange("arrivalDate", e.target.value)
+                      }
+                      className={`pl-10 text-lg h-12 ${
+                        errors.arrivalDate ? "border-red-500" : ""
+                      }`}
                       data-testid="input-final-arrival-date"
                     />
                   </div>
                   {errors.arrivalDate && (
-                    <p className="text-red-500 text-sm mt-1">{errors.arrivalDate}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.arrivalDate}
+                    </p>
                   )}
                 </div>
               </div>
             </div>
           </div>
 
-
           {/* Travel Details */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <Users className="text-accent" size={24} />
-              <h2 className="text-xl font-semibold text-textPrimary">Travel Details</h2>
+              <h2 className="text-xl font-semibold text-textPrimary">
+                Travel Details
+              </h2>
             </div>
 
             <div className="grid grid-cols-3 gap-6">
               <div>
-                <Label className="text-sm font-medium text-gray-700">Adults</Label>
+                <Label className="text-sm font-medium text-gray-700">
+                  Adults
+                </Label>
                 <div className="relative mt-2">
                   <Users
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -780,7 +887,9 @@ export default function LegBasedFlightDetailsPage() {
                     min="1"
                     max="10"
                     value={formData.adults}
-                    onChange={(e) => handleInputChange("adults", parseInt(e.target.value) || 1)}
+                    onChange={(e) =>
+                      handleInputChange("adults", parseInt(e.target.value) || 1)
+                    }
                     className="pl-10 text-lg h-12"
                     data-testid="input-adults"
                   />
@@ -788,7 +897,9 @@ export default function LegBasedFlightDetailsPage() {
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-gray-700">Children</Label>
+                <Label className="text-sm font-medium text-gray-700">
+                  Children
+                </Label>
                 <div className="relative mt-2">
                   <Users
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -799,7 +910,12 @@ export default function LegBasedFlightDetailsPage() {
                     min="0"
                     max="10"
                     value={formData.children}
-                    onChange={(e) => handleInputChange("children", parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "children",
+                        parseInt(e.target.value) || 0
+                      )
+                    }
                     className="pl-10 text-lg h-12"
                     data-testid="input-children"
                   />
@@ -807,7 +923,9 @@ export default function LegBasedFlightDetailsPage() {
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-gray-700">Luggage</Label>
+                <Label className="text-sm font-medium text-gray-700">
+                  Luggage
+                </Label>
                 <div className="relative mt-2">
                   <Luggage
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -818,7 +936,12 @@ export default function LegBasedFlightDetailsPage() {
                     min="0"
                     max="20"
                     value={formData.luggageCount}
-                    onChange={(e) => handleInputChange("luggageCount", parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "luggageCount",
+                        parseInt(e.target.value) || 0
+                      )
+                    }
                     className="pl-10 text-lg h-12"
                     data-testid="input-luggage"
                   />
@@ -833,9 +956,12 @@ export default function LegBasedFlightDetailsPage() {
               <div className="flex items-center gap-3">
                 <Loader2 className="animate-spin text-blue-500" size={20} />
                 <div>
-                  <h3 className="font-medium text-blue-800">Validating Locations...</h3>
+                  <h3 className="font-medium text-blue-800">
+                    Validating Locations...
+                  </h3>
                   <p className="text-sm text-blue-600">
-                    Checking {validationState.locations.length} location(s) for accuracy
+                    Checking {validationState.locations.length} location(s) for
+                    accuracy
                   </p>
                 </div>
               </div>

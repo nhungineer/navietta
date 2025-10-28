@@ -5,13 +5,14 @@ import {
   generateTravelRecommendations,
   generateFollowUpResponse,
   extractTravelDataFromPDF,
+  extractTravelDataFromPDFDirect,
 } from "./services/claude";
 import { generateMockTravelRecommendations } from "./services/mockClaude";
 import {
   validateLocation,
   validateJourney,
   type ValidationResult,
-  type LocationInfo
+  type LocationInfo,
 } from "./services/locationValidation";
 import { flightDetailsSchema, preferencesSchema } from "@shared/schema";
 import { z } from "zod";
@@ -40,7 +41,7 @@ const chatSchema = z.object({
       z.object({
         question: z.string(),
         response: z.string(),
-      }),
+      })
     )
     .optional()
     .default([]),
@@ -88,14 +89,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log("Using Claude API for recommendations");
           recommendations = await generateTravelRecommendations(
             flightDetails,
-            preferences,
+            preferences
           );
           console.log("Claude API completed successfully");
         } catch (error) {
           console.error("Claude API error, falling back to mock data:", error);
           recommendations = await generateMockTravelRecommendations(
             flightDetails,
-            preferences,
+            preferences
           );
           console.log("Fallback to mock data completed");
         }
@@ -103,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("No ANTHROPIC_API_KEY found, using mock data");
         recommendations = await generateMockTravelRecommendations(
           flightDetails,
-          preferences,
+          preferences
         );
         console.log("Mock data generation completed");
       }
@@ -150,7 +151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/travel/chat", async (req, res) => {
     try {
       const { sessionId, question, conversationHistory } = chatSchema.parse(
-        req.body,
+        req.body
       );
 
       // Retrieve the travel session
@@ -177,7 +178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             session.flightDetails,
             session.preferences,
             conversationHistory || [],
-            question,
+            question
           );
         } catch (error) {
           console.error("Claude API error for follow-up:", error);
@@ -209,7 +210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         console.log(
-          `Processing PDF upload: ${req.file.originalname}, size: ${req.file.size} bytes`,
+          `Processing PDF upload: ${req.file.originalname}, size: ${req.file.size} bytes`
         );
 
         // Extract text from the actual PDF file
@@ -220,7 +221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const pdfBase64 = pdfBuffer.toString("base64");
 
         console.log(
-          `Sending PDF directly to Claude for processing: ${req.file.originalname}`,
+          `Sending PDF directly to Claude for processing: ${req.file.originalname}`
         );
 
         // Extract travel data using Claude AI
@@ -230,7 +231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log("Using Claude API for PDF extraction");
             extractedData = await extractTravelDataFromPDFDirect(
               pdfBase64,
-              req.file.originalname,
+              req.file.originalname
             );
             console.log("Claude PDF extraction completed successfully");
           } catch (error) {
@@ -253,7 +254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Log successful extraction (without PII)
         console.log(
           "PDF extraction successful. Fields extracted:",
-          Object.keys(extractedData).length,
+          Object.keys(extractedData).length
         );
 
         res.json({
@@ -278,36 +279,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
           fallback: true,
         });
       }
-    },
+    }
   );
 
   // Location validation endpoint
   app.post("/api/validation/location", async (req, res) => {
     try {
       const { location } = locationValidationSchema.parse(req.body);
-      
+
       const result = await validateLocation(location);
-      
+
       res.json({
         success: result.isValid,
         location: result.location,
         error: result.error,
-        suggestions: result.suggestions || []
+        suggestions: result.suggestions || [],
       });
     } catch (error) {
       console.error("Location validation error:", error);
-      
+
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           success: false,
           error: "Invalid request format",
-          details: error.errors
+          details: error.errors,
         });
       }
-      
+
       res.status(500).json({
         success: false,
-        error: "Location validation service unavailable"
+        error: "Location validation service unavailable",
       });
     }
   });
@@ -315,48 +316,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Journey validation endpoint
   app.post("/api/validation/journey", async (req, res) => {
     try {
-      const { fromLocation, toLocation, departureTime, arrivalTime } = 
+      const { fromLocation, toLocation, departureTime, arrivalTime } =
         journeyValidationSchema.parse(req.body);
-      
+
       // Parse the time strings to Date objects
       const departure = new Date(departureTime);
       const arrival = new Date(arrivalTime);
-      
+
       if (isNaN(departure.getTime()) || isNaN(arrival.getTime())) {
         return res.status(400).json({
           success: false,
-          error: "Invalid date/time format"
+          error: "Invalid date/time format",
         });
       }
-      
+
       const result = await validateJourney(
         fromLocation,
         toLocation,
         departure,
         arrival
       );
-      
+
       res.json({
         success: result.isValid,
         fromLocation: result.fromLocationInfo,
         toLocation: result.toLocationInfo,
         distance: result.distance,
-        error: result.error
+        error: result.error,
       });
     } catch (error) {
       console.error("Journey validation error:", error);
-      
+
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           success: false,
           error: "Invalid request format",
-          details: error.errors
+          details: error.errors,
         });
       }
-      
+
       res.status(500).json({
         success: false,
-        error: "Journey validation service unavailable"
+        error: "Journey validation service unavailable",
       });
     }
   });

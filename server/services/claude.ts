@@ -17,13 +17,20 @@ const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
 
 // Environment-specific API key selection for cost tracking
 function getAnthropicApiKey(): string {
-  const isProduction = process.env.REPLIT_DEPLOYMENT === "1";
+  // Check multiple environment indicators for production
+  const isProduction =
+    process.env.NODE_ENV === "production" ||
+    process.env.REPLIT_DEPLOYMENT === "1" ||
+    process.env.RAILWAY_ENVIRONMENT === "production";
+
   const devKey = process.env.NAVIETTA_DEV_API_KEY;
   const prodKey =
     process.env.NAVIETTA_PROD_API_KEY || process.env.ANTHROPIC_API_KEY; // Support both naming conventions
 
   console.log("🔑 API Key Selection Debug:");
+  console.log("- NODE_ENV:", process.env.NODE_ENV);
   console.log("- REPLIT_DEPLOYMENT:", process.env.REPLIT_DEPLOYMENT);
+  console.log("- RAILWAY_ENVIRONMENT:", process.env.RAILWAY_ENVIRONMENT);
   console.log("- Is Production:", isProduction);
   console.log("- Dev key exists:", !!devKey);
   console.log("- Prod key exists:", !!prodKey);
@@ -54,15 +61,15 @@ let anthropic = new Anthropic({
   apiKey: getAnthropicApiKey(),
 });
 
-// Wrap with LangSmith for observability (dev environment only)
-const isDevEnvironment = process.env.NODE_ENV === "development";
+// Wrap with LangSmith for observability
 const langsmithEnabled = process.env.LANGSMITH_TRACING === "true";
 
-if (isDevEnvironment && langsmithEnabled) {
-  console.log("🔍 LangSmith tracing enabled for development");
+if (langsmithEnabled) {
+  const environment = process.env.NODE_ENV || "unknown";
+  console.log(`🔍 LangSmith tracing enabled for ${environment}`);
   anthropic = wrapSDK(anthropic);
 } else {
-  console.log("📋 LangSmith tracing disabled (set LANGSMITH_TRACING=true to enable in dev)");
+  console.log("📋 LangSmith tracing disabled (set LANGSMITH_TRACING=true to enable)");
 }
 
 interface FlightDetails {

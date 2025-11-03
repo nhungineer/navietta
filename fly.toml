@@ -1,0 +1,67 @@
+# fly.toml - Fly.io Configuration File
+# This file tells Fly.io how to run your app
+
+# App name - you'll set this when you run 'fly launch'
+# Leave this commented out for now
+# app = 'navietta'
+
+# Fly.io platform version (v2 is current)
+[build]
+
+# Build section is optional - Fly.io auto-detects Dockerfile
+
+[env]
+  # Set Node environment to production
+  NODE_ENV = "production"
+
+  # Port your app listens on (must match Dockerfile EXPOSE)
+  PORT = "3000"
+
+# HTTP Service Configuration
+[[services]]
+  # Internal port your app listens on (from your server code)
+  internal_port = 3000
+
+  # Protocol
+  protocol = "tcp"
+
+  # Auto stop/start machines when idle (free tier optimization)
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+
+  # Minimum machines running (1 for always available)
+  min_machines_running = 1
+
+  # HTTP checks to verify your app is healthy
+  [[services.http_checks]]
+    interval = "10s"
+    timeout = "2s"
+    grace_period = "5s"
+    method = "GET"
+    path = "/"
+
+  # Ports configuration
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+# VM Resources
+[vm]
+  # CPU kind (shared = free tier)
+  cpu_kind = "shared"
+
+  # CPUs (1 = free tier)
+  cpus = 1
+
+  # Memory in MB (256 = free tier)
+  memory_mb = 256
+
+# Deployment strategy
+[deploy]
+  # Deploy strategy (rolling updates)
+  strategy = "rolling"

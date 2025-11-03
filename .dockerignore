@@ -1,0 +1,49 @@
+# .dockerignore - tells Docker what NOT to copy into the container
+# This makes builds faster and images smaller
+
+# Node modules - we install them fresh in the Dockerfile
+node_modules
+
+# Environment files - NEVER copy secrets into the image
+.env
+.env.*
+.env.local
+
+# Git files - not needed in production
+.git
+.gitignore
+.github
+
+# Development files
+.replit
+replit.nix
+
+# Build output - we create this fresh in the Dockerfile
+dist
+
+# Documentation and development files
+README.md
+INTERVIEW_PREP.md
+*.md
+
+# Test files
+test/
+*.test.ts
+*.test.js
+
+# IDE files
+.vscode
+.idea
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/

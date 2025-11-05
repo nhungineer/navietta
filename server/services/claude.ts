@@ -36,7 +36,7 @@ function getAnthropicApiKey(): string {
   console.log("- Prod key exists:", !!prodKey);
   console.log(
     "- NAVIETTA_PROD_API_KEY exists:",
-    !!process.env.NAVIETTA_PROD_API_KEY,
+    !!process.env.NAVIETTA_PROD_API_KEY
   );
 
   if (isProduction) {
@@ -51,7 +51,7 @@ function getAnthropicApiKey(): string {
   const selectedKey = devKey || prodKey || "";
   console.log(
     "✅ Using DEVELOPMENT key:",
-    devKey ? "NAVIETTA_DEV_API_KEY" : "fallback to prod key",
+    devKey ? "NAVIETTA_DEV_API_KEY" : "fallback to prod key"
   );
   return selectedKey;
 }
@@ -69,7 +69,9 @@ if (langsmithEnabled) {
   console.log(`🔍 LangSmith tracing enabled for ${environment}`);
   anthropic = wrapSDK(anthropic);
 } else {
-  console.log("📋 LangSmith tracing disabled (set LANGSMITH_TRACING=true to enable)");
+  console.log(
+    "📋 LangSmith tracing disabled (set LANGSMITH_TRACING=true to enable)"
+  );
 }
 
 interface FlightDetails {
@@ -83,6 +85,8 @@ interface FlightDetails {
     location: string;
     arrivalTime: string;
     arrivalDate: string;
+    departureTime?: string;
+    departureDate?: string;
   }>;
 }
 
@@ -131,7 +135,7 @@ export async function generateFollowUpResponse(
   flightDetails: FlightDetails,
   preferences: Preferences,
   conversationHistory: Array<{ question: string; response: string }>,
-  newQuestion: string,
+  newQuestion: string
 ): Promise<string> {
   // Create compressed context from original recommendations
   const contextSummary = {
@@ -140,7 +144,11 @@ export async function generateFollowUpResponse(
     departureTime: flightDetails.departureTime,
     departureDate: flightDetails.departureDate,
     firstStopTime: flightDetails.stops[0]?.arrivalTime || "time not specified",
-    travelers: `${flightDetails.adults} adult(s)${flightDetails.children > 0 ? ` and ${flightDetails.children} child(ren)` : ""}`,
+    travelers: `${flightDetails.adults} adult(s)${
+      flightDetails.children > 0
+        ? ` and ${flightDetails.children} child(ren)`
+        : ""
+    }`,
     luggage: `${flightDetails.luggageCount} piece(s)`,
     preferences: {
       budget: preferences.budget,
@@ -163,8 +171,7 @@ export async function generateFollowUpResponse(
     conversationHistory.length > 0
       ? conversationHistory
           .map(
-            (msg, i) =>
-              `Q${i + 1}: ${msg.question}\nA${i + 1}: ${msg.response}`,
+            (msg, i) => `Q${i + 1}: ${msg.question}\nA${i + 1}: ${msg.response}`
           )
           .join("\n\n")
       : "";
@@ -172,15 +179,30 @@ export async function generateFollowUpResponse(
   const followUpPrompt = `You are Navietta, continuing a conversation about travel recommendations you previously provided.
 
 ## Original Travel Context
-- Starting from ${flightDetails.from} departing on ${contextSummary.departureDate} at ${contextSummary.departureTime}
-- First destination: ${contextSummary.firstDestination} at ${contextSummary.firstStopTime}
-- Travelers: ${contextSummary.travelers} with ${contextSummary.luggage} of luggage
+- Starting from ${flightDetails.from} departing on ${
+    contextSummary.departureDate
+  } at ${contextSummary.departureTime}
+- First destination: ${contextSummary.firstDestination} at ${
+    contextSummary.firstStopTime
+  }
+- Travelers: ${contextSummary.travelers} with ${
+    contextSummary.luggage
+  } of luggage
 - AI will recommend optimal transport based on preferences
-- User preferences: ${contextSummary.preferences.budget}/5 budget, ${contextSummary.preferences.activities}/5 activities, ${contextSummary.preferences.transitStyle} style
+- User preferences: ${contextSummary.preferences.budget}/5 budget, ${
+    contextSummary.preferences.activities
+  }/5 activities, ${contextSummary.preferences.transitStyle} style
 
 ## Your Previous Recommendations Summary
 You provided these ${contextSummary.options.length} options:
-${contextSummary.options.map((opt) => `- **${opt.title}**: ${opt.description} (${opt.cost}, ${opt.duration})${opt.recommended ? " [RECOMMENDED]" : ""}`).join("\n")}
+${contextSummary.options
+  .map(
+    (opt) =>
+      `- **${opt.title}**: ${opt.description} (${opt.cost}, ${opt.duration})${
+        opt.recommended ? " [RECOMMENDED]" : ""
+      }`
+  )
+  .join("\n")}
 
 Your recommended option was: ${contextSummary.recommendedOption}
 
@@ -193,7 +215,9 @@ ${newQuestion}
 ## Instructions
 - Answer naturally using "you" and "I" like continuing a conversation with a friend
 - Reference the specific recommendations you made previously
-- Use the actual destinations (${contextSummary.firstDestination}) and travel details
+- Use the actual destinations (${
+    contextSummary.firstDestination
+  }) and travel details
 - Be helpful and specific to their situation
 - If asked for timeline details, provide specific times and locations
 - If asked about other options, reference the ones you actually recommended
@@ -231,7 +255,7 @@ Respond directly as Navietta - no JSON formatting needed, just your natural resp
 
 export async function generateTravelRecommendations(
   flightDetails: FlightDetails,
-  preferences: Preferences,
+  preferences: Preferences
 ): Promise<TravelRecommendations> {
   const systemPrompt = `You are Navietta, an AI travel transit assistant. Provide practical travel recommendations with clear reasoning.
 
@@ -261,40 +285,78 @@ CRITICAL: Respond with ONLY valid JSON. No markdown blocks. Start with { and end
   const stopsText = flightDetails.stops
     .map(
       (stop: any, index: number) =>
-        `- Stop ${index + 1}: ${stop.location} at ${stop.arrivalTime} on ${stop.arrivalDate}`,
+        `- Stop ${index + 1}: ${stop.location} at ${stop.arrivalTime} on ${
+          stop.arrivalDate
+        }`
     )
     .join("\n");
 
-  const prompt = `LAYOVER PLANNING: ${flightDetails.from} → ${flightDetails.stops[0]?.location} → ${flightDetails.stops[1]?.location}
+  const prompt = `LAYOVER PLANNING: ${flightDetails.from} → ${
+    flightDetails.stops[0]?.location
+  } → ${flightDetails.stops[1]?.location}
 
 JOURNEY CONTEXT:
-- Flying from ${flightDetails.from} to ${flightDetails.stops[1]?.location} with a layover in ${flightDetails.stops[0]?.location}
-- Arrive ${flightDetails.stops[0]?.location}: ${flightDetails.stops[0]?.arrivalTime} on ${flightDetails.stops[0]?.arrivalDate}
-- Depart ${flightDetails.stops[0]?.location}: ${flightDetails.stops[0]?.departureTime} on ${flightDetails.stops[0]?.departureDate}
+- Flying from ${flightDetails.from} to ${
+    flightDetails.stops[1]?.location
+  } with a layover in ${flightDetails.stops[0]?.location}
+- Arrive ${flightDetails.stops[0]?.location}: ${
+    flightDetails.stops[0]?.arrivalTime
+  } on ${flightDetails.stops[0]?.arrivalDate}
+- Depart ${flightDetails.stops[0]?.location}: ${
+    flightDetails.stops[0]?.departureTime
+  } on ${flightDetails.stops[0]?.departureDate}
 - Final destination: ${flightDetails.stops[1]?.location}
-- Travelers: ${flightDetails.adults} adult(s)${flightDetails.children > 0 ? `, ${flightDetails.children} child(ren)` : ""}
+- Travelers: ${flightDetails.adults} adult(s)${
+    flightDetails.children > 0 ? `, ${flightDetails.children} child(ren)` : ""
+  }
 - Luggage: ${flightDetails.luggageCount} piece(s)
 
 YOUR TASK:
-Recommend what to do during the ${flightDetails.stops[0]?.location} layover. Focus on activities, food, rest, or exploration options available between arrival and departure times.
+Recommend what to do during the ${
+    flightDetails.stops[0]?.location
+  } layover. Focus on activities, food, rest, or exploration options available between arrival and departure times.
+
+**CRITICAL SAFETY CONSTRAINT**
+
+The final timeline item MUST be "Return to Airport and Complete Security" and MUST occur:
+- For international flights: AT LEAST 2 FULL HOURS before departure time
+- For Schengen/EU domestic: AT LEAST 1.5 hours before departure time
+
+EXAMPLE CALCULATION:
+- If departure time is 13:00 (1pm)
+- Final timeline item must be NO LATER THAN 11:00 (2 hours before)
+- If you recommend 12:45, this is WRONG and DANGEROUS
+
+This is a safety requirement. Passengers WILL miss their flight if you don't follow this rule.
 
 REQUIREMENTS:
 - Provide EXACTLY 2 layover options (NOT flight options)
-- Options should cover activities during the layover in ${flightDetails.stops[0]?.location}
-- Timeline starts from arrival at ${flightDetails.stops[0]?.arrivalTime} and ends before departure at ${flightDetails.stops[0]?.departureTime}
+- Options should cover activities during the layover in ${
+    flightDetails.stops[0]?.location
+  }
+- Timeline starts from arrival at ${flightDetails.stops[0]?.arrivalTime} and 
 - Include exactly 5-7 timeline items for the layover period
 - Consider: immigration/customs time, luggage storage, transport to/from city, activities, meals, rest
-- Assume the onward flight to ${flightDetails.stops[1]?.location} is already booked - don't recommend different flights
+- Assume the onward flight to ${
+    flightDetails.stops[1]?.location
+  } is already booked - don't recommend different flights
+- The LAST timeline item must end AT LEAST 2 hours before departure at ${
+    flightDetails.stops[0]?.departureTime
+  }
 
 USER PREFERENCES:
-- Budget: ${preferences.budget}/5 (1=Frugal/cheapest possible, 2=Economy/low-cost, 3=Balanced/cost and comfort equal, 4=Comfort/more spend for ease, 5=Luxury/max comfort)
-- Activities: ${preferences.activities}/5 (1=Resting/downtime, 2=Easy/mild activities, 3=Balanced/moderate plans, 4=Lively/active exploration, 5=Energised/high stamina)
+- Budget: ${
+    preferences.budget
+  }/5 (1=Frugal/cheapest possible, 2=Economy/low-cost, 3=Balanced/cost and comfort equal, 4=Comfort/more spend for ease, 5=Luxury/max comfort)
+- Activities: ${
+    preferences.activities
+  }/5 (1=Resting/downtime, 2=Easy/mild activities, 3=Balanced/moderate plans, 4=Lively/active exploration, 5=Energised/high stamina)
 - Transit style: ${preferences.transitStyle} ${
     preferences.transitStyle === "fast-track"
       ? "(prioritise quickest route, minimise travel time)"
       : preferences.transitStyle === "scenic-route"
-        ? "(take time, see sights, explore along the way)"
-        : "(most straightforward routes, minimal transfers)"
+      ? "(take time, see sights, explore along the way)"
+      : "(most straightforward routes, minimal transfers)"
   }
 
 Provide exactly 2 options in this JSON format:
@@ -333,13 +395,13 @@ Provide exactly 2 options in this JSON format:
         },
         {
           "time": "22:00",
-          "title": "Return to Airport",
+          "title": "Return to Airport", // 3 hours before 1:00 departure
           "description": "Head back in time for check-in (if required) for onward flight",
           "type": "primary"
         },
         {
           "time": "23:00",
-          "title": "Prepare for Onward Flight",
+          "title": "Complete Security and Check-in", //2 hours before 1:00 departure time
           "description": "Check-in, security, boarding for next leg of journey",
           "type": "primary"
         }
@@ -369,7 +431,7 @@ Provide exactly 2 options in this JSON format:
     console.log(
       "  Total prompt length:",
       systemPrompt.length + prompt.length,
-      "characters",
+      "characters"
     );
     console.log("DEBUGGING - Transit details sent to AI:");
     console.log("From:", flightDetails.from);
@@ -377,7 +439,7 @@ Provide exactly 2 options in this JSON format:
       "Stops:",
       flightDetails.stops
         .map((s) => `${s.location} at ${s.arrivalTime} on ${s.arrivalDate}`)
-        .join(", "),
+        .join(", ")
     );
 
     const response = await anthropic.messages.create({
@@ -400,7 +462,7 @@ Provide exactly 2 options in this JSON format:
       "  Total tokens:",
       response.usage
         ? response.usage.input_tokens + response.usage.output_tokens
-        : "unknown",
+        : "unknown"
     );
 
     // Report usage to LangSmith manually if tracing is enabled
@@ -419,7 +481,7 @@ Provide exactly 2 options in this JSON format:
     // Log a snippet of the raw AI response to debug
     console.log(
       "RAW AI RESPONSE (first 500 chars):",
-      content.text.substring(0, 500),
+      content.text.substring(0, 500)
     );
 
     // Clean the response text to handle markdown code blocks
@@ -455,7 +517,7 @@ Provide exactly 2 options in this JSON format:
 
 export async function extractTravelDataFromPDFDirect(
   pdfBase64: string,
-  filename: string,
+  filename: string
 ): Promise<PDFExtraction> {
   const systemPrompt = `You are a travel document analyzer that extracts structured travel information from travel documents. Your task is to extract travel details while strictly protecting privacy.
 
@@ -530,7 +592,9 @@ Return ONLY valid JSON with this exact structure. Omit fields if not found or co
 }`;
 
   try {
-    console.log(`Extracting travel data from PDF ${filename} using Claude API direct processing...`);
+    console.log(
+      `Extracting travel data from PDF ${filename} using Claude API direct processing...`
+    );
 
     const response = await anthropic.messages.create({
       model: DEFAULT_MODEL_STR,
@@ -581,7 +645,7 @@ Return ONLY valid JSON with this exact structure. Omit fields if not found or co
 
     console.log(
       "Raw direct PDF extraction response (first 300 chars):",
-      responseText.substring(0, 300),
+      responseText.substring(0, 300)
     );
 
     try {
@@ -590,7 +654,7 @@ Return ONLY valid JSON with this exact structure. Omit fields if not found or co
     } catch (parseError) {
       console.error(
         "JSON parsing error for direct PDF extraction. Raw response:",
-        content.text,
+        content.text
       );
       console.error("Cleaned response text:", responseText);
       throw parseError;
@@ -602,7 +666,7 @@ Return ONLY valid JSON with this exact structure. Omit fields if not found or co
 }
 
 export async function extractTravelDataFromPDF(
-  pdfText: string,
+  pdfText: string
 ): Promise<PDFExtraction> {
   const systemPrompt = `You are a travel document analyzer that extracts structured travel information from travel documents. Your task is to extract travel details while strictly protecting privacy.
 
@@ -718,7 +782,7 @@ ${pdfText}`,
 
     console.log(
       "Raw PDF extraction response (first 300 chars):",
-      responseText.substring(0, 300),
+      responseText.substring(0, 300)
     );
 
     try {
@@ -727,7 +791,7 @@ ${pdfText}`,
     } catch (parseError) {
       console.error(
         "JSON parsing error for PDF extraction. Raw response:",
-        content.text,
+        content.text
       );
       console.error("Cleaned response text:", responseText);
       throw parseError;

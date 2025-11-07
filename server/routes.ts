@@ -25,7 +25,7 @@ const anthropic = new Anthropic({
 });
 
 // <important_do_not_delete>
-const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
+const DEFAULT_MODEL_STR = "claude-sonnet-4-5-20250929";
 // </important_do_not_delete>
 
 const generateRecommendationsSchema = z.object({

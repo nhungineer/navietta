@@ -5,3 +5,5 @@ node_modules/
 replit.nix
 EOF
 'EOF'
+INTERVIEW_PREP.md
+DEV_SETUP.md Dockerfile

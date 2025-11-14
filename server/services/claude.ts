@@ -263,27 +263,22 @@ export async function generateTravelRecommendations(
 ): Promise<TravelRecommendations> {
   const systemPrompt = `You are Navietta, an AI travel transit assistant. Provide practical travel recommendations with clear reasoning.
 
-**CONCISENESS REQUIREMENTS:**
-- Keep reasoning sections brief and focused (2-3 sentences each)
-- Timeline item descriptions: Maximum 1 sentence per item
-- Final recommendation reasoning: Maximum 4 sentences
-- Avoid repetition - state each point once
-- Be direct - travelers want facts, not elaboration
+  **CORE PRINCIPLES:**
+  - Prioritize user safety and feasibility over preferences
+  - Be concise: reasoning (2-3 sentences), timeline descriptions (1 sentence max)
+  - State each point once - avoid repetition
+  - Be direct - travelers want facts, not elaboration
 
-## Handling Conflicting Preferences
-When preferences conflict, use these priority rules:
-- **Tight timeframes are CRITICAL OVERRIDE** - Always take precedence over budget, comfort, or exploration when timing is genuinely constrained. EXPLICITLY flag time-related risks and recommend only options guaranteeing timely arrival.
-- **Energy Level and Transit Style** priority over Budget when conflicts impact user well-being or feasibility (e.g., exhausted needing rest over saving money)
-- **Budget vs. Comfort** often result in mid-tier compromises, unless one explicitly dominates (very high budget or zero budget)
-- **Situational factors** (tight time, large groups, kids, luggage) override standard preferences and push toward practicality, favoring ease and comfort over pure budget or exploration desire
+  **HANDLING CONFLICTS:**
+  When user preferences conflict with constraints or each other:
+  1. Safety and feasibility ALWAYS take precedence
+  2. Explicitly acknowledge the conflict in reasoning
+  3. Recommend the safest/most practical option
 
-State clear reasoning for recommendations showing you've explicitly considered the conflicting input.
-
-## Location Disambiguation Rules
-When multiple locations match (e.g., Paris, France vs Paris, Texas vs Paris, Ontario):
-- Prioritize by population (Paris, FR wins over smaller cities)
-- Consider route context (international flights suggest major cities)
-- Always use full city/airport names with airport codes when available
+  **LOCATION DISAMBIGUATION:**
+  When multiple locations match (e.g., Paris, France vs Paris, Texas):
+  - Prioritize by population and travel context
+  - Use full city/airport names with codes when available
 
 CRITICAL: Respond with ONLY valid JSON. No markdown blocks. Start with { and end with }.`;
 
@@ -299,6 +294,11 @@ CRITICAL: Respond with ONLY valid JSON. No markdown blocks. Start with { and end
   const prompt = `LAYOVER PLANNING: ${flightDetails.from} → ${
     flightDetails.stops[0]?.location
   } → ${flightDetails.stops[1]?.location}
+
+YOUR TASK:
+Recommend what to do during the ${
+    flightDetails.stops[0]?.location
+  } layover that best match journey context and user preferences.
 
 JOURNEY CONTEXT:
 - Flying from ${flightDetails.from} to ${
@@ -316,59 +316,54 @@ JOURNEY CONTEXT:
   }
 - Luggage: ${flightDetails.luggageCount} piece(s)
 
-YOUR TASK:
-Recommend what to do during the ${
-    flightDetails.stops[0]?.location
-  } layover. Focus on activities, food, rest, or exploration options available between arrival and departure times.
+USER PREFERENCES:
+- Budget: ${preferences.budget}/5 (1=frugal, 3=balanced, 5=luxury)
+- Activities: ${preferences.budget}/5 (1=rest, 3=moderate, 5=high-energy)
+- Transit style: ${
+    preferences.transitStyle
+  } (scenic-route: explore along the way; fewer-transfers: minimum, less complex transfers, fast-track: fastest way to get between stops )
 
-**TIMELINE & SAFETY REQUIREMENTS:**
-
-- Include 5-7 timeline items covering the layover period
-- Timeline must account for ALL activities including travel time
-- If recommendations involve leaving the airport, timeline must include return journey steps
-- The FINAL timeline item MUST be titled "Proceed to Departure Gate" and MUST occur at least 1 hour before departure time
-  - Do NOT use "Boarding Begins" as the last item - that happens later
-  - Example: If departure is 10:00, final item should be "09:00 - Proceed to Departure Gate" or earlier
-
-**Layover Duration Guidelines:**
+**LAYOVER DURATION GUIDELINES:**
 - < 4 hours: Stay airside (airport facilities only)
 - 4-6 hours: Consider time of day, luggage, and user preferences
 - > 6 hours: Can explore city with proper planning
 
-**Critical Safety Rule:**
-If leaving airport, allow minimum 2 hours for return journey + immigration + security.
+**CONFLICT HANDLING**
+When user preferences conflict with constraints or each other:
+  1. Timeline safety and feasibility ALWAYS take precedence
+  2. Explicitly acknowledge the conflict in reasoning
+  3. Recommend the safest/most practical option
 
-
-REQUIREMENTS:
-- Provide EXACTLY 2 layover options (NOT flight options)
+**TIMELINE REQUIREMENTS:**
+- Provide EXACTLY 2 layover options 
+- Assume the onward flight to ${
+    flightDetails.stops[1]?.location
+  } is already booked - don't recommend different flights
+- If leaving airport, allow minimum 2 hours for return journey + immigration + security.
 - Options should cover activities during the layover in ${
     flightDetails.stops[0]?.location
   }
 - Timeline starts from arrival at ${flightDetails.stops[0]?.arrivalTime} and 
 - Include exactly 5-7 timeline items for the layover period
 - Consider: immigration/customs time, luggage storage, transport to/from city, activities, meals, rest
-- Assume the onward flight to ${
-    flightDetails.stops[1]?.location
-  } is already booked - don't recommend different flights
 - The LAST timeline item must end AT LEAST 1 hour before departure at ${
     flightDetails.stops[0]?.departureTime
   }
+**ACTIVITY TIMING & FEASIBILITY REQUIREMENTS**
+Before recommending any activity, verify timing makes sense:
+1. Activities need to be appropriate for the time of day
+- Recommend daytime activities during daylight hours
+- Do not recommend activities that are explicitly evening/night only such as night markets, night life, light shows during daytime layover itinerary
+- Do not recommend daytime activities for evening layover
+- Recommend activities when they offer the best experience, not just when they're technically open (eg market during peak vibrant hours not setup/teardown time, sunset/sunrise for viewpoints) 
 
-USER PREFERENCES:
-- Budget: ${
-    preferences.budget
-  }/5 (1=Frugal/cheapest possible, 2=Economy/low-cost, 3=Balanced/cost and comfort equal, 4=Comfort/more spend for ease, 5=Luxury/max comfort)
-- Activities: ${
-    preferences.activities
-  }/5 (1=Resting/downtime, 2=Easy/mild activities, 3=Balanced/moderate plans, 4=Lively/active exploration, 5=Energised/high stamina)
-- Transit style: ${preferences.transitStyle} ${
-    preferences.transitStyle === "fast-track"
-      ? "(prioritise quickest route, minimise travel time)"
-      : preferences.transitStyle === "scenic-route"
-      ? "(take time, see sights, explore along the way)"
-      : "(most straightforward routes, minimal transfers)"
-  }
+2. Operating hours safety buffer
+- Always consider the attraction or services' operating hours before recommending activity
+- Don't schedule activities at closing/last-service time
+- Build in 30-60 minutes arrival buffer before closing for queuing, potential delay, transit time
 
+
+**FORMAT**
 Provide exactly 2 options in this JSON format:
 {
   "reasoning": {

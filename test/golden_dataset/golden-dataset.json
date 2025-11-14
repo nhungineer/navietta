@@ -1,0 +1,744 @@
+{
+  "scenarios": [
+    {
+      "metadata": {
+        "id": "hk-2h-budget1-solo",
+        "name": "Hong Kong 2 hour layover, budget conscious, solo",
+        "category": "edge-case",
+        "description": "Test tight layover to make sure that only airport activities are recommended",
+        "created": "2025-11-07",
+        "difficulty": "medium"
+      },
+      "input": {
+        "flightDetails": {
+          "from": "Melbourne",
+          "to": "London",
+          "departureTime": "3:30",
+          "departureDate": "2025-10-20",
+          "arrivalTime": "18:00",
+          "arrivalDate": "2025-10-21",
+          "adults": 1,
+          "children": 0,
+          "luggageCount": 1,
+          "stops": [
+            {
+              "location": "Hong Kong",
+              "arrivalTime": "22:00",
+              "arrivalDate": "2025-10-20",
+              "departureTime": "00:00",
+              "departureDate": "2025-10-21"
+            },
+            {
+              "location": "London",
+              "arrivalTime": "18:00",
+              "arrivalDate": "2025-10-21"
+            }
+          ]
+        },
+        "preferences": {
+          "budget": 1,
+          "activities": 3,
+          "transitStyle": "fast-track"
+        }
+      },
+      "expectedOutput": {
+        "primary-focus": "Recommend staying at the airport due to short layover",
+        "must-have": [
+          "Do not suggest LEAVING the airport or book another flight to the destination",
+          "Activities should be low cost or free to match budget preferences",
+          "Include enough time to change gate, get ready for the connection flight"
+        ],
+        "good-looks-like": [
+          "Recommending free or low-cost activities at the airport",
+          "Provide clear reasoning on time constraints",
+          "Add hints,tips for budget travellers for quick, easy transfer between gate to meet their fast track preferences"
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "id": "hk-4h-balanced-budget-solo",
+        "name": "Hong Kong 4 hour layover, balanced budget, solo traveller",
+        "category": "boundary-case",
+        "description": "Test boundary layover to make sure that only airport activities are recommended",
+        "created": "2025-11-07",
+        "difficulty": "medium"
+      },
+      "input": {
+        "flightDetails": {
+          "from": "Melbourne",
+          "to": "London",
+          "departureTime": "3:30",
+          "departureDate": "2025-10-20",
+          "arrivalTime": "18:00",
+          "arrivalDate": "2025-10-21",
+          "adults": 1,
+          "children": 0,
+          "luggageCount": 1,
+          "stops": [
+            {
+              "location": "Hong Kong",
+              "arrivalTime": "22:00",
+              "arrivalDate": "2025-10-20",
+              "departureTime": "02:00",
+              "departureDate": "2025-10-21"
+            },
+            {
+              "location": "London",
+              "arrivalTime": "18:00",
+              "arrivalDate": "2025-10-21"
+            }
+          ]
+        },
+        "preferences": {
+          "budget": 3,
+          "activities": 3,
+          "transitStyle": "scenic-route"
+        }
+      },
+      "expectedOutput": {
+        "primary-focus": "Recommend staying at the airport with leisurely activities for a balanced budget",
+        "must-have": [
+          "Do not suggest LEAVING the airport or book another flight to the destination",
+          "Activities should match budget preferences with medium, good for value options",
+          "Include enough time to change gate, get ready for the connection flight"
+        ],
+        "good-looks-like": [
+          "Recommending  activities at the airport",
+          "Provide clear reasoning on time constraints over preference for scenic route, highlight critical time safety issues of getting out of the airport with risks to miss their flight",
+          "Suggest some interesting sightseeing, shopping, activities or food options at the airport to satisfy the scenic options within time constraints"
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "id": "hk-12h-overnight-scenic-route-solo",
+        "name": "Hong Kong 12 hour layover, overnight, budget balanced, solo",
+        "category": "happy-path",
+        "description": "Test long layover to for scenic route recommendation and overnight consideration",
+        "created": "2025-11-07",
+        "difficulty": "medium"
+      },
+      "input": {
+        "flightDetails": {
+          "from": "Melbourne",
+          "to": "London",
+          "departureTime": "3:30",
+          "departureDate": "2025-10-20",
+          "arrivalTime": "18:00",
+          "arrivalDate": "2025-10-21",
+          "adults": 1,
+          "children": 0,
+          "luggageCount": 1,
+          "stops": [
+            {
+              "location": "Hong Kong",
+              "arrivalTime": "22:00",
+              "arrivalDate": "2025-10-20",
+              "departureTime": "10:00",
+              "departureDate": "2025-10-21"
+            },
+            {
+              "location": "London",
+              "arrivalTime": "18:00",
+              "arrivalDate": "2025-10-21"
+            }
+          ]
+        },
+        "preferences": {
+          "budget": 3,
+          "activities": 3,
+          "transitStyle": "scenic-route"
+        }
+      },
+      "expectedOutput": {
+        "primary-focus": "Recommend nighttime scenic exploration of Hong Kong with a balanced budget, activities",
+        "must-have": [
+          "If leaving airport: Ensure user returns to the airport at least 2 hours before the next flight departure time",
+          "Do not suggest overly expensive, high-end options like 5-star hotel, Michelin star restaurants",
+          "Timeline needs to make sure the user is at the gate at least 1 hour before the next flight departure time",
+          "Only recommend activities open during night time (e.g. night markets, not temples)"
+        ],
+        "good-looks-like": [
+          "Recommend a scenic exploration to explore Hong Kong nightlife such as a Symphony of Lights, Temple street night market",
+          "Include any critical tips about customs, local transport options, local currency exchange, mobile data, luggage storage to ensure a stress-free transit experience",
+          "Include rest and meal time, as this is an overnight layover"
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "id": "hk-12h-daytime-scenic-route-solo",
+        "name": "Hong Kong 12 hour layover, daytime, budget balanced, solo",
+        "category": "happy-path",
+        "description": "Test long layover during the daytime to for scenic route recommendation",
+        "created": "2025-11-07",
+        "difficulty": "easy"
+      },
+      "input": {
+        "flightDetails": {
+          "from": "Melbourne",
+          "to": "London",
+          "departureTime": "3:30",
+          "departureDate": "2025-10-20",
+          "arrivalTime": "8:00",
+          "arrivalDate": "2025-10-22",
+          "adults": 1,
+          "children": 0,
+          "luggageCount": 1,
+          "stops": [
+            {
+              "location": "Hong Kong",
+              "arrivalTime": "8:00",
+              "arrivalDate": "2025-10-20",
+              "departureTime": "20:00",
+              "departureDate": "2025-10-20"
+            },
+            {
+              "location": "London",
+              "arrivalTime": "8:00",
+              "arrivalDate": "2025-10-22"
+            }
+          ]
+        },
+        "preferences": {
+          "budget": 3,
+          "activities": 3,
+          "transitStyle": "scenic-route"
+        }
+      },
+
+      "expectedOutput": {
+        "primary-focus": "Recommend daytime scenic exploration of Hong Kong with a balanced budget, activities",
+        "must-have": [
+          "If leaving airport: Ensure user returns to the airport at least 2 hours before the next flight departure time",
+          "Do not suggest overly expensive, high-end options",
+          "Timeline needs to make sure the user is at the gate at least 1 hour before the next flight departure time",
+          "Do not recommend activities that aren't open during the day time such as night market"
+        ],
+        "good-looks-like": [
+          "Recommend a scenic exploration to explore Hong Kong: Victoria Peak, fishing village in Aberdeen, Stanley market, or visit to Wong Tai Sin Temple",
+          "Include time to get out of the airport, best options, where to get tickets, currency exchange, luggage storage tips etc",
+          "Include meal time as this is a daytime layover",
+          "Factor enough time to get back to the airport for customs, check-in, and getting ready for the next flight"
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "id": "hk-12h-overnight-budget1-scenic-route-solo",
+        "name": "Hong Kong 12 hour layover, overnight, budget: 1 -frugal, solo",
+        "category": "happy-path",
+        "description": "Test budget overnight layover recommendations",
+        "created": "2025-11-10",
+        "difficulty": "medium"
+      },
+      "input": {
+        "flightDetails": {
+          "from": "Melbourne",
+          "to": "London",
+          "departureTime": "3:30",
+          "departureDate": "2025-10-20",
+          "arrivalTime": "18:00",
+          "arrivalDate": "2025-10-21",
+          "adults": 1,
+          "children": 0,
+          "luggageCount": 1,
+          "stops": [
+            {
+              "location": "Hong Kong",
+              "arrivalTime": "22:00",
+              "arrivalDate": "2025-10-20",
+              "departureTime": "10:00",
+              "departureDate": "2025-10-21"
+            },
+            {
+              "location": "London",
+              "arrivalTime": "18:00",
+              "arrivalDate": "2025-10-21"
+            }
+          ]
+        },
+        "preferences": {
+          "budget": 1,
+          "activities": 3,
+          "transitStyle": "scenic-route"
+        }
+      },
+      "expectedOutput": {
+        "primary-focus": "Recommend low budget overnight exploration of a 12h Hong Kong layover",
+        "must-have": [
+          "If leaving airport: Ensure user returns to the airport at least 2 hours before the next flight departure time",
+          "All recommendations must be free or low-cost (transport, meals, activities, accommodation) ",
+          "Timeline needs to make sure the user is at the gate at least 1 hour before the next flight departure time",
+          "Only recommend activities open during night time (e.g. night markets, not temples)",
+          "Total cost should not exceed $50 per person"
+        ],
+        "good-looks-like": [
+          "Recommend a scenic exploration to explore free to low cost Hong Kong nightlife such as a Symphony of Lights, Temple street night market",
+          "Include any critical tips about customs, local transport options eg MTR, local currency exchange, mobile data, luggage storage to ensure a stress-free, low budget transit experience",
+          "Include rest and meal time, as this is an overnight layover",
+          "Suggest free or low cost activities such as Free Layover Tour, eg making use of airport amenities like rest zone, charging devices, shower etc"
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "id": "hk-12h-overnight-budget5-scenic-route-solo",
+        "name": "Hong Kong 12 hour layover, overnight, budget: 5 - luxury, solo",
+        "category": "happy-path",
+        "description": "Test luxurious overnight exploration of a 12h Hong Kong layover",
+        "created": "2025-11-07",
+        "difficulty": "medium"
+      },
+      "input": {
+        "flightDetails": {
+          "from": "Melbourne",
+          "to": "London",
+          "departureTime": "3:30",
+          "departureDate": "2025-10-20",
+          "arrivalTime": "18:00",
+          "arrivalDate": "2025-10-21",
+          "adults": 1,
+          "children": 0,
+          "luggageCount": 1,
+          "stops": [
+            {
+              "location": "Hong Kong",
+              "arrivalTime": "22:00",
+              "arrivalDate": "2025-10-20",
+              "departureTime": "10:00",
+              "departureDate": "2025-10-21"
+            },
+            {
+              "location": "London",
+              "arrivalTime": "18:00",
+              "arrivalDate": "2025-10-21"
+            }
+          ]
+        },
+        "preferences": {
+          "budget": 5,
+          "activities": 3,
+          "transitStyle": "scenic-route"
+        }
+      },
+      "expectedOutput": {
+        "primary-focus": "Recommend scenic exploration of Hong Kong on maximum budget & comfort",
+        "must-have": [
+          "If leaving airport: Ensure user returns to the airport at least 2 hours before the next flight departure time",
+          "Primary recommendations must include high-end, luxurious options with maximum comfort level",
+          "Timeline needs to make sure the user is at the gate at least 1 hour before the next flight departure time",
+          "Only recommend activities open during night time (e.g. night markets, not temples)"
+        ],
+        "good-looks-like": [
+          "Recommend comfortable options like private taxi, staying at high-end hotels like Grand Hyatt, spa, fine dining options, VIP lounge",
+          "Include tips for a maximum comfortable and luxurious transit experience",
+          "Include rest and meal time, as this is an overnight layover"
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "id": "hk-12h-daytime-activity1-scenic-route-solo",
+        "name": "Hong Kong 12 hour layover, daytime, budget balanced, activity: 1 - resting, solo",
+        "category": "happy-path",
+        "description": "Test minimum, relaxing activitiy transit plan for 12 hour layover ",
+        "created": "2025-11-10",
+        "difficulty": "medium"
+      },
+      "input": {
+        "flightDetails": {
+          "from": "Melbourne",
+          "to": "London",
+          "departureTime": "3:30",
+          "departureDate": "2025-10-20",
+          "arrivalTime": "8:00",
+          "arrivalDate": "2025-10-21",
+          "adults": 1,
+          "children": 0,
+          "luggageCount": 1,
+          "stops": [
+            {
+              "location": "Hong Kong",
+              "arrivalTime": "8:00",
+              "arrivalDate": "2025-10-20",
+              "departureTime": "20:00",
+              "departureDate": "2025-10-20"
+            },
+            {
+              "location": "London",
+              "arrivalTime": "8:00",
+              "arrivalDate": "2025-10-21"
+            }
+          ]
+        },
+        "preferences": {
+          "budget": 3,
+          "activities": 1,
+          "transitStyle": "fast-track"
+        }
+      },
+
+      "expectedOutput": {
+        "primary-focus": "Prioritize rest and recovery with minimal activities",
+        "must-have": [
+          "If leaving airport: Ensure user returns to the airport at least 2 hours before the next flight departure time",
+          "Recommend no more than 1-2 low-effort activities maximum",
+          "Include substantial rest/downtime blocks in timeline",
+          "Timeline needs to make sure the user is at the gate at least 1 hour before the next flight departure time"
+        ],
+        "good-looks-like": [
+          "Recommend airport amenities (lounges, day rooms, rest zones, shower facilities)",
+          "If suggesting leaving airport: only nearby low-effort options (spa, park, quiet cafe)",
+          "Provide reasoning that acknowledges rest priority and avoids overpacking itinerary",
+          "Timeline shows multiple rest blocks, not just activity-to-activity transitions"
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "id": "hk-12h-daytime-activity5-scenic-route-solo",
+        "name": "Hong Kong 12 hour layover, daytime, budget balanced, activity: 5 - energised, solo",
+        "category": "happy-path",
+        "description": "Test maximum activitiy transit plan for 12 hour layover ",
+        "created": "2025-11-10",
+        "difficulty": "easy"
+      },
+      "input": {
+        "flightDetails": {
+          "from": "Melbourne",
+          "to": "London",
+          "departureTime": "3:30",
+          "departureDate": "2025-10-20",
+          "arrivalTime": "8:00",
+          "arrivalDate": "2025-10-21",
+          "adults": 1,
+          "children": 0,
+          "luggageCount": 1,
+          "stops": [
+            {
+              "location": "Hong Kong",
+              "arrivalTime": "8:00",
+              "arrivalDate": "2025-10-20",
+              "departureTime": "20:00",
+              "departureDate": "2025-10-20"
+            },
+            {
+              "location": "London",
+              "arrivalTime": "8:00",
+              "arrivalDate": "2025-10-21"
+            }
+          ]
+        },
+        "preferences": {
+          "budget": 3,
+          "activities": 5,
+          "transitStyle": "scenic-route"
+        }
+      },
+
+      "expectedOutput": {
+        "primary-focus": "Maximize exploration with a full, varied itinerary",
+        "must-have": [
+          "If leaving airport: Ensure user returns to the airport at least 2 hours before the next flight departure time",
+          "Recommend at least 3-4 distinct activities or sights",
+          "Timeline needs to make sure the user is at the gate at least 1 hour before the next flight departure time",
+          "Avoid overpacking to the point of stress or missing flight"
+        ],
+        "good-looks-like": [
+          "Recommend a variety of activities from sightseeing, to cultural exploration, to local food: Victoria Peak, fishing village in Aberdeen, Stanley market, or visit to Wong Tai Sin Temple",
+          "Suggest efficient scenic route that maximizes variety within time constraints",
+          "Provide rationale for activity sequencing (geographic proximity, timing)",
+          "Timeline shows back-to-back activities with minimal downtime (but still realistic)"
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "id": "hk-12h-daytime-scenic-route-family4",
+        "name": "Hong Kong 12 hour layover family 2 adults 2 kids",
+        "category": "happy-path",
+        "description": "Test family friendly daytime layover options",
+        "created": "2025-11-12",
+        "difficulty": "medium"
+      },
+      "input": {
+        "flightDetails": {
+          "from": "Melbourne",
+          "to": "London",
+          "departureTime": "1:30",
+          "departureDate": "2025-10-20",
+          "arrivalTime": "18:00",
+          "arrivalDate": "2025-10-21",
+          "adults": 2,
+          "children": 2,
+          "luggageCount": 2,
+          "stops": [
+            {
+              "location": "Hong Kong",
+              "arrivalTime": "8:00",
+              "arrivalDate": "2025-10-20",
+              "departureTime": "20:00",
+              "departureDate": "2025-10-20"
+            },
+            {
+              "location": "London",
+              "arrivalTime": "18:00",
+              "arrivalDate": "2025-10-21"
+            }
+          ]
+        },
+        "preferences": {
+          "budget": 3,
+          "activities": 3,
+          "transitStyle": "scenic-route"
+        }
+      },
+      "expectedOutput": {
+        "primary-focus": "Suggest family friendly options",
+        "must-have": [
+          "If leaving airport: Ensure user returns to the airport at least 2 hours before the next flight departure time",
+          "All recommended activities must be child-friendly and age-appropriate",
+          "Timeline must account for slower pace with children (toilet breaks, meals, rest)",
+          "Timeline needs to make sure the user is at the gate at least 1 hour before the next flight departure time"
+        ],
+        "good-looks-like": [
+          "Recommend kid-friendly attractions: Disneyland, Ocean park, Peak Tram, Ngong Ping cable car, playgrounds",
+          "Include practical family tips (stroller access, changing facility, family rest rooms, child menu)",
+          "Suggest transport options suitable for family eg taxi over complex MTR transfers with kids",
+          "Provide clear reasoning acknowledging family logistics",
+          "Timeline should include breaks, snacks, rest, not too much walking to avoid meltdown"
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "id": "hk-16h-daytime-scenic-route-family4",
+        "name": "Hong Kong 16 hour layover family 2 adults 2 kids",
+        "category": "happy-path",
+        "description": "Test long family friendly layover viable Disneyland option",
+        "created": "2025-11-12",
+        "difficulty": "medium"
+      },
+      "input": {
+        "flightDetails": {
+          "from": "Melbourne",
+          "to": "London",
+          "departureTime": "1:30",
+          "departureDate": "2025-10-20",
+          "arrivalTime": "18:00",
+          "arrivalDate": "2025-10-21",
+          "adults": 2,
+          "children": 2,
+          "luggageCount": 2,
+          "stops": [
+            {
+              "location": "Hong Kong",
+              "arrivalTime": "6:00",
+              "arrivalDate": "2025-10-20",
+              "departureTime": "22:00",
+              "departureDate": "2025-10-20"
+            },
+            {
+              "location": "London",
+              "arrivalTime": "18:00",
+              "arrivalDate": "2025-10-21"
+            }
+          ]
+        },
+        "preferences": {
+          "budget": 3,
+          "activities": 3,
+          "transitStyle": "scenic-route"
+        }
+      },
+      "expectedOutput": {
+        "primary-focus": "Suggest viable Disneyland options with strong time management",
+        "must-have": [
+          "If leaving airport: Ensure user returns to the airport at least 2 hours before the next flight departure time",
+          "All recommended activities must be child-friendly and age-appropriate",
+          "Timeline must account for slower pace with children (toilet breaks, meals, rest)",
+          "Timeline needs to make sure the user is at the gate at least 1 hour before the next flight departure time"
+        ],
+        "good-looks-like": [
+          "Recommend kid-friendly attractions: Disneyland, Ocean park, Peak Tram, Ngong Ping cable car, playgrounds",
+          "Include practical family tips (stroller access, changing facility, family rest rooms, child menu)",
+          "Suggest transport options suitable for family eg taxi over complex MTR transfers with kids",
+          "Provide clear reasoning acknowledging family logistics",
+          "Timeline should include breaks, snacks, rest, not too much walking to avoid meltdown"
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "id": "hk-12h-daytime-luggage3-scenic-route-solo",
+        "name": "Hong Kong 12 hour layover, daytime, luggage:3, budget: 3, activity: 3, solo",
+        "category": "edge-case",
+        "description": "Test how luggage count affect the layover plan ",
+        "created": "2025-11-10",
+        "difficulty": "medium"
+      },
+      "input": {
+        "flightDetails": {
+          "from": "Melbourne",
+          "to": "London",
+          "departureTime": "3:30",
+          "departureDate": "2025-10-20",
+          "arrivalTime": "8:00",
+          "arrivalDate": "2025-10-22",
+          "adults": 1,
+          "children": 0,
+          "luggageCount": 3,
+          "stops": [
+            {
+              "location": "Hong Kong",
+              "arrivalTime": "8:00",
+              "arrivalDate": "2025-10-20",
+              "departureTime": "20:00",
+              "departureDate": "2025-10-20"
+            },
+            {
+              "location": "London",
+              "arrivalTime": "8:00",
+              "arrivalDate": "2025-10-22"
+            }
+          ]
+        },
+        "preferences": {
+          "budget": 3,
+          "activities": 3,
+          "transitStyle": "scenic-route"
+        }
+      },
+
+      "expectedOutput": {
+        "primary-focus": "Luggage storage, retrieval recommendations",
+        "must-have": [
+          "If leaving airport: Must recommend luggage storage solution",
+          "If leaving airport: Ensure user returns to the airport at least 2 hours before the next flight departure time",
+          "Timeline must account for luggage storage and retrieval time",
+          "Timeline needs to make sure the user is at the gate at least 1 hour before the next flight departure time"
+        ],
+        "good-looks-like": [
+          "Recommend specific luggage storage options for convenience, price",
+          "Include practical tips on storage costs, locations, operating hours, payment methods",
+          "Clear reasoning for recommendation in considering luggage situation",
+          "Timeline shows explicit luggage drop-off and pickup steps"
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "id": "hk-2h-short-layover-scenic-route-solo",
+        "name": "Hong Kong 2 hour layover, scenic-route, solo",
+        "category": "edge-case",
+        "description": "Test conflict short layover vs sightseeing ",
+        "created": "2025-11-13",
+        "difficulty": "medium"
+      },
+      "input": {
+        "flightDetails": {
+          "from": "Melbourne",
+          "to": "London",
+          "departureTime": "3:30",
+          "departureDate": "2025-10-20",
+          "arrivalTime": "8:00",
+          "arrivalDate": "2025-10-22",
+          "adults": 1,
+          "children": 0,
+          "luggageCount": 3,
+          "stops": [
+            {
+              "location": "Hong Kong",
+              "arrivalTime": "8:00",
+              "arrivalDate": "2025-10-20",
+              "departureTime": "10:00",
+              "departureDate": "2025-10-20"
+            },
+            {
+              "location": "London",
+              "arrivalTime": "8:00",
+              "arrivalDate": "2025-10-21"
+            }
+          ]
+        },
+        "preferences": {
+          "budget": 3,
+          "activities": 3,
+          "transitStyle": "scenic-route"
+        }
+      },
+
+      "expectedOutput": {
+        "primary-focus": "AI should prioritise time constraint over scenic route transit style",
+        "must-have": [
+          "Do not suggest LEAVING the airport or book another flight to the destination",
+          "Include enough time to change gate, get ready for the connection flight"
+        ],
+        "good-looks-like": [
+          "Clear reasoning on time constraints override desire for sightseeing",
+          "Provide any alternative cultural/sightseeing option at the airport within safe timeline"
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "id": "hk-16h-family4-budget1-activity5",
+        "name": "Hong Kong 16 hour layover family 2 adults 2 kids",
+        "category": "nuanced-decision",
+        "description": "Test cost effective and activity pack itinerary for family",
+        "created": "2025-11-13",
+        "difficulty": "medium"
+      },
+      "input": {
+        "flightDetails": {
+          "from": "Melbourne",
+          "to": "London",
+          "departureTime": "1:30",
+          "departureDate": "2025-10-20",
+          "arrivalTime": "18:00",
+          "arrivalDate": "2025-10-21",
+          "adults": 2,
+          "children": 2,
+          "luggageCount": 2,
+          "stops": [
+            {
+              "location": "Hong Kong",
+              "arrivalTime": "6:00",
+              "arrivalDate": "2025-10-20",
+              "departureTime": "22:00",
+              "departureDate": "2025-10-20"
+            },
+            {
+              "location": "London",
+              "arrivalTime": "18:00",
+              "arrivalDate": "2025-10-21"
+            }
+          ]
+        },
+        "preferences": {
+          "budget": 1,
+          "activities": 5,
+          "transitStyle": "scenic-route"
+        }
+      },
+      "expectedOutput": {
+        "primary-focus": "Cost effective calculation, practical family logistics",
+        "must-have": [
+          "If leaving airport: Ensure user returns to the airport at least 2 hours before the next flight departure time",
+          "All recommended activities must be child-friendly and age-appropriate",
+          "Recommended options must be cost effective and practical, eg 1 taxi might be better than 4 MTR tickets",
+          "Timeline must account for slower pace with children (toilet breaks, meals, rest)",
+          "Timeline needs to make sure the user is at the gate at least 1 hour before the next flight departure time"
+        ],
+        "good-looks-like": [
+          "Recommend free or low cost kid-friendly attractions: playgrounds, parks, ferry ride, free guided layover tours",
+          "Include practical family tips (stroller access, changing facility, family rest rooms, child menu)",
+          "Provide clear reasoning acknowledging family logistics and cost-conscious options",
+          "Timeline should include breaks, snacks, rest, not too much walking to avoid meltdown"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+# Overview
+
+Navietta is a travel transit application that helps users find optimal layover recommendations between flights. The application uses AI (Anthropic Claude 4.0 Sonnet) to analyze flight details and user preferences to generate personalized transit options with transparent, step-by-step reasoning. It follows a 4-screen wizard flow where users input flight information, set preferences, and receive AI-generated recommendations with detailed timelines and trade-off analysis.
+
+## Recent Changes (September 2, 2025)
+
+### Preferences System Redesign
+- ✅ Updated preferences schema from 0-100 scales to more intuitive 1-5 and 0-5 scales
+- ✅ Budget: Changed from budgetComfort (0-100) to budget (1-5) with clear labels (Frugal, Economy, Balanced, Comfort, Luxury)
+- ✅ Activities: Changed from energyLevel (0-100) to activities (0-5) with descriptive levels (Resting, Easy, Gentle, Balanced, Lively, Energised)
+- ✅ Transit Style: Updated labels (fast-track, scenic-route, fewer-transfers) with clearer descriptions
+- ✅ Redesigned preferences UI to match modern mockup design with clean sliders
+- ✅ Added info tooltips with modals explaining all preference options
+- ✅ Updated all Claude API prompts and mock logic to use new preference scales
+- ✅ Enhanced AI recommendation system with explicit conflict resolution rules for tight timeframes
+
+### AI System Enhancements
+- ✅ Added explicit rules for handling conflicting preferences in recommendations
+- ✅ Implemented priority hierarchy: tight timeframes override all other preferences
+- ✅ Added location disambiguation rules for multiple matching cities
+- ✅ Enhanced system prompts with clear reasoning requirements for preference conflicts
+
+### Schema Evolution Completed (September 2, 2025)
+
+#### Phase 2B: Schema Evolution (Additive) - ✅ COMPLETED
+- ✅ Enhanced stop schema with optional departure fields (departureTime, departureDate)  
+- ✅ Maintained full backward compatibility - existing data structures still work  
+- ✅ Added leg-based structure support: each stop can track both arrival AND departure times  
+- ✅ Updated TypeScript types and Zod validation schemas  
+- ✅ Tested validation functions work with both original and enhanced schema structures  
+- ✅ Server successfully restarted and API endpoints responding correctly  
+
+**Ready for Phase 3**: New UI implementation with leg-based FlightDetails component and real-time validation integration.
+
+### Previous Changes (August 22, 2025)
+
+### PDF Document Extraction System
+- ✅ Implemented real PDF text extraction using pdf-parse library
+- ✅ Replaced mock data system with actual document parsing
+- ✅ Fixed extraction accuracy issues - now reads actual PDF content instead of filename-based mock data
+- ✅ Enhanced Claude AI prompts for improved location name formatting (full names with airport codes)
+- ✅ Improved child passenger detection from boarding pass titles
+- ✅ Fixed UI layout issues with overlapping time/date input fields using Flexbox
+- ✅ Cleaned up redundant field labels and improved form styling
+- ✅ Fixed luggage counter to properly handle AI-extracted data
+- ✅ Added confidence indicators for AI-extracted fields
+
+### Previous Architecture (August 18, 2025)
+- ✅ Successfully completed schema migration from single-stop to multi-stop structure
+- ✅ Fixed all TypeScript errors across mockClaude.ts, claude.ts, and Preferences.tsx
+- ✅ Constrained trip planning to exactly 2 stops (Start → Stop 1 → Stop 2)
+- ✅ Removed "Add Stop" functionality to maintain focused 3-step transit planning
+- ✅ Implemented date constraints: Stop 2 can only be same day or +1 day from Stop 1
+- ✅ Added user guidance explaining the tool's scope for short-term transit planning
+- ✅ Enhanced UI with date validation and automatic Stop 2 date synchronization
+- ✅ Application optimized for 1-2 day transit recommendations rather than extended travel
+- ✅ Fixed AI prompt structure to correctly understand multi-stop transit planning
+- ✅ Resolved issue where AI confused transit waypoints with final destinations
+- ✅ Cleaned up context summary to remove redundant departure time/date fields
+- ✅ Updated UI to clearly show: Start → Final Destination via Transit Stop
+
+# User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+# System Architecture
+
+## Frontend Architecture
+The frontend is built with React 18 using TypeScript and follows a modern single-page application (SPA) architecture. The application uses:
+
+- **Routing**: Client-side routing with Wouter for lightweight navigation between wizard steps
+- **State Management**: React Context API (`TravelContext`) for managing global application state across the multi-step form
+- **UI Framework**: Radix UI components with shadcn/ui design system, styled with Tailwind CSS
+- **Form Handling**: React Hook Form with Zod validation for type-safe form validation
+- **Data Fetching**: TanStack Query (React Query) for server state management and API communication
+
+The frontend follows a wizard-based flow with four main steps: Landing → Flight Details → Preferences → AI Results.
+
+## Backend Architecture
+The backend uses Express.js with TypeScript in a RESTful API architecture:
+
+- **Server Framework**: Express.js with custom middleware for request logging and error handling
+- **Development Setup**: Vite integration for hot module replacement and development server
+- **API Design**: RESTful endpoints under `/api` namespace with structured JSON responses
+- **Error Handling**: Centralized error handling middleware with proper HTTP status codes
+
+## Data Storage Solutions
+The application implements a flexible storage abstraction pattern:
+
+- **Storage Interface**: `IStorage` interface defining CRUD operations for travel sessions
+- **Current Implementation**: In-memory storage (`MemStorage`) using JavaScript Map for development
+- **Database Schema**: Designed for PostgreSQL with Drizzle ORM, supporting JSON columns for complex data structures
+- **Session Management**: UUID-based session identifiers for tracking user journeys
+
+## Authentication and Authorization
+Currently, the application operates without authentication, using session-based tracking for user journeys. The architecture supports future authentication integration through the existing session management system.
+
+## External Dependencies
+
+### AI Services
+- **Anthropic Claude API**: Primary AI service for generating travel recommendations using the latest Claude Sonnet 4 model
+- **API Integration**: Server-side integration with structured prompts and response parsing
+
+### Database Services
+- **Neon Database**: PostgreSQL-compatible serverless database for production deployments
+- **Drizzle ORM**: Type-safe database toolkit with schema-first approach and automatic migrations
+
+### UI and Styling
+- **Radix UI**: Accessible, unstyled component primitives for complex UI interactions
+- **shadcn/ui**: Pre-built component library built on Radix UI with consistent design tokens
+- **Tailwind CSS**: Utility-first CSS framework with custom design system integration
+
+### Development Tools
+- **Vite**: Build tool and development server with hot module replacement
+- **TypeScript**: Static type checking across the entire application
+- **ESBuild**: Fast bundling for production builds
+
+### Form and Validation
+- **React Hook Form**: Performant form library with minimal re-renders
+- **Zod**: TypeScript-first schema validation for runtime type safety
+- **Drizzle-Zod**: Integration between database schema and validation logic
+
+The application is structured as a monorepo with shared schemas and utilities, enabling type safety across client and server boundaries while maintaining clear separation of concerns.
